@@ -18,7 +18,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor()
 @Entity(name = "User")
 @Table(name = "users")
-public class UserEntity extends AbstractEntity {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
