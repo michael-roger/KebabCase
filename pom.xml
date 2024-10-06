@@ -119,7 +119,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>dev.coms4156.project.individualproject</mainClass>
+                            <mainClass>dev.coms4156.project.kebabcase</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

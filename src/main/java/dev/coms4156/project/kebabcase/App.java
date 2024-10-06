@@ -1,7 +1,7 @@
-package dev.coms4156.project.individualproject;
+package dev.coms4156.project.kebabcase;
 
-import dev.coms4156.project.individualproject.entity.Department;
-import dev.coms4156.project.individualproject.service.DatabaseService;
+import dev.coms4156.project.kebabcase.entity.Department;
+import dev.coms4156.project.kebabcase.service.DatabaseService;
 import jakarta.annotation.PreDestroy;
 import java.util.Map;
 import org.springframework.boot.CommandLineRunner;

@@ -1,4 +1,4 @@
-package dev.coms4156.project.individualproject.entity;
+package dev.coms4156.project.kebabcase.entity;
 
 import java.io.Serial;
 import java.io.Serializable;

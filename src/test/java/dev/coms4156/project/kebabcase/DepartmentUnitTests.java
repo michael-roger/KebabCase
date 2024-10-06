@@ -1,10 +1,10 @@
-package dev.coms4156.project.individualproject;
+package dev.coms4156.project.kebabcase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import dev.coms4156.project.individualproject.entity.Course;
-import dev.coms4156.project.individualproject.entity.Department;
+import dev.coms4156.project.kebabcase.entity.Course;
+import dev.coms4156.project.kebabcase.entity.Department;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;

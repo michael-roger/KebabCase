@@ -1,10 +1,10 @@
-package dev.coms4156.project.individualproject;
+package dev.coms4156.project.kebabcase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import dev.coms4156.project.individualproject.entity.Course;
+import dev.coms4156.project.kebabcase.entity.Course;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
