@@ -20,15 +20,15 @@ import lombok.experimental.Accessors;
 @Setter
 @NoArgsConstructor()
 @Entity(name = "Token")
-@Table(name = "Tokens")
+@Table(name = "tokens")
 public class TokenEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "key")
-    private String key;
+    @Column(name = "token")
+    private String token;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")

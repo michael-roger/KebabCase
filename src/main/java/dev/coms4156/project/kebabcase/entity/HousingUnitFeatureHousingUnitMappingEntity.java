@@ -27,9 +27,6 @@ public class HousingUnitFeatureHousingUnitMappingEntity {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "key")
-    private String key;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "housing_unit_id")
     private HousingUnitEntity housingUnit;
