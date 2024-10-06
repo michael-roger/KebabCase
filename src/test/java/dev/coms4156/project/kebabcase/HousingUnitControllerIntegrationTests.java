@@ -9,7 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class BuildingControllerIntegrationTests {
+class HousingUnitControllerIntegrationTests {
 
   @Autowired private MockMvc mockMvc;
 
