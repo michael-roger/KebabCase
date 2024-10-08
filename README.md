@@ -2,14 +2,15 @@
 
 -1. Install the "brew" if you don't have it installed:
 
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
 
 0. Install MySQL if you don't have it installed:
 
-brew install mysql@8.4
+```brew install mysql@8.4```
 
 1. Run the following SQL commands to create the database:
 
+```
 CREATE DATABASE
 IF
     NOT EXISTS kebabcase DEFAULT CHARACTER
@@ -44,11 +45,13 @@ SELECT
     Shutdown,
     TRIGGER,
     UPDATE ON *.* TO `kebabuser` @`localhost`;
+```
 
 2. Start the application and Hibernate will create the tables for you.
 
 3. Run the following SQL statements to populate your database with data:
 
+```
 INSERT INTO users
 SET created_datetime = NOW(),
 modified_datetime = NOW(),
@@ -56,3 +59,4 @@ email_address = "michael.roger@columbia.edu",
 first_name = "Michael",
 last_name = "Roger",
 `password` = "1234";
+```
