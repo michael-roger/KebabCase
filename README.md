@@ -1,6 +1,6 @@
 # KebabCase
 
--1. Install the "brew" if you don't have it installed:
+0. Install the "brew" if you don't have it installed:
 
 ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
 
