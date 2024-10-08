@@ -1,5 +1,13 @@
 # KebabCase
 
+-1. Install the "brew" if you don't have it installed:
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+0. Install MySQL if you don't have it installed:
+
+brew install mysql@8
+
 1. Run the following SQL commands to create the database:
 
 CREATE DATABASE
