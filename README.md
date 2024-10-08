@@ -6,7 +6,7 @@
 
 0. Install MySQL if you don't have it installed:
 
-brew install mysql@8
+brew install mysql@8.4
 
 1. Run the following SQL commands to create the database:
 
