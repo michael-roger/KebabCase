@@ -14,9 +14,9 @@
 
 ```mysqld_safe --skip-grant-tables &```
 
-```
-mysql -u root
+```mysql -u root```
 
+```
 USE mysql;
 UPDATE user SET authentication_string=PASSWORD('YourPasswordGoesHere') WHERE User='root';
 FLUSH PRIVILEGES;
