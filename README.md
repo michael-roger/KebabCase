@@ -8,6 +8,31 @@
 
 ```brew install mysql@8.4```
 
+```brew restart mysql@8.4```
+
+```brew services stop mysql```
+
+```mysqld_safe --skip-grant-tables &```
+
+```
+mysql -u root
+
+USE mysql;
+UPDATE user SET authentication_string=PASSWORD('YourPasswordGoesHere') WHERE User='root';
+FLUSH PRIVILEGES;
+exit;
+```
+Note: Be sure to update YourPasswordGoesHere with your own root password
+
+```
+mysqladmin -u root -p shutdown
+```
+
+```
+brew services start mysql@8.4
+```
+
+
 1. Run the following SQL commands to create the database:
 
 ```
