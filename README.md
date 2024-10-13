@@ -1,6 +1,68 @@
 # KebabCase
 
-## Insert Dummy Data SQL Statements
+# KebabCase
+
+0. Install the "brew" if you don't have it installed:
+
+```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
+
+0. Install MySQL if you don't have it installed:
+
+```brew install mysql@8.4```
+
+```brew restart mysql@8.4```
+
+```brew services stop mysql```
+
+```mysqld_safe --skip-grant-tables &```
+
+```mysql -u root```
+
+```
+USE mysql;
+UPDATE user SET authentication_string=PASSWORD('YourPasswordGoesHere') WHERE User='root';
+FLUSH PRIVILEGES;
+exit;
+```
+Note: Be sure to update YourPasswordGoesHere with your own root password
+
+```
+mysqladmin -u root -p shutdown
+```
+
+```
+brew services start mysql@8.4
+```
+
+
+1. Run the following SQL commands to create the database:
+
+```
+CREATE DATABASE
+IF
+    NOT EXISTS kebabcase DEFAULT CHARACTER
+    SET = 'utf8mb4' DEFAULT COLLATE 'utf8mb4_unicode_520_ci'
+
+CREATE USER `kebabuser`@`localhost` IDENTIFIED BY 'kebabpass';
+
+GRANT
+ALTER,
+SELECT,
+CREATE,
+DELETE,
+DROP,
+INDEX,
+INSERT
+ON
+kebabcase.*
+TO `kebabuser` @`localhost`;
+
+FLUSH PRIVILEGES;
+```
+
+2. Start the application and Hibernate will create the tables for you.
+
+3. Run the following SQL statements to populate your database with data:
 
 ### users
 ```
@@ -22,17 +84,17 @@ INSERT INTO clients (id, name, created_datetime, modified_datetime) VALUES
 
 ### tokens
 ```
-INSERT INTO tokens (id, client_id, user_id, key, expiration_datetime, created_datetime, modified_datetime) VALUES
+INSERT INTO tokens (id, client_id, user_id, token, expiration_datetime, created_datetime, modified_datetime) VALUES
 (1, 1, 1, 'john_doe_token', '2024-04-01 12:00:00', '2024-01-01 10:15:00', '2024-01-01 10:15:00'),
 (2, 2, 2, 'jane_smith_token', '2024-05-01 12:00:00', '2024-02-01 10:15:00', '2024-02-01 10:15:00'),
 (3, 1, 3, 'emily_johnson_token', '2024-06-01 12:00:00', '2024-03-01 10:15:00', '2024-03-01 10:15:00'),
 (4, 2, 4, 'luci_feinberg_token', '2024-06-05 12:00:00', '2024-03-01 10:15:00', '2024-03-01 10:15:00');
 
-INSERT INTO tokens (id, client_id, key, expiration_datetime, created_datetime, modified_datetime) VALUES
+INSERT INTO tokens (id, client_id, token, expiration_datetime, created_datetime, modified_datetime) VALUES
 (5, 1, 'HousingForAll_token', '2024-04-01 12:00:00', '2024-01-01 10:15:00', '2024-01-01 10:15:00'),
 (6, 2, 'AccessibleHomes_token', '2024-05-01 12:00:00', '2024-02-01 10:15:00', '2024-02-01 10:15:00'),
 (7, 3, 'BronxHousing_token', '2024-06-01 12:00:00', '2024-03-01 10:15:00', '2024-03-01 10:15:00'),
-(8, 4, 'BrooklynHousing_token', '2024-06-05 12:00:00', '2024-03-01 10:15:00', '2024-03-01 10:15:00'),;
+(8, 4, 'BrooklynHousing_token', '2024-06-05 12:00:00', '2024-03-01 10:15:00', '2024-03-01 10:15:00');
 ```
 
 ### buildings
@@ -52,7 +114,7 @@ INSERT INTO housing_units (id, building_id, unit_number, created_datetime, modif
 (3, 2, '2A', '2024-02-23 10:00:00', '2024-02-23 10:00:00'),
 (4, 3, '3C', '2024-03-16 10:00:00', '2024-03-16 10:00:00'),
 (5, 2, '8D', '2024-05-25 10:00:00', '2024-02-23 10:00:00'),
-(6, 4, '4A', '2024-07-08 10:00:00', '2024-03-16 10:00:00'),;
+(6, 4, '4A', '2024-07-08 10:00:00', '2024-03-16 10:00:00');
 ```
 
 ### building_features
