@@ -43,33 +43,19 @@ IF
 
 CREATE USER `kebabuser`@`localhost` IDENTIFIED BY 'kebabpass';
 
-GRANT ALTER,
-ALTER Routine,
+GRANT
+ALTER,
+SELECT,
 CREATE,
-CREATE Routine,
-CREATE TEMPORARY TABLES,
-CREATE USER,
-CREATE VIEW,
 DELETE,
 DROP,
-EVENT,
-EXECUTE,
-File,
 INDEX,
-INSERT,
-LOCK TABLES,
-Process,
-REFERENCES,
-Reload,
-Replication Client,
-Replication SLAVE,
-SELECT
-    ,
-    SHOW DATABASES,
-    SHOW VIEW,
-    Shutdown,
-    TRIGGER,
-    UPDATE ON *.* TO `kebabuser` @`localhost`;
+INSERT
+ON
+kebabcase.*
+TO `kebabuser` @`localhost`;
+
+FLUSH PRIVILEGES;
 ```
 
 2. Start the application and Hibernate will create the tables for you.
