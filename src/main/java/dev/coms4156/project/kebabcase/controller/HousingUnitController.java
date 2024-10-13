@@ -53,6 +53,7 @@ public class HousingUnitController {
     return housingUnits.stream().map(housingUnit -> {
       ObjectNode Json = this.objectMapper.createObjectNode();
       Json.put("id", housingUnit.getId());
+      Json.put("unit_number", housingUnit.getUnitNumber());
       return Json;
     }).collect(Collectors.toList());
   }
