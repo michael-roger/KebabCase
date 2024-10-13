@@ -10,9 +10,11 @@
 
 ```brew install mysql@8.4```
 
+```echo 'export PATH="/opt/homebrew/opt/mysql@8.4/bin:$PATH"' >> ~/.zshrc```
+
 ```brew restart mysql@8.4```
 
-```brew services stop mysql```
+```brew services stop mysql@8.4```
 
 ```mysqld_safe --skip-grant-tables &```
 
