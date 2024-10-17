@@ -25,7 +25,12 @@ public class BuildingController {
 
   private final ObjectMapper objectMapper;
 
-
+  /**
+   * Constructs a new BuildingController.
+   * 
+   * @param buildingRepository the repository used to interact with building entities
+   * @param objectMapper the object mapper used for JSON serialization
+   */
   public BuildingController(
       BuildingRepositoryInterface buildingRepository,
       ObjectMapper objectMapper
@@ -34,6 +39,19 @@ public class BuildingController {
     this.objectMapper = objectMapper;
   }
 
+  /**
+   * Updates the information of an existing building by its ID.
+   * Only fields provided as request parameters will be updated.
+   * If no fields are provided, an HTTP 400 Bad Request will be returned.
+   * 
+   * @param id the ID of the building to update
+   * @param address the new address of the building (optional)
+   * @param city the new city of the building (optional)
+   * @param state the new state of the building (optional)
+   * @param zipCode the new zip code of the building (optional)
+   * @return a {@link ResponseEntity} indicating the result of the update
+   * @throws ResponseStatusException if the building with the given ID is not found or no fields are provided for update
+   */
   @PatchMapping("/building/{id}")
   public ResponseEntity<?> updateBuilding(
       @PathVariable int id, 
@@ -79,6 +97,16 @@ public class BuildingController {
 
   }
 
+  /**
+   * Creates a new building entity and saves it to the repository.
+   * The new building's information must be provided as request parameters.
+   * 
+   * @param address the address of the new building
+   * @param city the city of the new building
+   * @param state the state of the new building
+   * @param zipCode the zip code of the new building
+   * @return a {@link ResponseEntity} containing the result of the creation and the new building's ID
+   */
   @PostMapping("/building")
   public ResponseEntity<?> createBuilding(
       @RequestParam String address,
