@@ -1,13 +1,18 @@
 package dev.coms4156.project.kebabcase.controller;
 
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -100,4 +105,61 @@ public class HousingUnitController {
 
     return json;
   }
+
+
+  @PatchMapping("/housing-unit/{id}")
+  public ResponseEntity<?> updateBuilding(
+      @PathVariable int id, 
+      @RequestParam String unitNumber
+  ) {
+
+    Optional<HousingUnitEntity> unitResult = housingUnitRepository.findById(id);
+
+    if (unitResult.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found");
+    }
+
+    HousingUnitEntity unit = unitResult.get();
+
+    unit.setUnitNumber(unitNumber);
+
+    unit.setModifiedDatetime(OffsetDateTime.now());
+
+    housingUnitRepository.save(unit);
+
+    return ResponseEntity.ok("Housing unit info has been successfully updated!");
+
+  }
+
+  
+  @PostMapping("/housing-unit")
+  public ResponseEntity<?> createBuilding(
+      @RequestParam int buildingID,
+      @RequestParam String unitNumber
+  ) {
+
+    HousingUnitEntity newUnit = new HousingUnitEntity();
+
+    Optional<BuildingEntity> buildingRepoResult = this.buildingRepository.findById(buildingID);
+
+    if (buildingRepoResult.isEmpty()) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Building with id " + buildingID + " not found"
+      );
+    }
+
+    BuildingEntity building = buildingRepoResult.get();
+
+    newUnit.setBuilding(building);
+    newUnit.setUnitNumber(unitNumber);
+    newUnit.setCreatedDatetime(OffsetDateTime.now());
+    newUnit.setModifiedDatetime(OffsetDateTime.now());
+
+    HousingUnitEntity savedUnit = housingUnitRepository.save(newUnit);
+
+    String response = "Housing Unit was added succesfully! Housing Unit ID: " + savedUnit.getId().toString();
+
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
+  }
+
 }
