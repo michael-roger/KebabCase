@@ -65,9 +65,22 @@ public class HousingUnitController {
     }).collect(Collectors.toList());
   }
 
+  /**
+   * Retrieves a housing unit by its ID and returns its details as a JSON object.
+   * <p>
+   * This method uses the housing unit ID to search the repository for a corresponding
+   * {@link HousingUnitEntity}. If found, the housing unit's details such as ID, building ID,
+   * unit number, created date, and modified date are returned in JSON format. If the housing unit 
+   * is not found, an HTTP 404 Not Found status is returned.
+   * </p>
+   *
+   * @param id the ID of the housing unit to retrieve
+   * @return an {@link ObjectNode} containing the housing unit's details
+   * @throws ResponseStatusException if the housing unit with the given ID is not found
+   */
   @GetMapping("/housing-unit/{id}")
   public ObjectNode getHousingUnit(@PathVariable int id) {
-
+    
     Optional<HousingUnitEntity> housingUnitRepoResult = this.housingUnitRepository.findById(id);
 
     if (housingUnitRepoResult.isEmpty()) {
