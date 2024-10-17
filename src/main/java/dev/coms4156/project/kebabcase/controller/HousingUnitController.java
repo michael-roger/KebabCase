@@ -106,7 +106,15 @@ public class HousingUnitController {
     return json;
   }
 
-
+  /**
+   * Updates the information of an existing housing unit by its ID.
+   * Specifically, it updates the unit number and modified date.
+   * 
+   * @param id the ID of the housing unit to update
+   * @param unitNumber the new unit number for the housing unit
+   * @return a {@link ResponseEntity} indicating the result of the update
+   * @throws ResponseStatusException if the housing unit with the given ID is not found
+   */
   @PatchMapping("/housing-unit/{id}")
   public ResponseEntity<?> updateBuilding(
       @PathVariable int id, 
@@ -131,7 +139,16 @@ public class HousingUnitController {
 
   }
 
-  
+  /**
+   * Creates a new housing unit and associates it with an existing building.
+   * The new housing unit will have the specified unit number and be linked to the building
+   * with the provided building ID.
+   * 
+   * @param buildingID the ID of the building to associate the new housing unit with
+   * @param unitNumber the unit number for the new housing unit
+   * @return a {@link ResponseEntity} containing a message and the new housing unit's ID
+   * @throws ResponseStatusException if the building with the provided ID is not found
+   */
   @PostMapping("/housing-unit")
   public ResponseEntity<?> createBuilding(
       @RequestParam int buildingID,
