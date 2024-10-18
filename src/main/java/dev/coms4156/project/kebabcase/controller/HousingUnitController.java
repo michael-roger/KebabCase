@@ -97,7 +97,7 @@ public class HousingUnitController {
    * @throws ResponseStatusException if the housing unit with the given ID is not found
    */
   @GetMapping("/housing-unit/{id}")
-  public ObjectNode getHousingUnit(@PathVariable int id) {
+  public ResponseEntity<?> getHousingUnit(@PathVariable int id) {
     
     Optional<HousingUnitEntity> housingUnitRepoResult = this.housingUnitRepository.findById(id);
 
@@ -115,7 +115,7 @@ public class HousingUnitController {
     json.put("created_datetime", unit.getCreatedDatetime().format(formatter));
     json.put("modified_datetime", unit.getModifiedDatetime().format(formatter));
 
-    return json;
+    return ResponseEntity.ok(json);
   }
 
   /**
