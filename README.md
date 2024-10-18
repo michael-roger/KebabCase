@@ -275,10 +275,6 @@ curl -X GET http://localhost:8080/buildings
 ```
 
 
-
-
-
-
 ### GET /building/{id}
 
 **Description**: Retrieves information about a specific building by its ID.
