@@ -273,3 +273,124 @@ curl -X GET http://localhost:8080/housing-unit/1
 ```bash
 curl -X GET http://localhost:8080/buildings
 ```
+
+
+
+
+
+
+### GET /building/{id}
+
+**Description**: Retrieves information about a specific building by its ID.
+
+**URL**: `/building/{id}`
+
+**Method**: `GET`
+
+**URL Parameters**: 
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `id`        | `int`  | The ID of building   |
+
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+    {
+    "id": 1,
+    "address": "123 Elm St",
+    "city": "Brooklyn",
+    "state": "NY",
+    "zip_code": "62701",
+    "created_datetime": "2024-01-20T14:30:00",
+    "modified_datetime": "2024-01-20T14:30:00"
+    }
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X GET http://localhost:8080/building/1
+```
+
+
+### GET /building/{id}/housing-units
+**Description**: Retrieves all available housing units inside a building with a specific ID.
+
+**URL**: `/building/{id}/housing-units`
+
+**Method**: `GET`
+
+**URL Parameters**: 
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `id`        | `int`  | The ID of building   |
+
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+    [
+    {
+        "id": 1,
+        "unit_number": "1A"
+    },
+    {
+        "id": 2,
+        "unit_number": "1B"
+    }
+    ]
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X GET http://localhost:8080/building/1/housing-units
+```
+
+
+
+### POST /building
+**Description**: Retrieves all available housing units inside a building with a specific ID.
+
+**URL**: `/building`
+
+**Method**: `POST`
+
+**URL Parameters**: 
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `address`        | `String`  | The building address   |
+| `city`        | `String`  | The city the building is located in   |
+| `state`        | `String`  | 	The state the building is located in   |
+| `zip_code`        | `String`  | The postal code of the building  |
+
+
+**Success Response**:
+
+- **Code**: 201 Created
+- **Content**:
+
+    ```json
+    {
+    "id": 5,
+    "address": "500 Pine St",
+    "city": "Brooklyn",
+    "state": "NY",
+    "zip_code": "62703",
+    "created_datetime": "2024-10-17T12:00:00",
+    "modified_datetime": "2024-10-17T12:00:00"
+    }
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X POST http://localhost:8080/building -d '{"address": "500 Pine St", "city": "Brooklyn", "state": "NY", "zip_code": "62703"}' -H "Content-Type: application/json"
+```
