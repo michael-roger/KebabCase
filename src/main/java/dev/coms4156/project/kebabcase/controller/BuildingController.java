@@ -1,6 +1,8 @@
 package dev.coms4156.project.kebabcase.controller;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,10 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
+import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 
 /** TODO */
@@ -22,6 +28,10 @@ import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 public class BuildingController {
   
   private final BuildingRepositoryInterface buildingRepository;
+
+  private final BuildingFeatureRepositoryInterface buildingFeatureRepository;
+
+  private final BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository;
 
   private final ObjectMapper objectMapper;
 
@@ -33,24 +43,35 @@ public class BuildingController {
    */
   public BuildingController(
       BuildingRepositoryInterface buildingRepository,
+      BuildingFeatureRepositoryInterface buildingFeatureRepository,
+      BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
       ObjectMapper objectMapper
   ) {
     this.buildingRepository = buildingRepository;
+    this.buildingFeatureRepository = buildingFeatureRepository;
+    this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
     this.objectMapper = objectMapper;
   }
 
   /**
    * Updates the information of an existing building by its ID.
-   * Only fields provided as request parameters will be updated.
+   * Only the fields provided as request parameters will be updated.
    * If no fields are provided, an HTTP 400 Bad Request will be returned.
+   * Additionally, new building features can be associated with the building.
+   * If a list of feature IDs is provided, valid features will be added to the building.
+   * If any feature ID in the list is not found, the update will still proceed, but an HTTP 206 Partial Content
+   * will be returned, along with a message listing the invalid feature IDs.
    * 
    * @param id the ID of the building to update
    * @param address the new address of the building (optional)
    * @param city the new city of the building (optional)
    * @param state the new state of the building (optional)
    * @param zipCode the new zip code of the building (optional)
-   * @return a {@link ResponseEntity} indicating the result of the update
-   * @throws ResponseStatusException if the building with the given ID is not found or no fields are provided for update
+   * @param features a list of feature IDs to associate with the building (optional)
+   * @return a {@link ResponseEntity} indicating the result of the update. If all updates succeed, 
+   * an HTTP 200 OK is returned. If some feature IDs are invalid, an HTTP 206 Partial Content is returned 
+   * with a message listing the invalid feature IDs.
+   * @throws ResponseStatusException if the building with the given ID is not found or if no fields are provided for update
    */
   @PatchMapping("/building/{id}")
   public ResponseEntity<?> updateBuilding(
@@ -58,7 +79,8 @@ public class BuildingController {
       @RequestParam(required = false) String address,
       @RequestParam(required = false) String city,
       @RequestParam(required = false) String state,
-      @RequestParam(required = false) String zipCode
+      @RequestParam(required = false) String zipCode,
+      @RequestParam(required = false) List<Integer> features
   ) {
 
     Optional<BuildingEntity> buildingResult = buildingRepository.findById(id);
@@ -72,7 +94,8 @@ public class BuildingController {
     if (address == null && 
         city == null && 
         state == null && 
-        zipCode == null) {
+        zipCode == null &&
+        features == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No fields provided for update");
     }
 
@@ -93,8 +116,34 @@ public class BuildingController {
 
     buildingRepository.save(building);
 
-    return ResponseEntity.ok("Building info has been successfully updated!");
+    /* Insert new building feature to building-feature mapping if exists */
+    List<Integer> invalidFeatures = new ArrayList<>();
 
+    if (features != null) {
+      for (Integer featureID : features) {
+        BuildingFeatureBuildingMappingEntity buildingMapFeature = new BuildingFeatureBuildingMappingEntity();
+
+        Optional<BuildingFeatureEntity> featureResult = this.buildingFeatureRepository.findById(featureID);
+
+        if (featureResult.isEmpty()) {
+          invalidFeatures.add(featureID);
+        } else {
+          BuildingFeatureEntity feature = featureResult.get();
+        
+          buildingMapFeature.setBuilding(building);
+          buildingMapFeature.setBuildingFeature(feature);
+
+          buildingFeatureMappingRepository.save(buildingMapFeature);
+        }
+      }
+    }
+
+    if (!invalidFeatures.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+          .body("Building updated, but the following feature IDs were not found: " + invalidFeatures);
+    }
+
+    return ResponseEntity.ok("Building info has been successfully updated!");
   }
 
   /**

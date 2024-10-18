@@ -2,6 +2,7 @@ package dev.coms4156.project.kebabcase.controller;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,7 +22,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureHousingUnitMappingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitRepositoryInterface;
 
 /** TODO */
@@ -31,6 +36,10 @@ public class HousingUnitController {
 
   private final BuildingRepositoryInterface buildingRepository;
 
+  private final HousingUnitFeatureRepositoryInterface unitFeatureRepository;
+
+  private final HousingUnitFeatureHousingUnitMappingRepositoryInterface unitFeatureMappingRepository;
+
   private final ObjectMapper objectMapper;
 
   private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -39,10 +48,14 @@ public class HousingUnitController {
   public HousingUnitController(
       HousingUnitRepositoryInterface housingUnitRepository,
       BuildingRepositoryInterface buildingRepository,
+      HousingUnitFeatureRepositoryInterface unitFeatureRepository,
+      HousingUnitFeatureHousingUnitMappingRepositoryInterface unitFeatureMappingRepository,
       ObjectMapper objectMapper
   ) {
     this.housingUnitRepository = housingUnitRepository;
     this.buildingRepository = buildingRepository;
+    this.unitFeatureRepository = unitFeatureRepository;
+    this.unitFeatureMappingRepository = unitFeatureMappingRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -108,17 +121,26 @@ public class HousingUnitController {
 
   /**
    * Updates the information of an existing housing unit by its ID.
-   * Specifically, it updates the unit number and modified date.
+   * Specifically, it updates the unit number, the modified date, and optionally associates new features with the housing unit.
+   * 
+   * If no fields (unitNumber or features) are provided, an HTTP 400 Bad Request will be returned.
+   * If features are provided, valid features will be added to the housing unit. 
+   * If any feature ID in the list is not found, the update will still proceed, but an HTTP 206 Partial Content
+   * will be returned with a message listing the invalid feature IDs.
    * 
    * @param id the ID of the housing unit to update
-   * @param unitNumber the new unit number for the housing unit
-   * @return a {@link ResponseEntity} indicating the result of the update
-   * @throws ResponseStatusException if the housing unit with the given ID is not found
+   * @param unitNumber the new unit number for the housing unit (optional)
+   * @param features a list of feature IDs to associate with the housing unit (optional)
+   * @return a {@link ResponseEntity} indicating the result of the update. If all updates succeed, 
+   * an HTTP 200 OK is returned. If some feature IDs are invalid, an HTTP 206 Partial Content is returned 
+   * with a message listing the invalid feature IDs.
+   * @throws ResponseStatusException if the housing unit with the given ID is not found, or if no fields are provided for update
    */
   @PatchMapping("/housing-unit/{id}")
   public ResponseEntity<?> updateBuilding(
       @PathVariable int id, 
-      @RequestParam String unitNumber
+      @RequestParam(required = false) String unitNumber,
+      @RequestParam(required = false) List<Integer> features
   ) {
 
     Optional<HousingUnitEntity> unitResult = housingUnitRepository.findById(id);
@@ -129,14 +151,46 @@ public class HousingUnitController {
 
     HousingUnitEntity unit = unitResult.get();
 
-    unit.setUnitNumber(unitNumber);
+    if (unitNumber == null && features == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No fields provided for update");
+    }
+
+    if (unitNumber != null) {
+      unit.setUnitNumber(unitNumber);
+    }
 
     unit.setModifiedDatetime(OffsetDateTime.now());
 
     housingUnitRepository.save(unit);
 
-    return ResponseEntity.ok("Housing unit info has been successfully updated!");
+    /* Insert new unit feature to unit-feature mapping if exists */
+    List<Integer> invalidFeatures = new ArrayList<>();
 
+    if (features != null) {
+      for(Integer featureID : features) {
+        HousingUnitFeatureHousingUnitMappingEntity unitMapFeature = new HousingUnitFeatureHousingUnitMappingEntity();
+
+        Optional<HousingUnitFeatureEntity> featureResult = this.unitFeatureRepository.findById(featureID);
+
+        if (featureResult.isEmpty()) {
+          invalidFeatures.add(featureID);
+        } else {
+          HousingUnitFeatureEntity feature = featureResult.get();
+
+          unitMapFeature.setHousingUnit(unit);
+          unitMapFeature.setHousingUnitFeature(feature);
+
+          unitFeatureMappingRepository.save(unitMapFeature);
+        }
+      }
+    }
+
+    if (!invalidFeatures.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+          .body("Housing unit updated, but the following feature IDs were not found: " + invalidFeatures);
+    }
+
+    return ResponseEntity.ok("Housing unit info has been successfully updated!");
   }
 
   /**
