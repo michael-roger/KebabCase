@@ -346,14 +346,46 @@ public class BuildingController {
 
     return result.stream().map(mapping -> {
       BuildingEntity building = mapping.getBuilding();
-      ObjectNode Json = objectMapper.createObjectNode();
-      Json.put("id", building.getId());
-      Json.put("building_address", building.getAddress());
-      Json.put("city", building.getCity());
-      Json.put("state", building.getState());
-      Json.put("zipcode", building.getZipCode());
-      return Json;
+      ObjectNode json = objectMapper.createObjectNode();
+      json.put("id", building.getId());
+      json.put("building_address", building.getAddress());
+      json.put("city", building.getCity());
+      json.put("state", building.getState());
+      json.put("zipcode", building.getZipCode());
+      return json;
     }).collect(Collectors.toList());
+  }
+
+  /**
+   * Retrieves a specific building by its ID and returns the details as a JSON object.
+   *
+   * @param id The ID of the building to retrieve.
+   * @return An ObjectNode JSON object containing the building details.
+   * @throws ResponseStatusException if the building with the given ID is not found,
+   *     with an HTTP status of 404.
+   */
+  @GetMapping("/building/{id}")
+  public ObjectNode getBuildingById(@PathVariable int id) {
+
+    Optional<BuildingEntity> buildingRepositoryResult = this.buildingRepository.findById(id);
+    if (buildingRepositoryResult.isEmpty()) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Building with id " + id + " not found"
+      );
+    }
+
+    BuildingEntity building = buildingRepositoryResult.get();
+
+    ObjectNode json = this.objectMapper.createObjectNode();
+    json.put("id", building.getId());
+    json.put("address", building.getAddress());
+    json.put("city", building.getCity());
+    json.put("state", building.getState());
+    json.put("zip_code", building.getZipCode());
+    json.put("created_datetime", building.getCreatedDatetime().toString());
+    json.put("modified_datetime", building.getModifiedDatetime().toString());
+
+    return json;
   }
 
 }
