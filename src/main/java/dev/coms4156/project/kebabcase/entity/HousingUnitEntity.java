@@ -16,6 +16,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+/**
+ * Entity detailing all the information held by a housing unit.
+ */
+
 @Accessors(chain = true)
 @Getter
 @Setter
@@ -23,22 +27,22 @@ import lombok.experimental.Accessors;
 @Entity(name = "HousingUnit")
 @Table(name = "housing_units")
 public class HousingUnitEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Integer id;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "building_id")
-    private BuildingEntity building;
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "building_id")
+  private BuildingEntity building;
 
-    @Column(name = "unit_number")
-    private String unitNumber;
+  @Column(name = "unit_number")
+  private String unitNumber;
 
-    @Column(name = "created_datetime")
-    private OffsetDateTime createdDatetime;
+  @Column(name = "created_datetime")
+  private OffsetDateTime createdDatetime;
 
-    @Column(name = "modified_datetime")
-    private OffsetDateTime modifiedDatetime;
+  @Column(name = "modified_datetime")
+  private OffsetDateTime modifiedDatetime;
 }

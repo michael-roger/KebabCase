@@ -99,7 +99,8 @@ public class HousingUnitController {
    * <p>Given a building ID, this method returns all housing units associated with the building.
    * If the building is not found, a 404 Not Found status is returned.
    * </p>
-   * 
+   *
+   *
    * @param id the ID of the building to retrieve housing units for
    * @return a list of {@link ObjectNode} containing housing unit details
    * @throws ResponseStatusException if the building with the given ID is not found
@@ -134,6 +135,7 @@ public class HousingUnitController {
    * <p>This method fetches a housing unit based on its ID and returns its details as a JSON object.
    * If the unit is not found, a 404 Not Found response is returned.
    * </p>
+   *
    *
    * @param id the ID of the housing unit to retrieve
    * @return a {@link ResponseEntity} containing the housing unit's details in JSON format, or 
@@ -170,7 +172,8 @@ public class HousingUnitController {
    * If features are added or removed, valid feature IDs will be processed and invalid ones will
    * return HTTP 206 Partial Content with a list of invalid feature IDs.
    * </p>
-   * 
+   *
+   *
    * @param id the ID of the housing unit to update
    * @param unitNumber the new unit number for the housing unit (optional)
    * @param addFeatures a list of feature IDs to add to the housing unit (optional)
@@ -303,7 +306,8 @@ public class HousingUnitController {
    * If the building is not found, a 404 Not Found response is returned. If a housing unit with the
    * same unit number already exists within the building, a 409 Conflict response is returned.
    * </p>
-   * 
+   *
+   *
    * @param buildingId the ID of the building to associate the new housing unit with
    * @param unitNumber the unit number for the new housing unit
    * @param features a list of feature IDs to associate with the housing unit (optional)

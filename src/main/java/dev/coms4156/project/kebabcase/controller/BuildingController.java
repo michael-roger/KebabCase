@@ -15,10 +15,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -321,7 +325,6 @@ public class BuildingController {
   }
 
   /**
-   *
    * Displays a list of all buildings with the desired building feature.
    *
    * @param id the ID of the desired building feature
@@ -334,14 +337,14 @@ public class BuildingController {
   public List<ObjectNode> getBuildingHousingUnits(@PathVariable int id) {
 
     Optional<BuildingFeatureEntity> feature = this.buildingFeatureRepository.findById(id);
-    if (feature.isEmpty()){
+    if (feature.isEmpty()) {
       throw new ResponseStatusException(
         HttpStatus.NOT_FOUND, "Building with feature id " + id + " not found"
       );
     }
 
     List<BuildingFeatureBuildingMappingEntity> result =
-      this.buildingFeatureMappingRepository.findByBuildingFeatureId(id);
+        this.buildingFeatureMappingRepository.findByBuildingFeatureId(id);
 
 
     return result.stream().map(mapping -> {
