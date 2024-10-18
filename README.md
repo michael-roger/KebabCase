@@ -353,6 +353,50 @@ curl -X GET http://localhost:8080/building/1/housing-units
 ```
 
 
+### GET /building-feature/{id}/buildings
+**Description**: Retrieves all available buildings with the specified building feature ID.
+
+**URL**: `/building-feature/{id}/buildings`
+
+**Method**: `GET`
+
+**URL Parameters**:
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `id`        | `int`  | The ID of building feature   |
+
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+    [
+    {
+        "id": 2,
+        "building_address": "456 Oak Ave",
+        "city": "Brooklyn",
+        "state": "NY",
+        "zipcode": 46142
+    },
+    {
+        "id": 3,
+        "building_address": "789 Maple Blvd",
+        "city": "Bronx",
+        "state": "NY",
+        "zipcode": 43215
+    }
+    ]
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X GET http://localhost:8080/building-feature/3/buildings
+```
+
+
 
 ### POST /building
 **Description**: Retrieves all available housing units inside a building with a specific ID.
@@ -508,4 +552,6 @@ To checkstyle, run the following command:
 ```
 mvn checkstyle:check
 ```
-We seek for no checkstyle violations or warnings.
+We seek for no checkstyle violations or warnings.  The following is our report as of October 18, 2024.
+
+![Checkstyle](/reports/checkstyle.png)
