@@ -3,8 +3,10 @@ package dev.coms4156.project.kebabcase.controller;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -139,9 +141,11 @@ public class HousingUnitController {
   public ResponseEntity<?> updateBuilding(
       @PathVariable int id, 
       @RequestParam(required = false) String unitNumber,
-      @RequestParam(required = false) List<Integer> features
+      @RequestParam(required = false) List<Integer> addFeatures,
+      @RequestParam(required = false) List<Integer> removeFeatures
   ) {
 
+    /* Check if unit exists */
     Optional<HousingUnitEntity> unitResult = housingUnitRepository.findById(id);
 
     if (unitResult.isEmpty()) {
@@ -151,11 +155,26 @@ public class HousingUnitController {
 
     HousingUnitEntity unit = unitResult.get();
 
-    if (unitNumber == null && features == null) {
+    /* Check if the user entered anything to update */
+    if (unitNumber == null && addFeatures == null && removeFeatures == null) {
       String errorMessage = "No fields provided for update";
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 
+    /* Check if there is an ID in both add/remove */
+    if (addFeatures != null && removeFeatures != null) {
+      Set<Integer> addFeaturesSet = new HashSet<>(addFeatures);
+      Set<Integer> removeFeaturesSet = new HashSet<>(removeFeatures);
+
+      addFeaturesSet.retainAll(removeFeaturesSet);
+
+      if (!addFeaturesSet.isEmpty()) {
+          String errorMessage = "Conflict: Feature IDs present in both add and remove lists: " + addFeaturesSet;
+          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+      }
+    }
+
+    /* Start updating */
     if (unitNumber != null) {
       unit.setUnitNumber(unitNumber);
     }
@@ -164,11 +183,11 @@ public class HousingUnitController {
 
     housingUnitRepository.save(unit);
 
-    /* Insert new unit feature to unit-feature mapping if exists */
-    List<Integer> invalidFeatures = new ArrayList<>();
+    Set<Integer> invalidFeatures = new HashSet<>();
 
-    if (features != null) {
-      for(Integer featureID : features) {
+    /* Add new unit feature to unit-feature mapping if exists */
+    if (addFeatures != null) {
+      for (Integer featureID : addFeatures) {
         HousingUnitFeatureHousingUnitMappingEntity unitMapFeature = new HousingUnitFeatureHousingUnitMappingEntity();
 
         Optional<HousingUnitFeatureEntity> featureResult = this.unitFeatureRepository.findById(featureID);
@@ -191,9 +210,30 @@ public class HousingUnitController {
       }
     }
 
+    /* Remove features */
+    if (removeFeatures != null) {
+      for (Integer featureID : removeFeatures) {
+        Optional<HousingUnitFeatureEntity> featureResult = this.unitFeatureRepository.findById(featureID);
+
+        if (featureResult.isEmpty()) {
+          invalidFeatures.add(featureID);
+        } else {
+          HousingUnitFeatureEntity feature = featureResult.get();
+
+          Optional<HousingUnitFeatureHousingUnitMappingEntity> existingMapping =
+              this.unitFeatureMappingRepository.findByHousingUnitAndHousingUnitFeature(unit, feature);
+
+          if (existingMapping.isPresent()) {
+            unitFeatureMappingRepository.delete(existingMapping.get());
+          }
+        }
+      }
+    }
+
     if (unitNumber == null &&
-        features != null &&
-        invalidFeatures.size() == features.size()) {
+        addFeatures != null &&
+        removeFeatures != null &&
+        invalidFeatures.size() == (addFeatures.size() + removeFeatures.size())) {
       String errorMessage = "Could not find any of the housing unit features requested.";
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }

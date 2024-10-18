@@ -2,8 +2,10 @@ package dev.coms4156.project.kebabcase.controller;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,9 +82,11 @@ public class BuildingController {
       @RequestParam(required = false) String city,
       @RequestParam(required = false) String state,
       @RequestParam(required = false) String zipCode,
-      @RequestParam(required = false) List<Integer> features
+      @RequestParam(required = false) List<Integer> addFeatures,
+      @RequestParam(required = false) List<Integer> removeFeatures
   ) {
 
+    /* Check if building exists */
     Optional<BuildingEntity> buildingResult = buildingRepository.findById(id);
 
     if (buildingResult.isEmpty()) {
@@ -92,15 +96,31 @@ public class BuildingController {
 
     BuildingEntity building = buildingResult.get();
 
+    /* Check if the user entered anything to update */
     if (address == null && 
         city == null && 
         state == null && 
         zipCode == null &&
-        features == null) {
+        addFeatures == null &&
+        removeFeatures == null) {
       String errorMessage = "No fields provided for update";
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 
+    /* Check if there is an ID in both add/remove */
+    if (addFeatures != null && removeFeatures != null) {
+      Set<Integer> addFeaturesSet = new HashSet<>(addFeatures);
+      Set<Integer> removeFeaturesSet = new HashSet<>(removeFeatures);
+
+      addFeaturesSet.retainAll(removeFeaturesSet);
+
+      if (!addFeaturesSet.isEmpty()) {
+        String errorMessage = "Conflict: Feature IDs present in both add and remove lists: " + addFeaturesSet;
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+      }
+    }
+
+    /* Start updating */
     if (address != null) {
         building.setAddress(address);
     }
@@ -118,11 +138,11 @@ public class BuildingController {
 
     buildingRepository.save(building);
 
-    /* Insert new building feature to building-feature mapping if exists */
-    List<Integer> invalidFeatures = new ArrayList<>();
+    Set<Integer> invalidFeatures = new HashSet<>();
 
-    if (features != null) {
-      for (Integer featureID : features) {
+    /* Insert new building feature to building-feature mapping if exists */
+    if (addFeatures != null) {
+      for (Integer featureID : addFeatures) {
         BuildingFeatureBuildingMappingEntity buildingMapFeature = new BuildingFeatureBuildingMappingEntity();
 
         Optional<BuildingFeatureEntity> featureResult = this.buildingFeatureRepository.findById(featureID);
@@ -145,12 +165,33 @@ public class BuildingController {
       }
     }
 
+    /* Remove features */
+    if (removeFeatures != null) {
+      for (Integer featureID : removeFeatures) {
+        Optional<BuildingFeatureEntity> featureResult = this.buildingFeatureRepository.findById(featureID);
+
+        if (featureResult.isEmpty()) {
+          invalidFeatures.add(featureID);
+        } else {
+          BuildingFeatureEntity feature = featureResult.get();
+
+          Optional<BuildingFeatureBuildingMappingEntity> existingMapping =
+              this.buildingFeatureMappingRepository.findByBuildingAndBuildingFeature(building, feature);
+
+          if (existingMapping.isPresent()) {
+            buildingFeatureMappingRepository.delete(existingMapping.get());
+          }
+        }
+      }
+    }
+
     if (address == null && 
         city == null && 
         state == null && 
         zipCode == null &&
-        features != null &&
-        invalidFeatures.size() == features.size()) {
+        addFeatures != null &&
+        removeFeatures != null &&
+        invalidFeatures.size() == (addFeatures.size() + removeFeatures.size())) {
       String errorMessage = "Could not find any of the building features requested.";
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);          
     }
