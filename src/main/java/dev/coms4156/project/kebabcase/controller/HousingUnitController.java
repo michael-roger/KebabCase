@@ -34,6 +34,34 @@ public class HousingUnitController {
     this.objectMapper = objectMapper;
   }
 
+  /*
+  *  Displays a list of all available housing units (apartments)
+  */
+
+//
+
+  @GetMapping("/housing units")
+  public List<ObjectNode> getAllHousingUnits() {
+
+    List<HousingUnitEntity> housingResult = this.housingUnitRepository.findAll();
+
+    if (housingResult.isEmpty()) {
+      throw new ResponseStatusException(
+              HttpStatus.NOT_FOUND, "No available housing units founds"
+      );
+    }
+
+    return housingResult.stream().map(housingUnit -> {
+      ObjectNode Json = this.objectMapper.createObjectNode();
+      Json.put("building_id", housingUnit.getBuildingId());
+      Json.put("id", housingUnit.getId());
+      Json.put("created_datetime", housingUnit.getCreatedDatetime().toEpochSecond());
+      Json.put("modified_datetime", housingUnit.getModifiedDatetime().toEpochSecond());
+      Json.put("unit_number", housingUnit.getUnitNumber());
+      return Json;
+    }).collect(Collectors.toList());
+  }
+
   @GetMapping("/building/{id}/housing-units")
   public List<ObjectNode> getBuildingHousingUnits(@PathVariable int id) {
 

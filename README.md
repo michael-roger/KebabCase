@@ -1,7 +1,8 @@
 # KebabCase
 
 # KebabCase
-
+" JIRA link: https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1?atlOrigin=eyJwIjoiai[…]3801eef3-b3ce-4e5f-b31d-4322601dbdac&selectedIssue=KAN-3
+"
 0. Install the "brew" if you don't have it installed:
 
 ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```

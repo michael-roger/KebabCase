@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository("HousingUnitRepository")
 public interface HousingUnitRepositoryInterface extends JpaRepository<HousingUnitEntity, Integer> {
   List<HousingUnitEntity> findByBuilding(BuildingEntity building);
+
 }
