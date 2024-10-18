@@ -159,3 +159,39 @@ INSERT INTO housing_unit_feature_housing_unit_mappings (id, housing_unit_id, hou
 (7, 5, 3),  -- Housing unit 8D is on the Ground Floor
 (8, 6, 1);  -- Housing unit 4A has Wheelchair Accessibility
 ```
+
+## API Endpoints
+
+### GET /housing-units
+
+**Description**: Retrieves a list of available housing units with specific attributes.
+
+**URL**: `/housing-units`
+
+**Method**: `GET`
+
+**URL Parameters**: None
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+    [
+      {
+        "id": 1,
+        "unit_number": "1A",
+        "building_id": 1,
+        "attributes": {
+          // Specific attributes
+        }
+      },
+      // More housing units
+    ]
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X GET http://localhost:8080/housing-units
