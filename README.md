@@ -477,3 +477,37 @@ curl -X PATCH http://localhost:8080/housing-unit/1 -d '{"unit_number": "1B Updat
 ```bash
 curl -X PATCH http://localhost:8080/building/1 -d '{"address": "500 Oak St"}' -H "Content-Type: application/json"
 ```
+
+## Testing
+This project uses **JUnit** for unit testing, **MockMVC**, **JaCoCo** for code coverage, Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.
+
+### Before you start testing, make sure you have the following:
+- **Maven**
+-  **Java 17**
+
+## **JUnit Testing**
+Use the following command to run all unit tests located at src/test/java/:
+```
+mvn test
+```
+
+## **JaCoCo Coverage**
+Use the following command to generate a Jacoco Coverage report:
+```
+mvn jacoco:report
+```
+This will generate a report under the target/site/jacoco directory. Refer to/view the index.html to view the report.
+
+##**Static Analysis**
+To perform static analysis with PMD, run the following command:
+```
+mvn pmd:pmd
+```
+This generates a static analysis report under target/site/pmd.html.
+
+##**Checkstyle**
+To checkstyle, run the following command:
+```
+mvn checkstyle:check
+```
+We seek for no checkstyle violations or warnings.
