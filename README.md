@@ -195,3 +195,80 @@ INSERT INTO housing_unit_feature_housing_unit_mappings (id, housing_unit_id, hou
 
 ```bash
 curl -X GET http://localhost:8080/housing-units
+```
+
+### GET /housing-unit/{id}
+
+**Description**: Retrieves the specific details of a housing unit by its ID.
+
+**URL**: `/housing-unit/{id}`
+
+**Method**: `GET`
+
+**URL Parameters**:
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `id`        | `int`  | The ID of housing unit    |
+
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+{
+  "id": 1,
+  "unit_number": "1A",
+  "building_id": 1,
+  "attributes": {
+    // Specific attributes
+  },
+  "created_datetime": "2024-01-21T10:00:00",
+  "modified_datetime": "2024-01-21T10:00:00"
+}
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X GET http://localhost:8080/housing-unit/1
+```
+
+### GET /buildings
+
+**Description**: Retrieves a list of buildings with specific attributes.
+
+**URL**: `/buildings`
+
+**Method**: `GET`
+
+**URL Parameters**: None
+
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+[
+  {
+    "id": 1,
+    "address": "123 Elm St",
+    "city": "Brooklyn",
+    "state": "NY",
+    "zip_code": "62701",
+    "attributes": {
+      // Specific building attributes
+    }
+  },
+  // More buildings
+]
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X GET http://localhost:8080/buildings
+```
