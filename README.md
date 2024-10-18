@@ -394,3 +394,86 @@ curl -X GET http://localhost:8080/building/1/housing-units
 ```bash
 curl -X POST http://localhost:8080/building -d '{"address": "500 Pine St", "city": "Brooklyn", "state": "NY", "zip_code": "62703"}' -H "Content-Type: application/json"
 ```
+
+
+### PATCH  /housing-unit/{id}
+**Description**: Allows for the update of a specific housing unit.
+
+**URL**: ` /housing-unit/{id}`
+
+**Method**: `PATCH`
+
+**URL Parameters**: 
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `id`        | `int`  | The ID of the housing unit  |
+
+**Body Parameters**: 
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `unit_number`        | `String`  | The new unit number of the housing unit   |
+
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+    {
+    "id": 1,
+    "unit_number": "1B Updated",
+    "building_id": 1,
+    "created_datetime": "2024-01-21T10:00:00",
+    "modified_datetime": "2024-10-17T12:00:00"
+    }
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X PATCH http://localhost:8080/housing-unit/1 -d '{"unit_number": "1B Updated"}' -H "Content-Type: application/json"
+```
+
+
+
+### PATCH  /building/{id}
+**Description**: Allows for the update of a specific building.
+
+**URL**: `/building/{id}`
+
+**Method**: `PATCH`
+
+**URL Parameters**: 
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `id`        | `int`  | The ID of the housing unit  |
+
+**Body Parameters**: 
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `address`        | `String`  | The new building address   |
+
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+    {
+    "id": 1,
+    "address": "500 Oak St",
+    "city": "Brooklyn",
+    "state": "NY",
+    "zip_code": "62701",
+    "created_datetime": "2024-01-20T14:30:00",
+    "modified_datetime": "2024-10-17T12:00:00"
+    }
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X PATCH http://localhost:8080/building/1 -d '{"address": "500 Oak St"}' -H "Content-Type: application/json"
+```
