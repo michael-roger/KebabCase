@@ -213,20 +213,21 @@ curl -X GET http://localhost:8080/housing-units
 
 **Success Response**:
 
+
 - **Code**: 200 OK
 - **Content**:
 
     ```json
-{
-  "id": 1,
-  "unit_number": "1A",
-  "building_id": 1,
-  "attributes": {
-    // Specific attributes
-  },
-  "created_datetime": "2024-01-21T10:00:00",
-  "modified_datetime": "2024-01-21T10:00:00"
-}
+    {
+    "id": 1,
+    "unit_number": "1A",
+    "building_id": 1,
+    "attributes": {
+        // Specific attributes
+    },
+    "created_datetime": "2024-01-21T10:00:00",
+    "modified_datetime": "2024-01-21T10:00:00"
+    }
     ```
 
 **Sample Call**:
@@ -252,19 +253,19 @@ curl -X GET http://localhost:8080/housing-unit/1
 - **Content**:
 
     ```json
-[
-  {
-    "id": 1,
-    "address": "123 Elm St",
-    "city": "Brooklyn",
-    "state": "NY",
-    "zip_code": "62701",
-    "attributes": {
-      // Specific building attributes
-    }
-  },
-  // More buildings
-]
+    [
+    {
+        "id": 1,
+        "address": "123 Elm St",
+        "city": "Brooklyn",
+        "state": "NY",
+        "zip_code": "62701",
+        "attributes": {
+        // Specific building attributes
+        }
+    },
+    // More buildings
+    ]
     ```
 
 **Sample Call**:
