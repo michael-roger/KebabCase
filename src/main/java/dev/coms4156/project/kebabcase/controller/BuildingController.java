@@ -129,11 +129,16 @@ public class BuildingController {
           invalidFeatures.add(featureID);
         } else {
           BuildingFeatureEntity feature = featureResult.get();
-        
-          buildingMapFeature.setBuilding(building);
-          buildingMapFeature.setBuildingFeature(feature);
 
-          buildingFeatureMappingRepository.save(buildingMapFeature);
+          Optional<BuildingFeatureBuildingMappingEntity> existingMapping =
+            this.buildingFeatureMappingRepository.findByBuildingAndBuildingFeature(building, feature);
+
+          if (existingMapping.isEmpty()) {
+            buildingMapFeature.setBuilding(building);
+            buildingMapFeature.setBuildingFeature(feature);
+
+            buildingFeatureMappingRepository.save(buildingMapFeature);
+          }
         }
       }
     }

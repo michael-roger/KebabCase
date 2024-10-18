@@ -177,10 +177,15 @@ public class HousingUnitController {
         } else {
           HousingUnitFeatureEntity feature = featureResult.get();
 
-          unitMapFeature.setHousingUnit(unit);
-          unitMapFeature.setHousingUnitFeature(feature);
+          Optional<HousingUnitFeatureHousingUnitMappingEntity> existingMapping =
+            this.unitFeatureMappingRepository.findByHousingUnitAndHousingUnitFeature(unit, feature);
 
-          unitFeatureMappingRepository.save(unitMapFeature);
+          if (existingMapping.isEmpty()) {
+            unitMapFeature.setHousingUnit(unit);
+            unitMapFeature.setHousingUnitFeature(feature);
+
+            unitFeatureMappingRepository.save(unitMapFeature);
+          }
         }
       }
     }
