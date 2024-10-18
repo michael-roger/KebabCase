@@ -11,5 +11,5 @@ import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappin
 
 @Repository("HousingUnitFeatureHousingUnitMappingRepository")
 public interface HousingUnitFeatureHousingUnitMappingRepositoryInterface extends JpaRepository<HousingUnitFeatureHousingUnitMappingEntity, Integer> {
-        Optional<HousingUnitFeatureHousingUnitMappingEntity> findByHousingUnitAndHousingUnitFeature(HousingUnitEntity housingUnit, HousingUnitFeatureEntity housingUnitFeature);
+  Optional<HousingUnitFeatureHousingUnitMappingEntity> findByHousingUnitAndHousingUnitFeature(HousingUnitEntity housingUnit, HousingUnitFeatureEntity housingUnitFeature);
 }

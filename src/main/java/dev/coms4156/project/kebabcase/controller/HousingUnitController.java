@@ -21,8 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
-import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
-import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
@@ -104,9 +102,8 @@ public class HousingUnitController {
     Optional<HousingUnitEntity> housingUnitRepoResult = this.housingUnitRepository.findById(id);
 
     if (housingUnitRepoResult.isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Housing unit with id " + id + " not found"
-      );
+      String errorMessage = "Housing unit with id " + id + " not found";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }
 
     HousingUnitEntity unit = housingUnitRepoResult.get();
@@ -148,13 +145,15 @@ public class HousingUnitController {
     Optional<HousingUnitEntity> unitResult = housingUnitRepository.findById(id);
 
     if (unitResult.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found");
+      String errorMessage = "Building not found";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }
 
     HousingUnitEntity unit = unitResult.get();
 
     if (unitNumber == null && features == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No fields provided for update");
+      String errorMessage = "No fields provided for update";
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 
     if (unitNumber != null) {
@@ -195,7 +194,8 @@ public class HousingUnitController {
     if (unitNumber == null &&
         features != null &&
         invalidFeatures.size() == features.size()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find any of the housing unit features requested.");
+      String errorMessage = "Could not find any of the housing unit features requested.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }
 
     if (!invalidFeatures.isEmpty()) {
@@ -223,17 +223,25 @@ public class HousingUnitController {
       @RequestParam(required = false) List<Integer> features
   ) {
 
-    HousingUnitEntity newUnit = new HousingUnitEntity();
-
+    /* Check if building exists */
     Optional<BuildingEntity> buildingRepoResult = this.buildingRepository.findById(buildingID);
 
     if (buildingRepoResult.isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Building with id " + buildingID + " not found"
-      );
+      String errorMessage = "Building with id " + buildingID + " not found";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }
 
     BuildingEntity building = buildingRepoResult.get();
+
+    /* Check if the housing unit already exists */
+    Optional<HousingUnitEntity> existingUnit = housingUnitRepository.findByBuildingAndUnitNumber(building, unitNumber);
+
+    if (existingUnit.isPresent()) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body("A housing unit in the same building already exists.");
+    }
+
+    /* Create a new housing unit */
+    HousingUnitEntity newUnit = new HousingUnitEntity();
 
     newUnit.setBuilding(building);
     newUnit.setUnitNumber(unitNumber);

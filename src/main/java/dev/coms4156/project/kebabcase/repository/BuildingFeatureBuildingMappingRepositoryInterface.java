@@ -11,6 +11,5 @@ import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
 
 @Repository("BuildingFeatureBuildingMappingRepository")
 public interface BuildingFeatureBuildingMappingRepositoryInterface extends JpaRepository<BuildingFeatureBuildingMappingEntity, Integer> {
-        Optional<BuildingFeatureBuildingMappingEntity> findByBuildingAndBuildingFeature(BuildingEntity building, BuildingFeatureEntity buildingFeature);
-
+  Optional<BuildingFeatureBuildingMappingEntity> findByBuildingAndBuildingFeature(BuildingEntity building, BuildingFeatureEntity buildingFeature);
 }

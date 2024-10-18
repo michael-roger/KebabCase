@@ -86,7 +86,8 @@ public class BuildingController {
     Optional<BuildingEntity> buildingResult = buildingRepository.findById(id);
 
     if (buildingResult.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found");
+      String errorMessage = "Building not found";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }
 
     BuildingEntity building = buildingResult.get();
@@ -96,7 +97,8 @@ public class BuildingController {
         state == null && 
         zipCode == null &&
         features == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No fields provided for update");
+      String errorMessage = "No fields provided for update";
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 
     if (address != null) {
@@ -149,7 +151,8 @@ public class BuildingController {
         zipCode == null &&
         features != null &&
         invalidFeatures.size() == features.size()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find any of the building features requested.");
+      String errorMessage = "Could not find any of the building features requested.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);          
     }
 
     if (!invalidFeatures.isEmpty()) {
@@ -179,6 +182,14 @@ public class BuildingController {
       @RequestParam(required = false) List<Integer> features
   ) {
 
+    /* Check if the building already exists */
+    Optional<BuildingEntity> existingBuilding = buildingRepository.findByAddressAndCityAndStateAndZipCode(address, city, state, zipCode);
+
+    if (existingBuilding.isPresent()) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body("A building with the same address already exists.");
+    }
+
+    /* Create building */
     BuildingEntity newBuilding = new BuildingEntity();
 
     newBuilding.setAddress(address);
