@@ -1,5 +1,7 @@
 package dev.coms4156.project.kebabcase.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
@@ -12,13 +14,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -59,6 +59,8 @@ public class BuildingController {
 
   private final BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository;
 
+  private final ObjectMapper objectMapper;
+
   /**
    * Constructs a new BuildingController.
    *
@@ -69,11 +71,13 @@ public class BuildingController {
   public BuildingController(
       BuildingRepositoryInterface buildingRepository,
       BuildingFeatureRepositoryInterface buildingFeatureRepository,
-      BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository
+      BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
+      ObjectMapper objectMapper
   ) {
     this.buildingRepository = buildingRepository;
     this.buildingFeatureRepository = buildingFeatureRepository;
     this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
+    this.objectMapper = objectMapper;
   }
 
   /**
@@ -314,6 +318,42 @@ public class BuildingController {
                           + savedBuilding.getId().toString();
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
+  }
+
+  /**
+   *
+   * Displays a list of all buildings with the desired building feature.
+   *
+   * @param id the ID of the desired building feature
+   * @return a list of {@link ObjectNode} containing the building
+   *     information with the desired building feature
+   * @throws ResponseStatusException if the building feature ID is not found
+   **/
+
+  @GetMapping("/building-feature/{id}/buildings")
+  public List<ObjectNode> getBuildingHousingUnits(@PathVariable int id) {
+
+    Optional<BuildingFeatureEntity> feature = this.buildingFeatureRepository.findById(id);
+    if (feature.isEmpty()){
+      throw new ResponseStatusException(
+        HttpStatus.NOT_FOUND, "Building with feature id " + id + " not found"
+      );
+    }
+
+    List<BuildingFeatureBuildingMappingEntity> result =
+      this.buildingFeatureMappingRepository.findByBuildingFeatureId(id);
+
+
+    return result.stream().map(mapping -> {
+      BuildingEntity building = mapping.getBuilding();
+      ObjectNode Json = objectMapper.createObjectNode();
+      Json.put("id", building.getId());
+      Json.put("building_address", building.getAddress());
+      Json.put("city", building.getCity());
+      Json.put("state", building.getState());
+      Json.put("zipcode", building.getZipCode());
+      return Json;
+    }).collect(Collectors.toList());
   }
 
 }
