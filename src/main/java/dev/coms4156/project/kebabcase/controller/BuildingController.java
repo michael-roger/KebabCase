@@ -57,19 +57,20 @@ public class BuildingController {
 
   /**
    * Updates the information of an existing building by its ID.
-   * Only the fields provided as request parameters will be updated.
-   * If no fields are provided, an HTTP 400 Bad Request will be returned.
-   * Additionally, new building features can be associated with the building.
-   * If a list of feature IDs is provided, valid features will be added to the building.
-   * If any feature ID in the list is not found, the update will still proceed, but an HTTP 206 Partial Content
-   * will be returned, along with a message listing the invalid feature IDs.
+   * <p>
+   * This method updates only the fields provided as request parameters. If no fields are provided, an HTTP 400 Bad Request will be returned.
+   * In addition to updating the building's address, city, state, and zip code, new building features can also be added, and existing features
+   * can be removed. If a list of feature IDs is provided, valid features will be added to or removed from the building. If any feature ID 
+   * in the list is not found, the update will proceed, but an HTTP 206 Partial Content will be returned, with a message listing the invalid feature IDs.
+   * </p>
    * 
    * @param id the ID of the building to update
    * @param address the new address of the building (optional)
    * @param city the new city of the building (optional)
    * @param state the new state of the building (optional)
    * @param zipCode the new zip code of the building (optional)
-   * @param features a list of feature IDs to associate with the building (optional)
+   * @param addFeatures a list of feature IDs to associate with the building (optional)
+   * @param removeFeatures a list of feature IDs to disassociate from the building (optional)
    * @return a {@link ResponseEntity} indicating the result of the update. If all updates succeed, 
    * an HTTP 200 OK is returned. If some feature IDs are invalid, an HTTP 206 Partial Content is returned 
    * with a message listing the invalid feature IDs.
@@ -206,13 +207,21 @@ public class BuildingController {
 
   /**
    * Creates a new building entity and saves it to the repository.
-   * The new building's information must be provided as request parameters.
+   * <p>
+   * The new building's information such as address, city, state, and zip code must be provided. Optionally, 
+   * a list of feature IDs can be associated with the building at the time of creation. If any feature IDs are not found, 
+   * the building will still be created, but an HTTP 206 Partial Content will be returned, listing the invalid feature IDs.
+   * Additionally, if a building with the same address, city, state, and zip code already exists, an HTTP 409 Conflict will be returned.
+   * </p>
    * 
    * @param address the address of the new building
    * @param city the city of the new building
    * @param state the state of the new building
    * @param zipCode the zip code of the new building
-   * @return a {@link ResponseEntity} containing the result of the creation and the new building's ID
+   * @param features a list of feature IDs to associate with the new building (optional)
+   * @return a {@link ResponseEntity} containing the result of the creation and the new building's ID. If any feature IDs are invalid,
+   * an HTTP 206 Partial Content is returned.
+   * @throws ResponseStatusException if a building with the same address, city, state, and zip code already exists
    */
   @PostMapping("/building")
   public ResponseEntity<?> createBuilding(

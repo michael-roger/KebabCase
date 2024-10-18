@@ -91,11 +91,12 @@ public class HousingUnitController {
    * This method uses the housing unit ID to search the repository for a corresponding
    * {@link HousingUnitEntity}. If found, the housing unit's details such as ID, building ID,
    * unit number, created date, and modified date are returned in JSON format. If the housing unit 
-   * is not found, an HTTP 404 Not Found status is returned.
+   * is not found, an HTTP 404 Not Found status is returned with an error message.
    * </p>
    *
    * @param id the ID of the housing unit to retrieve
-   * @return an {@link ObjectNode} containing the housing unit's details
+   * @return a {@link ResponseEntity} containing the housing unit's details in an {@link ObjectNode} format,
+   *         or a 404 Not Found status if the housing unit is not found.
    * @throws ResponseStatusException if the housing unit with the given ID is not found
    */
   @GetMapping("/housing-unit/{id}")
@@ -122,19 +123,23 @@ public class HousingUnitController {
 
   /**
    * Updates the information of an existing housing unit by its ID.
-   * Specifically, it updates the unit number, the modified date, and optionally associates new features with the housing unit.
-   * 
-   * If no fields (unitNumber or features) are provided, an HTTP 400 Bad Request will be returned.
-   * If features are provided, valid features will be added to the housing unit. 
+   * Specifically, it updates the unit number, the modified date, and optionally adds or removes
+   * features associated with the housing unit. 
+   * <p>
+   * If no fields (unitNumber, addFeatures, or removeFeatures) are provided, an HTTP 400 Bad Request will be returned.
+   * If features are provided, valid features will be added to or removed from the housing unit. 
    * If any feature ID in the list is not found, the update will still proceed, but an HTTP 206 Partial Content
    * will be returned with a message listing the invalid feature IDs.
+   * </p>
    * 
    * @param id the ID of the housing unit to update
    * @param unitNumber the new unit number for the housing unit (optional)
-   * @param features a list of feature IDs to associate with the housing unit (optional)
-   * @return a {@link ResponseEntity} indicating the result of the update. If all updates succeed, 
-   * an HTTP 200 OK is returned. If some feature IDs are invalid, an HTTP 206 Partial Content is returned 
-   * with a message listing the invalid feature IDs.
+   * @param addFeatures a list of feature IDs to add to the housing unit (optional)
+   * @param removeFeatures a list of feature IDs to remove from the housing unit (optional)
+   * @return a {@link ResponseEntity} indicating the result of the update. 
+   *         If all updates succeed, an HTTP 200 OK is returned. 
+   *         If some feature IDs are invalid, an HTTP 206 Partial Content is returned 
+   *         with a message listing the invalid feature IDs.
    * @throws ResponseStatusException if the housing unit with the given ID is not found, or if no fields are provided for update
    */
   @PatchMapping("/housing-unit/{id}")
@@ -249,12 +254,16 @@ public class HousingUnitController {
   /**
    * Creates a new housing unit and associates it with an existing building.
    * The new housing unit will have the specified unit number and be linked to the building
-   * with the provided building ID.
+   * with the provided building ID. Optionally, it can also associate features with the new housing unit.
+   * 
+   * If the building ID is not found, an HTTP 404 Not Found response is returned.
+   * If a housing unit with the same unit number already exists in the building, an HTTP 409 Conflict is returned.
    * 
    * @param buildingID the ID of the building to associate the new housing unit with
    * @param unitNumber the unit number for the new housing unit
-   * @return a {@link ResponseEntity} containing a message and the new housing unit's ID
-   * @throws ResponseStatusException if the building with the provided ID is not found
+   * @param features a list of feature IDs to associate with the housing unit (optional)
+   * @return a {@link ResponseEntity} containing a message and the new housing unit's ID, or an error message if the building or housing unit cannot be found
+   * @throws ResponseStatusException if the building with the provided ID is not found or if a housing unit with the same number already exists in the building
    */
   @PostMapping("/housing-unit")
   public ResponseEntity<?> createBuilding(
