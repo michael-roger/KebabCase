@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+/**
+ * Entity detailing all the information held by a user.
+ */
+
 @Accessors(chain = true)
 @Getter
 @Setter
@@ -19,26 +23,26 @@ import lombok.experimental.Accessors;
 @Entity(name = "User")
 @Table(name = "users")
 public class UserEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Integer id;
 
-    @Column(name = "first_name")
-    private String firstName;
+  @Column(name = "first_name")
+  private String firstName;
 
-    @Column(name = "last_name")
-    private String lastName;
+  @Column(name = "last_name")
+  private String lastName;
 
-    @Column(name = "email_address")
-    private String emailAddress;
+  @Column(name = "email_address")
+  private String emailAddress;
     
-    @Column(name = "password")
-    private String password;
+  @Column(name = "password")
+  private String password;
 
-    @Column(name = "created_datetime")
-    private OffsetDateTime createdDatetime;
+  @Column(name = "created_datetime")
+  private OffsetDateTime createdDatetime;
 
-    @Column(name = "modified_datetime")
-    private OffsetDateTime modifiedDatetime;
+  @Column(name = "modified_datetime")
+  private OffsetDateTime modifiedDatetime;
 }

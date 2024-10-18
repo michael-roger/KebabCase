@@ -14,6 +14,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+/**
+ * Entity detailing all the information held by a building.
+ */
+
 @Accessors(chain = true)
 @Getter
 @Setter
@@ -21,29 +25,29 @@ import lombok.experimental.Accessors;
 @Entity(name = "Building")
 @Table(name = "buildings")
 public class BuildingEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Integer id;
 
-    @OneToMany(mappedBy = "building")
-    private Set<HousingUnitEntity> housingUnits;
+  @OneToMany(mappedBy = "building")
+  private Set<HousingUnitEntity> housingUnits;
 
-    @Column(name = "address")
-    private String address;
+  @Column(name = "address")
+  private String address;
 
-    @Column(name = "city")
-    private String city;
+  @Column(name = "city")
+  private String city;
 
-    @Column(name = "state")
-    private String state;
+  @Column(name = "state")
+  private String state;
 
-    @Column(name = "zip_code")
-    private String zipCode;
+  @Column(name = "zip_code")
+  private String zipCode;
 
-    @Column(name = "created_datetime")
-    private OffsetDateTime createdDatetime;
+  @Column(name = "created_datetime")
+  private OffsetDateTime createdDatetime;
 
-    @Column(name = "modified_datetime")
-    private OffsetDateTime modifiedDatetime;
+  @Column(name = "modified_datetime")
+  private OffsetDateTime modifiedDatetime;
 }

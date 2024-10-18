@@ -14,16 +14,19 @@ import org.springframework.stereotype.Repository;
  * {@link HousingUnitEntity}. It also includes custom query methods for finding housing 
  * units by building and by building and unit number.
  * </p>
- * 
+ *
+ *
  * @see HousingUnitEntity
  * @see BuildingEntity
  */
+
 @Repository("HousingUnitRepository")
 public interface HousingUnitRepositoryInterface extends JpaRepository<HousingUnitEntity, Integer> {
 
   /**
    * Retrieves a list of housing units associated with a specific building.
-   * 
+   *
+   *
    * @param building the building entity to find housing units for
    * @return a list of {@link HousingUnitEntity} associated with the building
    */
@@ -31,7 +34,8 @@ public interface HousingUnitRepositoryInterface extends JpaRepository<HousingUni
 
   /**
    * Finds a housing unit by its building and unit number.
-   * 
+   *
+   *
    * @param building the building entity
    * @param unitNumber the unit number of the housing unit
    * @return an {@link Optional} containing the housing unit if found, or empty if not found
