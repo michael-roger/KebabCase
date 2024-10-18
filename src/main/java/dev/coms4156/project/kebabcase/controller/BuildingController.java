@@ -41,7 +41,7 @@ public class BuildingController {
    * Displays a list of all buildings with the desired building feature
    */
 
-  @GetMapping("/buildings/{id}/features")
+  @GetMapping("/feature/{id}/buildings")
   public List<ObjectNode> getBuildingHousingUnits(@PathVariable int id) {
 
     List<BuildingFeatureBuildingMappingEntity> result =
