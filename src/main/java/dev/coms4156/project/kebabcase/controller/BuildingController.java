@@ -143,6 +143,15 @@ public class BuildingController {
       }
     }
 
+    if (address == null && 
+        city == null && 
+        state == null && 
+        zipCode == null &&
+        features != null &&
+        invalidFeatures.size() == features.size()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find any of the building features requested.");
+    }
+
     if (!invalidFeatures.isEmpty()) {
       return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
           .body("Building updated, but the following feature IDs were not found: " + invalidFeatures);
@@ -166,7 +175,8 @@ public class BuildingController {
       @RequestParam String address,
       @RequestParam String city,
       @RequestParam String state,
-      @RequestParam String zipCode
+      @RequestParam String zipCode,
+      @RequestParam(required = false) List<Integer> features
   ) {
 
     BuildingEntity newBuilding = new BuildingEntity();
@@ -180,10 +190,36 @@ public class BuildingController {
 
     BuildingEntity savedBuilding = buildingRepository.save(newBuilding);
 
+    /* Add building features */
+    List<Integer> invalidFeatures = new ArrayList<>();
+
+    if (features != null) {
+      for (Integer featureID : features) {
+        BuildingFeatureBuildingMappingEntity buildingMapFeature = new BuildingFeatureBuildingMappingEntity();
+
+        Optional<BuildingFeatureEntity> featureResult = this.buildingFeatureRepository.findById(featureID);
+
+        if (featureResult.isEmpty()) {
+          invalidFeatures.add(featureID);
+        } else {
+          BuildingFeatureEntity feature = featureResult.get();
+
+          buildingMapFeature.setBuilding(savedBuilding);
+          buildingMapFeature.setBuildingFeature(feature);
+
+          buildingFeatureMappingRepository.save(buildingMapFeature);
+        }
+      }
+    }
+
+    if (!invalidFeatures.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+          .body("Building created, but the following feature IDs were not found: " + invalidFeatures);
+    }
+
     String response = "Building was added succesfully! Building ID: " + savedBuilding.getId().toString();
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
-
 
 }

@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
@@ -190,6 +192,12 @@ public class HousingUnitController {
       }
     }
 
+    if (unitNumber == null &&
+        features != null &&
+        invalidFeatures.size() == features.size()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find any of the housing unit features requested.");
+    }
+
     if (!invalidFeatures.isEmpty()) {
       return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
           .body("Housing unit updated, but the following feature IDs were not found: " + invalidFeatures);
@@ -211,7 +219,8 @@ public class HousingUnitController {
   @PostMapping("/housing-unit")
   public ResponseEntity<?> createBuilding(
       @RequestParam int buildingID,
-      @RequestParam String unitNumber
+      @RequestParam String unitNumber,
+      @RequestParam(required = false) List<Integer> features
   ) {
 
     HousingUnitEntity newUnit = new HousingUnitEntity();
@@ -232,6 +241,33 @@ public class HousingUnitController {
     newUnit.setModifiedDatetime(OffsetDateTime.now());
 
     HousingUnitEntity savedUnit = housingUnitRepository.save(newUnit);
+
+    /* Add Housing Unit Features */
+    List<Integer> invalidFeatures = new ArrayList<>();
+
+    if (features != null) {
+      for (Integer featureID : features) {
+        HousingUnitFeatureHousingUnitMappingEntity housingUnitMapFeature = new HousingUnitFeatureHousingUnitMappingEntity();
+
+        Optional<HousingUnitFeatureEntity> featureResult = this.unitFeatureRepository.findById(featureID);
+
+        if (featureResult.isEmpty()) {
+          invalidFeatures.add(featureID);
+        } else {
+          HousingUnitFeatureEntity feature = featureResult.get();
+
+          housingUnitMapFeature.setHousingUnit(savedUnit);
+          housingUnitMapFeature.setHousingUnitFeature(feature);
+
+          unitFeatureMappingRepository.save(housingUnitMapFeature);
+        }
+      }
+    }
+
+    if (!invalidFeatures.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+          .body("Building created, but the following feature IDs were not found: " + invalidFeatures);
+    }
 
     String response = "Housing Unit was added succesfully! Housing Unit ID: " + savedUnit.getId().toString();
 
