@@ -16,7 +16,7 @@ public class IndexController {
   @GetMapping({"/", "/index", "/home"})
   public String index() {
     return """
-            Welcome! \
+            Welcome!\
             """;
   }
 }
