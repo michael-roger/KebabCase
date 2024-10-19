@@ -1,7 +1,5 @@
 # KebabCase
 
-# KebabCase
-
 0. Install the "brew" if you don't have it installed:
 
 ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
@@ -56,7 +54,8 @@ CREATE,
 DELETE,
 DROP,
 INDEX,
-INSERT
+INSERT,
+UPDATE
 ON
 kebabcase.*
 TO `kebabuser` @`localhost`;
@@ -64,7 +63,15 @@ TO `kebabuser` @`localhost`;
 FLUSH PRIVILEGES;
 ```
 
-2. Start the application and Hibernate will create the tables for you.
+2. Set the following line to "create" in applicatin.properties:
+
+spring.jpa.hibernate.ddl-auto=create
+
+Start the application and Hibernate will create the tables for you.
+
+Be sure to change the line back to "none" after the first time you start the application:
+
+spring.jpa.hibernate.ddl-auto=none
 
 3. Run the following SQL statements to populate your database with data:
 
@@ -530,27 +537,27 @@ This project uses **JUnit** for unit testing, **JaCoCo** for code coverage, Mave
 ## **JUnit Testing**
 Use the following command to run all unit tests located at src/test/java/:
 ```
-mvn test
+./mvnw test
 ```
 
 ## **JaCoCo Coverage**
 Use the following command to generate a Jacoco Coverage report:
 ```
-mvn jacoco:report
+./mvnw jacoco:report
 ```
 This will generate a report under the target/site/jacoco directory. Refer to view the index.html to view the report.
 
 ## **Static Analysis**
 To perform static analysis with PMD, run the following command:
 ```
-mvn pmd:pmd
+./mvnw pmd:pmd
 ```
 This generates a static analysis report under target/site/pmd.html.
 
 ## **Checkstyle**
 To checkstyle, run the following command:
 ```
-mvn checkstyle:check
+./mvnw checkstyle:check
 ```
 We seek for no checkstyle violations or warnings.  The following is our report as of October 18, 2024.
 
