@@ -124,8 +124,10 @@ public class HousingUnitController {
 
       List<ObjectNode> featureList = unitFeatures.stream().map(mapping -> {
         ObjectNode featureJson = this.objectMapper.createObjectNode();
-        featureJson.put("feature_id", mapping.getHousingUnitFeature().getId());
-        featureJson.put("feature_name", mapping.getHousingUnitFeature().getName());  // Assuming a `getName` method
+        featureJson.put("feature_id",
+                mapping.getHousingUnitFeature().getId());
+        featureJson.put("feature_name",
+                mapping.getHousingUnitFeature().getName());
         return featureJson;
       }).collect(Collectors.toList());
 
