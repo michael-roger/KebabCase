@@ -85,6 +85,54 @@ public class BuildingController {
   }
 
   /**
+   * Retrieves all buildings and returns the details as a JSON object.
+   *
+   * @return An ObjectNode JSON object containing all buildings
+   * @throws ResponseStatusException if no buildings found
+   *     with an HTTP status of 404.
+   */
+  @GetMapping("/building")
+  public ResponseEntity<List<ObjectNode>> getAllBuildings() {
+    List<BuildingEntity> buildings = this.buildingRepository.findAll();
+
+    if (buildings.isEmpty()) {
+      throw new ResponseStatusException(
+              HttpStatus.NOT_FOUND, "Buildings not found"
+      );
+    }
+
+    List<ObjectNode> buildingList = buildings.stream().map(building -> {
+      ObjectNode buildingJson = objectMapper.createObjectNode();
+      buildingJson.put("id", building.getId());
+      buildingJson.put("name", building.getName());
+      buildingJson.put("address", building.getAddress());
+      buildingJson.put("city", building.getCity());
+      buildingJson.put("state", building.getState());
+      buildingJson.put("zip_code", building.getZipCode());
+
+      List<BuildingFeatureEntity> features = this.buildingFeatureMappingRepository
+              .findByBuildingId(building.getId())
+              .stream()
+              .map(BuildingFeatureBuildingMappingEntity::getFeature)
+              .collect(Collectors.toList());
+
+      List<ObjectNode> featureJsonList = features.stream().map(feature -> {
+        ObjectNode featureJson = objectMapper.createObjectNode();
+        featureJson.put("id", feature.getId());
+        featureJson.put("name", feature.getName());
+        featureJson.put("description", feature.getDescription());
+        return featureJson;
+      }).collect(Collectors.toList());
+
+      buildingJson.set("features", objectMapper.valueToTree(featureJsonList));
+      return buildingJson;
+    }).collect(Collectors.toList());
+
+    return ResponseEntity.ok(buildingList);
+  }
+
+
+  /**
    * Updates the information of an existing building by its ID.
    * 
    * <p>Updates only the provided fields. If no fields are provided, an HTTP 400 Bad Request will 

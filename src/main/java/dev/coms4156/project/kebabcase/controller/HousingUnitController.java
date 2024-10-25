@@ -94,6 +94,49 @@ public class HousingUnitController {
   }
 
   /**
+   * Retrieves a list of all housing units with their attributes.
+   *
+   * @return a list of {@link ObjectNode} containing housing unit details
+   * @throws ResponseStatusException NOT FOUND if no available housing units were found
+   */
+  @GetMapping("/housing-units")
+  public List<ObjectNode> getAllHousingUnits() {
+
+    List<HousingUnitEntity> housingResult = this.housingUnitRepository.findAll();
+
+    if (housingResult.isEmpty()) {
+      throw new ResponseStatusException(
+              HttpStatus.NOT_FOUND, "No available housing units found"
+      );
+    }
+
+    return housingResult.stream().map(housingUnit -> {
+      ObjectNode json = this.objectMapper.createObjectNode();
+      json.put("building_id", housingUnit.getBuildingId());
+      json.put("id", housingUnit.getId());
+      json.put("created_datetime", housingUnit.getCreatedDatetime().toEpochSecond());
+      json.put("modified_datetime", housingUnit.getModifiedDatetime().toEpochSecond());
+      json.put("unit_number", housingUnit.getUnitNumber());
+
+      //now fetch the  HousingUnitFeature and add it to the json to be returned
+      List<HousingUnitFeatureHousingUnitMappingEntity> unitFeatures =
+              this.unitFeatureMappingRepository.findByHousingUnit(housingUnit);
+
+      List<ObjectNode> featureList = unitFeatures.stream().map(mapping -> {
+        ObjectNode featureJson = this.objectMapper.createObjectNode();
+        featureJson.put("feature_id", mapping.getHousingUnitFeature().getId());
+        featureJson.put("feature_name", mapping.getHousingUnitFeature().getName());  // Assuming a `getName` method
+        return featureJson;
+      }).collect(Collectors.toList());
+
+      json.putArray("features").addAll(featureList);
+
+
+      return json;
+    }).collect(Collectors.toList());
+  }
+
+  /**
    * Retrieves a list of housing units for a specific building.
    * 
    * <p>Given a building ID, this method returns all housing units associated with the building.
@@ -314,7 +357,7 @@ public class HousingUnitController {
    * @return a {@link ResponseEntity} containing the new housing unit's ID, or error messages if 
    *         the building or features are not found
    */
-  @PostMapping("/housing-unit")
+  @PostMapping("/housing-units")
   public ResponseEntity<?> createBuilding(
       @RequestParam int buildingId,
       @RequestParam String unitNumber,
@@ -380,7 +423,7 @@ public class HousingUnitController {
                   + invalidFeatures);
     }
 
-    String response = "Housing Unit was added succesfully! Housing Unit ID: " 
+    String response = "Housing Unit was added successfully! Housing Unit ID: "
                         + savedUnit.getId().toString();
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);

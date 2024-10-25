@@ -1,5 +1,5 @@
 # KebabCase
-
+## Jira Link: https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1?atlOrigin=eyJwIjoiai[…]3801eef3-b3ce-4e5f-b31d-4322601dbdac&selectedIssue=KAN-3
 0. Install the "brew" if you don't have it installed:
 
 ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
@@ -173,7 +173,7 @@ INSERT INTO housing_unit_feature_housing_unit_mappings (id, housing_unit_id, hou
 
 ### GET /housing-units
 
-**Description**: Retrieves a list of available housing units with specific attributes.
+**Description**: Retrieves a list of available housing units with attributes.
 
 **URL**: `/housing-units`
 
@@ -245,7 +245,7 @@ curl -X GET http://localhost:8080/housing-units
 curl -X GET http://localhost:8080/housing-unit/1
 ```
 
-### GET /buildings
+### GET /building
 
 **Description**: Retrieves a list of buildings with specific attributes.
 
@@ -444,7 +444,6 @@ curl -X GET http://localhost:8080/building-feature/3/buildings
 curl -X POST http://localhost:8080/building -d '{"address": "500 Pine St", "city": "Brooklyn", "state": "NY", "zip_code": "62703"}' -H "Content-Type: application/json"
 ```
 
-
 ### PATCH  /housing-unit/{id}
 **Description**: Allows for the update of a specific housing unit.
 
@@ -483,8 +482,6 @@ curl -X POST http://localhost:8080/building -d '{"address": "500 Pine St", "city
 ```bash
 curl -X PATCH http://localhost:8080/housing-unit/1 -d '{"unit_number": "1B Updated"}' -H "Content-Type: application/json"
 ```
-
-
 
 ### PATCH  /building/{id}
 **Description**: Allows for the update of a specific building.
@@ -526,6 +523,50 @@ curl -X PATCH http://localhost:8080/housing-unit/1 -d '{"unit_number": "1B Updat
 ```bash
 curl -X PATCH http://localhost:8080/building/1 -d '{"address": "500 Oak St"}' -H "Content-Type: application/json"
 ```
+
+### GET {"/", "/index", "/home"}
+**Description**: Displays a welcome message on the root "/", "/index", and “/home” paths.
+
+**URL**: `/ or '/index' or '/home '`
+
+**Method**: `GET`
+
+**URL Parameters**: None 
+
+**Body Parameters**:
+| Parameter   | Type   | Description               |
+|-------------|--------|---------------------------|
+| `address`        | `String`  | The new building address   |
+
+
+**Success Response**:
+
+- **Code**: 200 OK
+- **Content**:
+
+    ```json
+    {
+    "id": 1,
+    "address": "500 Oak St",
+    "city": "Brooklyn",
+    "state": "NY",
+    "zip_code": "62701",
+    "created_datetime": "2024-01-20T14:30:00",
+    "modified_datetime": "2024-10-17T12:00:00"
+    }
+    ```
+
+**Sample Call**:
+
+```bash
+curl -X PATCH http://localhost:8080/building/1 -d '{"address": "500 Oak St"}' -H "Content-Type: application/json"
+```
+
+
+
+
+
+
 
 ## Testing
 This project uses **JUnit** for unit testing, **JaCoCo** for code coverage, Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.
