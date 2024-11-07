@@ -1,15 +1,23 @@
 package dev.coms4156.project.kebabcase;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.controller.BuildingController;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
+
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +35,9 @@ class BuildingControllerUnitTests {
 
   @Mock
   private BuildingFeatureRepositoryInterface buildingFeatureRepository;
+
+  @Mock
+  private BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository;
 
   @Mock
   private ObjectMapper objectMapper;
@@ -84,7 +95,7 @@ class BuildingControllerUnitTests {
   }
 
   @Test
-  void testCreateBuildingSuccess() {
+  void testCreateBuildingSuccessWithoutFeatures() {
     // Arrange
     BuildingEntity building = new BuildingEntity();
     building.setId(1);
@@ -94,43 +105,100 @@ class BuildingControllerUnitTests {
     building.setZipCode("12345");
 
     when(buildingRepository.findByAddressAndCityAndStateAndZipCode(
-        anyString(), anyString(), anyString(), anyString()))
+        "123 Test Street", "Test City", "TS", "12345"))
         .thenReturn(Optional.empty()); // No duplicate address
-    // Save the building
+
     when(buildingRepository.save(any(BuildingEntity.class))).thenReturn(building);
 
     // Act
     ResponseEntity<?> response = buildingController.createBuilding(
-        "123 Test Street", "Test City",
-        "TS", "12345", null);
+        "123 Test Street", "Test City", "TS", "12345", null);
 
     // Assert
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Building was added succesfully"));
-    verify(buildingRepository, times(1))
-        .save(any(BuildingEntity.class));
+    assertTrue(response.getBody().toString().contains("Building was added succesfully!"));
+    verify(buildingRepository, times(1)).save(any(BuildingEntity.class));
+    verify(buildingFeatureMappingRepository, times(0)).save(any(BuildingFeatureBuildingMappingEntity.class));
   }
 
   @Test
-  void testCreateBuildingConflict() {
+  void testCreateBuildingSuccessWithValidFeatures() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    building.setAddress("123 Test Street");
+
+    BuildingFeatureEntity feature1 = new BuildingFeatureEntity();
+    BuildingFeatureEntity feature2 = new BuildingFeatureEntity();
+
+    when(buildingRepository.findByAddressAndCityAndStateAndZipCode(
+        "123 Test Street", "Test City", "TS", "12345"))
+        .thenReturn(Optional.empty()); // No duplicate address
+
+    when(buildingRepository.save(any(BuildingEntity.class))).thenReturn(building);
+    when(buildingFeatureRepository.findById(1)).thenReturn(Optional.of(feature1));
+    when(buildingFeatureRepository.findById(2)).thenReturn(Optional.of(feature2));
+
+    // Act
+    ResponseEntity<?> response = buildingController.createBuilding(
+        "123 Test Street", "Test City", "TS", "12345", List.of(1, 2));
+
+    // Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Building was added succesfully!"));
+    verify(buildingRepository, times(1)).save(any(BuildingEntity.class));
+    verify(buildingFeatureMappingRepository, times(2)).save(any(BuildingFeatureBuildingMappingEntity.class));
+  }
+
+  @Test
+  void testCreateBuildingPartialContentWithInvalidFeatures() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    building.setAddress("123 Test Street");
+
+    BuildingFeatureEntity validFeature = new BuildingFeatureEntity();
+    validFeature.setId(1);
+
+    when(buildingRepository.findByAddressAndCityAndStateAndZipCode(
+        "123 Test Street", "Test City", "TS", "12345"))
+        .thenReturn(Optional.empty()); // No duplicate address
+
+    when(buildingRepository.save(any(BuildingEntity.class))).thenReturn(building);
+    when(buildingFeatureRepository.findById(1)).thenReturn(Optional.of(validFeature)); // Valid feature
+    when(buildingFeatureRepository.findById(-1)).thenReturn(Optional.empty()); // Invalid feature
+
+    // Act
+    ResponseEntity<?> response = buildingController.createBuilding(
+        "123 Test Street", "Test City", "TS", "12345", List.of(1, -1));
+
+    // Assert
+    assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Building created, but the following feature IDs were not found: [-1]"));
+    verify(buildingRepository, times(1)).save(any(BuildingEntity.class));
+    verify(buildingFeatureMappingRepository, times(1)).save(any(BuildingFeatureBuildingMappingEntity.class));
+  }
+
+  @Test
+  void testCreateBuildingConflictDuplicateAddress() {
     // Arrange
     BuildingEntity existingBuilding = new BuildingEntity();
     existingBuilding.setId(1);
     existingBuilding.setAddress("123 Test Street");
 
     when(buildingRepository.findByAddressAndCityAndStateAndZipCode(
-        anyString(), anyString(), anyString(), anyString()))
+        "123 Test Street", "Test City", "TS", "12345"))
         .thenReturn(Optional.of(existingBuilding)); // Duplicate address found
 
     // Act
     ResponseEntity<?> response = buildingController.createBuilding(
-        "123 Test Street", "Test City",
-        "TS", "12345", null);
+        "123 Test Street", "Test City", "TS", "12345", null);
 
     // Assert
     assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-    verify(buildingRepository, times(0))
-        .save(any(BuildingEntity.class));
+    assertTrue(response.getBody().toString().contains("A building with the same address already exists."));
+    verify(buildingRepository, times(0)).save(any(BuildingEntity.class));
+    verify(buildingFeatureMappingRepository, times(0)).save(any(BuildingFeatureBuildingMappingEntity.class));
   }
 
   @Test
@@ -169,5 +237,80 @@ class BuildingControllerUnitTests {
     // Assert
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Building not found"));
+  }
+
+  @Test
+  void testUpdateBuildingNoFieldsProvided() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+        1, null, null, null, null, null, null);
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("No fields provided for update"));
+  }
+
+  @Test
+  void testUpdateBuildingConflictInAddAndRemoveFeatures() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+    List<Integer> addFeatures = List.of(1, 2);
+    List<Integer> removeFeatures = List.of(2, 3); // Conflict on feature ID 2
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+        1, null, null, null, null, addFeatures, removeFeatures);
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Conflict: Feature IDs present in both add and remove lists"));
+  }
+
+  @Test
+  void testUpdateBuildingPartialContentInvalidFeatures() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+    List<Integer> addFeatures = List.of(1, -1);  // Assume feature ID -1 is invalid
+
+    when(buildingFeatureRepository.findById(1)).thenReturn(Optional.of(new BuildingFeatureEntity()));
+    when(buildingFeatureRepository.findById(-1)).thenReturn(Optional.empty()); // Feature -1 not found
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+        1, "New Address", null, null, null, addFeatures, null);
+
+    // Assert
+    assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Building updated, but the following feature IDs were not found: [-1]"));
+  }
+
+  @Test
+  void testUpdateBuildingAllInvalidFeatures() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+    List<Integer> addFeatures = List.of(-1, -2); // Assume all IDs are invalid
+
+    when(buildingFeatureRepository.findById(-1)).thenReturn(Optional.empty());
+    when(buildingFeatureRepository.findById(-2)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+        1, null, null, null, null, addFeatures, null);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Could not find any of the building features requested."));
   }
 }

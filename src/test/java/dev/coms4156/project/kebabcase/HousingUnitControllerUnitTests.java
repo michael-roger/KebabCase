@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.controller.HousingUnitController;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureHousingUnitMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureRepositoryInterface;
@@ -24,6 +25,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class HousingUnitControllerUnitTests {
@@ -198,5 +202,157 @@ class HousingUnitControllerUnitTests {
     // Assert
     assertEquals(HttpStatus.CONFLICT, result.getStatusCode());
     assertTrue(result.getBody().toString().contains("A housing unit in the same building already exists."));
+  }
+
+  @Test
+  void testCreateHousingUnitPartialContent() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(1);
+    unit.setUnitNumber("Unit 101");
+    unit.setCreatedDatetime(OffsetDateTime.now());
+    unit.setModifiedDatetime(OffsetDateTime.now());
+
+    List<Integer> features = List.of(1, 2, -1);  // Adding both valid and invalid feature IDs
+
+    // Mock building existence
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+    // Mock housing unit non-existence
+    when(housingUnitRepository.findByBuildingAndUnitNumber(any(BuildingEntity.class), anyString()))
+        .thenReturn(Optional.empty());
+
+    // Mock saving the new housing unit
+    when(housingUnitRepository.save(any(HousingUnitEntity.class))).thenReturn(unit);
+
+    // Mock feature lookup: feature IDs 1 and 2 exist, but -1 does not
+    when(unitFeatureRepository.findById(1)).thenReturn(Optional.of(new HousingUnitFeatureEntity()));
+    when(unitFeatureRepository.findById(2)).thenReturn(Optional.of(new HousingUnitFeatureEntity()));
+    when(unitFeatureRepository.findById(-1)).thenReturn(Optional.empty());  // Feature -1 is missing
+
+    // Act
+    ResponseEntity<?> result = housingUnitController.createBuilding(1, "Unit 101", features);
+
+    // Assert
+    assertEquals(HttpStatus.PARTIAL_CONTENT, result.getStatusCode());
+    assertTrue(result.getBody().toString().contains("Building created, but the following feature IDs were not found: [-1]"));
+    verify(housingUnitRepository, times(1)).save(any(HousingUnitEntity.class));
+    verify(unitFeatureRepository, times(3)).findById(anyInt());  // Ensures each feature ID is checked
+  }
+
+  @Test
+  void testUpdateHousingUnitNotFound() {
+    // Arrange
+    when(housingUnitRepository.findById(999)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> result = housingUnitController.updateBuilding(999, null, null, null);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+    assertEquals("Building not found", result.getBody());
+    verify(housingUnitRepository, times(1)).findById(999);
+  }
+
+  @Test
+  void testUpdateHousingUnitNoFieldsProvided() {
+    // Arrange
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(1);
+    when(housingUnitRepository.findById(1)).thenReturn(Optional.of(unit));
+
+    // Act
+    ResponseEntity<?> result = housingUnitController.updateBuilding(1, null, null, null);
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    assertEquals("No fields provided for update", result.getBody());
+  }
+
+  @Test
+  void testUpdateHousingUnitConflictInAddAndRemoveFeatures() {
+    // Arrange
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(1);
+    when(housingUnitRepository.findById(1)).thenReturn(Optional.of(unit));
+    List<Integer> addFeatures = List.of(1, 2);
+    List<Integer> removeFeatures = List.of(2, 3); // Conflict on feature ID 2
+
+    // Act
+    ResponseEntity<?> result = housingUnitController.updateBuilding(1, null, addFeatures, removeFeatures);
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    assertEquals("Conflict: Feature IDs present in both add and remove lists: [2]", result.getBody());
+  }
+
+  @Test
+  void testUpdateHousingUnitPartialContentInvalidFeatures() {
+    // Arrange
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(1);
+    unit.setUnitNumber("Unit 101");
+    when(housingUnitRepository.findById(1)).thenReturn(Optional.of(unit));
+
+    List<Integer> addFeatures = List.of(1, -1);  // Assume feature ID -1 is invalid
+
+    when(unitFeatureRepository.findById(1)).thenReturn(Optional.of(new HousingUnitFeatureEntity()));
+    when(unitFeatureRepository.findById(-1)).thenReturn(Optional.empty()); // Feature -1 not found
+
+    // Act
+    ResponseEntity<?> result = housingUnitController.updateBuilding(1, "New Unit 102", addFeatures, null);
+
+    // Assert
+    assertEquals(HttpStatus.PARTIAL_CONTENT, result.getStatusCode());
+    assertEquals("Housing unit updated, but the following feature IDs were not found: [-1]", result.getBody());
+  }
+
+  @Test
+  void testUpdateHousingUnitAllInvalidFeatures() {
+    // Arrange
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(1);
+    // unit.setUnitNumber("Unit 101");
+    when(housingUnitRepository.findById(1)).thenReturn(Optional.of(unit));
+
+    List<Integer> addFeatures = List.of(-1, -2); // Assume all IDs are invalid
+
+    when(unitFeatureRepository.findById(-1)).thenReturn(Optional.empty());
+    when(unitFeatureRepository.findById(-2)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> result = housingUnitController.updateBuilding(1, null, addFeatures, null);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+    assertEquals("Could not find any of the housing unit features requested.", result.getBody());
+  }
+
+  @Test
+  void testUpdateHousingUnitSuccess() {
+    // Arrange
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(1);
+    unit.setUnitNumber("Unit 101");
+    when(housingUnitRepository.findById(1)).thenReturn(Optional.of(unit));
+
+    List<Integer> addFeatures = List.of(1, 2);
+    HousingUnitFeatureEntity feature1 = new HousingUnitFeatureEntity();
+    HousingUnitFeatureEntity feature2 = new HousingUnitFeatureEntity();
+
+    when(unitFeatureRepository.findById(1)).thenReturn(Optional.of(feature1));
+    when(unitFeatureRepository.findById(2)).thenReturn(Optional.of(feature2));
+    when(unitFeatureMappingRepository.findByHousingUnitAndHousingUnitFeature(unit, feature1)).thenReturn(Optional.empty());
+    when(unitFeatureMappingRepository.findByHousingUnitAndHousingUnitFeature(unit, feature2)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> result = housingUnitController.updateBuilding(1, "New Unit 102", addFeatures, null);
+
+    // Assert
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals("Housing unit info has been successfully updated!", result.getBody());
   }
 }
