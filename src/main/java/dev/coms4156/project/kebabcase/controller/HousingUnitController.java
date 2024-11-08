@@ -1,11 +1,14 @@
 package dev.coms4156.project.kebabcase.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
+import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureHousingUnitMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureRepositoryInterface;
@@ -59,6 +62,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class HousingUnitController {
   private final HousingUnitRepositoryInterface housingUnitRepository;
   private final BuildingRepositoryInterface buildingRepository;
+  private final BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository;
   private final HousingUnitFeatureRepositoryInterface unitFeatureRepository;
   private final HousingUnitFeatureHousingUnitMappingRepositoryInterface 
                   unitFeatureMappingRepository;
@@ -82,12 +86,14 @@ public class HousingUnitController {
   public HousingUnitController(
       HousingUnitRepositoryInterface housingUnitRepository,
       BuildingRepositoryInterface buildingRepository,
+      BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
       HousingUnitFeatureRepositoryInterface unitFeatureRepository,
       HousingUnitFeatureHousingUnitMappingRepositoryInterface unitFeatureMappingRepository,
       ObjectMapper objectMapper
   ) {
     this.housingUnitRepository = housingUnitRepository;
     this.buildingRepository = buildingRepository;
+    this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
     this.unitFeatureRepository = unitFeatureRepository;
     this.unitFeatureMappingRepository = unitFeatureMappingRepository;
     this.objectMapper = objectMapper;
@@ -153,12 +159,43 @@ public class HousingUnitController {
 
     HousingUnitEntity unit = housingUnitRepoResult.get();
 
+    // Initialize JSON structure for housing unit
     ObjectNode json = this.objectMapper.createObjectNode();
+    if (json == null) {
+      throw new IllegalStateException("ObjectMapper could not create ObjectNode");
+    }
+    
     json.put("id", unit.getId());
-    json.put("building_id", unit.getBuilding().getId());
     json.put("unit_number", unit.getUnitNumber());
     json.put("created_datetime", unit.getCreatedDatetime().format(formatter));
     json.put("modified_datetime", unit.getModifiedDatetime().format(formatter));
+
+    // Retrieve building and add building information
+    final BuildingEntity building = unit.getBuilding();
+    ObjectNode buildingJson = json.putObject("building");
+    buildingJson.put("id", building.getId());
+    buildingJson.put("address", building.getAddress());
+    buildingJson.put("city", building.getCity());
+    buildingJson.put("state", building.getState());
+    buildingJson.put("zip_code", building.getZipCode());
+
+    // Add building features
+    ArrayNode buildingFeaturesJson = buildingJson.putArray("features");
+    List<BuildingFeatureBuildingMappingEntity> buildingFeatures = 
+        this.buildingFeatureMappingRepository.findByBuilding(building);
+
+    for (BuildingFeatureBuildingMappingEntity featureMapping : buildingFeatures) {
+      buildingFeaturesJson.add(featureMapping.getBuildingFeature().getName());
+    }
+
+    // Add housing unit features
+    ArrayNode housingUnitFeaturesJson = json.putArray("housing_unit_features");
+    List<HousingUnitFeatureHousingUnitMappingEntity> unitFeatures = 
+        this.unitFeatureMappingRepository.findByHousingUnit(unit);
+
+    for (HousingUnitFeatureHousingUnitMappingEntity featureMapping : unitFeatures) {
+      housingUnitFeaturesJson.add(featureMapping.getHousingUnitFeature().getName());
+    }
 
     return ResponseEntity.ok(json);
   }
