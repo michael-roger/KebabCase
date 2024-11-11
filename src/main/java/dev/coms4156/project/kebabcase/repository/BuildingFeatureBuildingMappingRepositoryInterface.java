@@ -49,4 +49,13 @@ public interface BuildingFeatureBuildingMappingRepositoryInterface
    *     all entries with the desired building feature, or empty if none found
    */
   List<BuildingFeatureBuildingMappingEntity> findByBuildingFeatureId(int buildingFeatureId);
+
+  /**
+   * Finds all mappings associated with a given building.
+   *
+   * @param building the building entity to find feature mappings for
+   * @return a list of {@link BuildingFeatureBuildingMappingEntity} containing
+   *     all mappings for the specified building, or an empty list if none found
+   */
+  List<BuildingFeatureBuildingMappingEntity> findByBuilding(BuildingEntity building);
 }
