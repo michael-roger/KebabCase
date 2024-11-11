@@ -225,8 +225,8 @@ public class BuildingController {
         && state == null
         && zipCode == null
         && (addFeatures != null || removeFeatures != null)
-        && ((addFeatures == null || invalidFeatures.containsAll(addFeatures))
-          && (removeFeatures == null || invalidFeatures.containsAll(removeFeatures)))) {
+        && (addFeatures == null || invalidFeatures.containsAll(addFeatures))
+        && (removeFeatures == null || invalidFeatures.containsAll(removeFeatures))) {
       String errorMessage = "Could not find any of the building features requested.";
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);          
     }
