@@ -161,10 +161,6 @@ public class HousingUnitController {
 
     // Initialize JSON structure for housing unit
     ObjectNode json = this.objectMapper.createObjectNode();
-    if (json == null) {
-      throw new IllegalStateException("ObjectMapper could not create ObjectNode");
-    }
-    
     json.put("id", unit.getId());
     json.put("unit_number", unit.getUnitNumber());
     json.put("created_datetime", unit.getCreatedDatetime().format(formatter));

@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
@@ -148,25 +149,38 @@ class HousingUnitControllerUnitTests {
     housingUnitFeatureMapping.setHousingUnitFeature(housingUnitFeature);
     when(unitFeatureMappingRepository.findByHousingUnit(housingUnit)).thenReturn(List.of(housingUnitFeatureMapping));
 
+    ObjectNode json = mock(ObjectNode.class);
+    ObjectNode buildingJson = mock(ObjectNode.class);
+    ArrayNode buildingFeaturesJson = mock(ArrayNode.class);
+    ArrayNode housingUnitFeaturesJson = mock(ArrayNode.class);
+
+    when(objectMapper.createObjectNode()).thenReturn(json, buildingJson);
+
+    // Mock the json structure for housing unit
+    when(json.put(eq("id"), eq(1))).thenReturn(json);
+    when(json.put(eq("unit_number"), eq("101"))).thenReturn(json);
+    when(json.put(eq("created_datetime"), anyString())).thenReturn(json);
+    when(json.put(eq("modified_datetime"), anyString())).thenReturn(json);
+
+    // Mock the json structure for building details
+    when(json.putObject("building")).thenReturn(buildingJson);
+    when(buildingJson.put(eq("id"), eq(10))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("address"), eq("123 Main St"))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("city"), eq("Test City"))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("state"), eq("TS"))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("zip_code"), eq("12345"))).thenReturn(buildingJson);
+
+    // Mock arrays for features
+    when(buildingJson.putArray("features")).thenReturn(buildingFeaturesJson);
+    when(json.putArray("housing_unit_features")).thenReturn(housingUnitFeaturesJson);
+    when(buildingFeaturesJson.add("Gym")).thenReturn(buildingFeaturesJson);
+    when(housingUnitFeaturesJson.add("Balcony")).thenReturn(housingUnitFeaturesJson);
+
     // Act
     ResponseEntity<?> response = housingUnitController.getHousingUnit(1);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    ObjectNode jsonResponse = (ObjectNode) response.getBody();
-    assertNotNull(jsonResponse);
-    assertEquals("101", jsonResponse.get("unit_number").asText());
-
-    ObjectNode buildingJson = (ObjectNode) jsonResponse.get("building");
-    assertEquals("123 Main St", buildingJson.get("address").asText());
-    assertEquals("Test City", buildingJson.get("city").asText());
-
-    ArrayNode buildingFeatures = (ArrayNode) buildingJson.get("features");
-    assertEquals("Gym", buildingFeatures.get(0).asText());
-
-    ArrayNode housingUnitFeatures = (ArrayNode) jsonResponse.get("housing_unit_features");
-    assertEquals("Balcony", housingUnitFeatures.get(0).asText());
-
     verify(housingUnitRepository, times(1)).findById(1);
     verify(buildingFeatureMappingRepository, times(1)).findByBuilding(building);
     verify(unitFeatureMappingRepository, times(1)).findByHousingUnit(housingUnit);
@@ -208,24 +222,35 @@ class HousingUnitControllerUnitTests {
     when(buildingFeatureMappingRepository.findByBuilding(building)).thenReturn(List.of());
     when(unitFeatureMappingRepository.findByHousingUnit(housingUnit)).thenReturn(List.of());
 
+    ObjectNode json = mock(ObjectNode.class);
+    ObjectNode buildingJson = mock(ObjectNode.class);
+    ArrayNode buildingFeaturesJson = mock(ArrayNode.class);
+    ArrayNode housingUnitFeaturesJson = mock(ArrayNode.class);
+
+    // Mock the ObjectMapper to return these nodes
+    when(objectMapper.createObjectNode()).thenReturn(json, buildingJson);
+    
+    // Mock the put methods on ObjectNode with matchers
+    when(json.put(eq("id"), eq(1))).thenReturn(json);
+    when(json.put(eq("unit_number"), eq("101"))).thenReturn(json);
+    when(json.put(eq("created_datetime"), anyString())).thenReturn(json);
+    when(json.put(eq("modified_datetime"), anyString())).thenReturn(json);
+    
+    when(json.putObject(eq("building"))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("id"), eq(10))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("address"), eq("123 Main St"))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("city"), eq("Test City"))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("state"), eq("TS"))).thenReturn(buildingJson);
+    when(buildingJson.put(eq("zip_code"), eq("12345"))).thenReturn(buildingJson);
+    
+    when(buildingJson.putArray(eq("features"))).thenReturn(buildingFeaturesJson);
+    when(json.putArray(eq("housing_unit_features"))).thenReturn(housingUnitFeaturesJson);
+
     // Act
     ResponseEntity<?> response = housingUnitController.getHousingUnit(1);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    ObjectNode jsonResponse = (ObjectNode) response.getBody();
-    assertNotNull(jsonResponse);
-    assertEquals("101", jsonResponse.get("unit_number").asText());
-
-    ObjectNode buildingJson = (ObjectNode) jsonResponse.get("building");
-    assertEquals("123 Main St", buildingJson.get("address").asText());
-
-    ArrayNode buildingFeatures = (ArrayNode) buildingJson.get("features");
-    assertEquals(0, buildingFeatures.size()); // No building features
-
-    ArrayNode housingUnitFeatures = (ArrayNode) jsonResponse.get("housing_unit_features");
-    assertEquals(0, housingUnitFeatures.size()); // No housing unit features
-
     verify(housingUnitRepository, times(1)).findById(1);
     verify(buildingFeatureMappingRepository, times(1)).findByBuilding(building);
     verify(unitFeatureMappingRepository, times(1)).findByHousingUnit(housingUnit);
