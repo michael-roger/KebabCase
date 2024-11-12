@@ -43,7 +43,7 @@ brew services start mysql@8.4
 CREATE DATABASE
 IF
     NOT EXISTS kebabcase DEFAULT CHARACTER
-    SET = 'utf8mb4' DEFAULT COLLATE 'utf8mb4_unicode_520_ci'
+    SET = 'utf8mb4' DEFAULT COLLATE 'utf8mb4_unicode_520_ci';
 
 CREATE USER `kebabuser`@`localhost` IDENTIFIED BY 'kebabpass';
 
@@ -55,6 +55,7 @@ DELETE,
 DROP,
 INDEX,
 INSERT,
+REFERENCES,
 UPDATE
 ON
 kebabcase.*
@@ -63,7 +64,7 @@ TO `kebabuser` @`localhost`;
 FLUSH PRIVILEGES;
 ```
 
-2. Set the following line to "create" in applicatin.properties:
+2. Set the following line to "create" in application.properties:
 
 spring.jpa.hibernate.ddl-auto=create
 
