@@ -17,7 +17,7 @@ import lombok.experimental.Accessors;
 
 /**
  * Entity connecting a permission and the client
- * who has that permission
+ * who has that permission.
  */
 @Accessors(chain = true)
 @Getter

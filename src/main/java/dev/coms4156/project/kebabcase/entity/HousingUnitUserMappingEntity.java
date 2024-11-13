@@ -16,7 +16,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * Entity connecting a housing unit and a user
+ * Entity connecting a housing unit and a user.
  */
 @Accessors(chain = true)
 @Getter

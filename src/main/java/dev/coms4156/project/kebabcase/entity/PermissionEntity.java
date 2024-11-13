@@ -13,7 +13,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * Entity detailing a permission that a client can have
+ * Entity detailing a permission that a client can have.
  */
 @Accessors(chain = true)
 @Getter

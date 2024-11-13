@@ -16,7 +16,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * Entity connecting a building and a user
+ * Entity connecting a building and a user.
  */
 @Accessors(chain = true)
 @Getter
