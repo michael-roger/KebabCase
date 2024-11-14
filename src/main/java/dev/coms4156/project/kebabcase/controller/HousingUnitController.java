@@ -3,16 +3,22 @@ package dev.coms4156.project.kebabcase.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureHousingUnitMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
+
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -21,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +37,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import dev.coms4156.project.kebabcase.entity.HousingUnitUserMappingEntity;
 
 /**
  * REST controller for managing housing units and associated features within buildings.
@@ -66,6 +75,7 @@ public class HousingUnitController {
   private final HousingUnitFeatureRepositoryInterface unitFeatureRepository;
   private final HousingUnitFeatureHousingUnitMappingRepositoryInterface 
                   unitFeatureMappingRepository;
+  private final UserRepositoryInterface userRepository;
   private final ObjectMapper objectMapper;
   private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
@@ -89,6 +99,7 @@ public class HousingUnitController {
       BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
       HousingUnitFeatureRepositoryInterface unitFeatureRepository,
       HousingUnitFeatureHousingUnitMappingRepositoryInterface unitFeatureMappingRepository,
+      UserRepositoryInterface userRepository,
       ObjectMapper objectMapper
   ) {
     this.housingUnitRepository = housingUnitRepository;
@@ -96,6 +107,7 @@ public class HousingUnitController {
     this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
     this.unitFeatureRepository = unitFeatureRepository;
     this.unitFeatureMappingRepository = unitFeatureMappingRepository;
+    this.userRepository = userRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -417,6 +429,29 @@ public class HousingUnitController {
                         + savedUnit.getId().toString();
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
+  }
+
+  @GetMapping("/user/{id}/housing-units")
+  public List<ObjectNode> getUserBuildings(@PathVariable int id) {
+
+    Optional<UserEntity> user = this.userRepository.findById(id);
+
+    if (user.isEmpty()) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "User with id " + id + " not found."
+      );
+    }
+
+    List<HousingUnitUserMappingEntity> result =
+        this.housingUnitUserMappingRepository.findByUserId(id);
+
+    return result.stream().map(mapping -> {
+      HousingUnitEntity unit = mapping.getHousingUnit();
+      ObjectNode json = objectMapper.createObjectNode();
+      json.put("id", unit.getId());
+      json.put("unit_number", unit.getUnitNumber());
+      return json;
+    }).collect(Collectors.toList());
   }
 
 }

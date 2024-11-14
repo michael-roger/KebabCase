@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -63,6 +66,8 @@ public class BuildingController {
 
   private final BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository;
 
+  private final UserRepositoryInterface userRepository;
+
   private final ObjectMapper objectMapper;
 
   /**
@@ -71,16 +76,19 @@ public class BuildingController {
    * @param buildingRepository the repository used to interact with building entities
    * @param buildingFeatureRepository the repository used for building features
    * @param buildingFeatureMappingRepository the repository for mapping building features
+   * @param userRepository the repository used to interact with user entities
    */
   public BuildingController(
       BuildingRepositoryInterface buildingRepository,
       BuildingFeatureRepositoryInterface buildingFeatureRepository,
       BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
+      UserRepositoryInterface userRepository,
       ObjectMapper objectMapper
   ) {
     this.buildingRepository = buildingRepository;
     this.buildingFeatureRepository = buildingFeatureRepository;
     this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
+    this.userRepository = userRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -346,7 +354,6 @@ public class BuildingController {
     List<BuildingFeatureBuildingMappingEntity> result =
         this.buildingFeatureMappingRepository.findByBuildingFeatureId(id);
 
-
     return result.stream().map(mapping -> {
       BuildingEntity building = mapping.getBuilding();
       ObjectNode json = objectMapper.createObjectNode();
@@ -389,6 +396,32 @@ public class BuildingController {
     json.put("modified_datetime", building.getModifiedDatetime().toString());
 
     return json;
+  }
+
+  @GetMapping("/user/{id}/buildings")
+  public List<ObjectNode> getUserBuildings(@PathVariable int id) {
+
+    Optional<UserEntity> user = this.userRepository.findById(id);
+
+    if (user.isEmpty()) {
+      throw new ResponseStatusException(
+          HttpStatus.NOT_FOUND, "User with id " + id + " not found."
+      );
+    }
+
+    List<BuildingUserMappingEntity> result =
+        this.buildingUserMappingRepository.findByUserId(id);
+
+    return result.stream().map(mapping -> {
+      BuildingEntity building = mapping.getBuilding();
+      ObjectNode json = objectMapper.createObjectNode();
+      json.put("id", building.getId());
+      json.put("building_address", building.getAddress());
+      json.put("city", building.getCity());
+      json.put("state", building.getState());
+      json.put("zipcode", building.getZipCode());
+      return json;
+    }).collect(Collectors.toList());
   }
 
 }
