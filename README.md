@@ -171,6 +171,7 @@ INSERT INTO housing_unit_feature_housing_unit_mappings (id, housing_unit_id, hou
 ```
 
 ### housing_unit_user_mappings
+```
 INSERT INTO housing_unit_user_mappings (id, housing_unit_id, user_id, created_datetime, modified_datetime) VALUES
 (1, 1, 1, '2024-01-21 10:05:00', '2024-01-21 10:05:00'),  -- John associated with Housing Unit 1A
 (2, 2, 2, '2024-01-21 10:10:00', '2024-01-21 10:10:00'),  -- Jane associated with Housing Unit 1B
@@ -178,8 +179,10 @@ INSERT INTO housing_unit_user_mappings (id, housing_unit_id, user_id, created_da
 (4, 4, 4, '2024-03-16 10:05:00', '2024-03-16 10:05:00'),  -- Luci associated with Housing Unit 3C
 (5, 5, 1, '2024-02-25 10:00:00', '2024-02-25 10:00:00'),  -- John associated with Housing Unit 8D
 (6, 6, 3, '2024-07-08 10:05:00', '2024-07-08 10:05:00');  -- Emily associated with Housing Unit 4A
+```
 
-## building_user_mappings 
+### building_user_mappings
+``` 
 INSERT INTO building_user_mappings (id, building_id, user_id, created_datetime, modified_datetime) VALUES
 (1, 1, 1, '2024-01-20 14:35:00', '2024-01-20 14:35:00'),  -- John associated with Building 123 Elm St
 (2, 2, 2, '2024-02-22 14:35:00', '2024-02-22 14:35:00'),  -- Jane associated with Building 456 Oak Ave
@@ -187,8 +190,10 @@ INSERT INTO building_user_mappings (id, building_id, user_id, created_datetime, 
 (4, 4, 4, '2024-04-15 14:35:00', '2024-04-15 14:35:00'),  -- Luci associated with Building 111 Jojo St
 (5, 2, 3, '2024-02-25 14:40:00', '2024-02-25 14:40:00'),  -- Emily also associated with Building 456 Oak Ave
 (6, 3, 2, '2024-03-18 14:45:00', '2024-03-18 14:45:00');  -- Jane also associated with Building 789 Maple Blvd
+```
 
-## Permission table
+### Permission table
+```
 INSERT INTO permissions (id, name, created_datetime, modified_datetime) VALUES
 (1, 'view_housing_units', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),  -- GET access for housing units
 (2, 'create_housing_units', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),  -- POST access for housing units
@@ -197,9 +202,10 @@ INSERT INTO permissions (id, name, created_datetime, modified_datetime) VALUES
 (5, 'create_buildings', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),  -- POST access for buildings
 (6, 'edit_buildings', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),  -- PATCH access for buildings
 (7, 'view_only', '2024-01-01 10:00:00', '2024-01-01 10:00:00');  -- View-only access
+```
 
-
-# permission_client_mappings
+### permission_client_mappings
+```
 INSERT INTO permission_client_mappings (id, permission_id, client_id, created_datetime, modified_datetime) VALUES
 -- HousingForAll Permissions
 (1, 1, 1, '2024-01-01 10:00:00', '2024-01-01 10:00:00'),  -- view_housing_units
@@ -221,7 +227,7 @@ INSERT INTO permission_client_mappings (id, permission_id, client_id, created_da
 -- BrooklynHousing Permissions (view-only for housing units and buildings)
 (12, 1, 4, '2024-01-01 10:00:00', '2024-01-01 10:00:00'),  -- view_housing_units
 (13, 4, 4, '2024-01-01 10:00:00', '2024-01-01 10:00:00');  -- view_buildings
-
+```
 
 ## API Endpoints
 
