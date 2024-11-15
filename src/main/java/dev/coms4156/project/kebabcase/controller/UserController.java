@@ -2,11 +2,13 @@ package dev.coms4156.project.kebabcase.controller;
 
 import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
 
 /**
  * REST controller for authenticating users.
@@ -17,7 +19,7 @@ import java.util.Optional;
  *
  * <h2>Endpoints:</h2>
  * <ul>
- *   <li><strong>POST /authenticate</strong>: Authenticates a user and returns the user ID or null.</li>
+ *   <li><strong>POST /authenticate</strong>: Authenticates user, returns userID or null.</li>
  * </ul>
  *
  * <h2>Error Handling:</h2>
@@ -30,45 +32,44 @@ import java.util.Optional;
 @RestController
 public class UserController {
 
-    private final UserRepositoryInterface userRepository;
+  private final UserRepositoryInterface userRepository;
 
-    /**
-     * Constructs a new {@link AuthController}.
-     *
-     * @param userRepository the repository for user entities
-     */
-    public UserController(UserRepositoryInterface userRepository) {
-        this.userRepository = userRepository;
+  /**
+   * Constructs a new {@link AuthController}.
+   *
+   * @param userRepository the repository for user entities
+   */
+  public UserController(UserRepositoryInterface userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  /**
+   * Authenticates a user by email and password.
+   *
+   * @param email the email of the user as requested.
+   * @param password the plain-text password of that user.
+   * @return the user ID if authentication is successful, or null if not.
+   */
+  @PostMapping("/authenticate")
+  public ResponseEntity<Integer> authenticate(
+      @RequestParam String email, @RequestParam String password) {
+
+    if (email == null || email.isBlank() || password == null || password.isBlank()) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
 
-    /**
-     * Authenticates a user by email and password.
-     *
-     * @param email the email of the user as requested.
-     * @param password the plain-text password of that user.
-     * @return the user ID if authentication is successful, or null if not.
-     */
-    @PostMapping("/authenticate")
-    public ResponseEntity<Integer> authenticate(
-            @RequestParam String email,
-            @RequestParam String password) {
+    Optional<UserEntity> userResult = userRepository.findByEmailAddress(email);
 
-        if (email == null || email.isBlank() || password == null || password.isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-
-        Optional<UserEntity> userResult = userRepository.findByEmailAddress(email);
-
-        if (userResult.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).body(null);
-        }
-
-        UserEntity user = userResult.get();
-
-        if (user.getPassword().equals(password)) {
-            return ResponseEntity.status(HttpStatus.OK).body(user.getId());
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+    if (userResult.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.OK).body(null);
     }
+
+    UserEntity user = userResult.get();
+
+    if (user.getPassword().equals(password)) {
+      return ResponseEntity.status(HttpStatus.OK).body(user.getId());
+    }
+
+    return ResponseEntity.status(HttpStatus.OK).body(null);
+  }
 }
