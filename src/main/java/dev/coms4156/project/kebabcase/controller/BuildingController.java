@@ -10,6 +10,7 @@ import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.BuildingUserMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -61,13 +62,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class BuildingController {
   
   private final BuildingRepositoryInterface buildingRepository;
-
   private final BuildingFeatureRepositoryInterface buildingFeatureRepository;
-
   private final BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository;
-
+  private final BuildingUserMappingRepositoryInterface buildingUserMappingRepository;
   private final UserRepositoryInterface userRepository;
-
   private final ObjectMapper objectMapper;
 
   /**
@@ -76,18 +74,21 @@ public class BuildingController {
    * @param buildingRepository the repository used to interact with building entities
    * @param buildingFeatureRepository the repository used for building features
    * @param buildingFeatureMappingRepository the repository for mapping building features
+   * @param buildingUserMappingRepository the repository for mapping users to buildings
    * @param userRepository the repository used to interact with user entities
    */
   public BuildingController(
       BuildingRepositoryInterface buildingRepository,
       BuildingFeatureRepositoryInterface buildingFeatureRepository,
       BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
+      BuildingUserMappingRepositoryInterface buildingUserMappingRepository,
       UserRepositoryInterface userRepository,
       ObjectMapper objectMapper
   ) {
     this.buildingRepository = buildingRepository;
     this.buildingFeatureRepository = buildingFeatureRepository;
     this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
+    this.buildingUserMappingRepository = buildingUserMappingRepository;
     this.userRepository = userRepository;
     this.objectMapper = objectMapper;
   }

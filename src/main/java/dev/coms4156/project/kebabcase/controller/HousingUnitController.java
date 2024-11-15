@@ -17,6 +17,7 @@ import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureHousingUnitMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.HousingUnitUserMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 
 import java.time.OffsetDateTime;
@@ -37,8 +38,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import dev.coms4156.project.kebabcase.entity.HousingUnitUserMappingEntity;
 
 /**
  * REST controller for managing housing units and associated features within buildings.
@@ -75,6 +74,7 @@ public class HousingUnitController {
   private final HousingUnitFeatureRepositoryInterface unitFeatureRepository;
   private final HousingUnitFeatureHousingUnitMappingRepositoryInterface 
                   unitFeatureMappingRepository;
+  private final HousingUnitUserMappingRepositoryInterface unitUserMappingRepository;
   private final UserRepositoryInterface userRepository;
   private final ObjectMapper objectMapper;
   private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -91,6 +91,7 @@ public class HousingUnitController {
    * @param buildingRepository the repository for building entities
    * @param unitFeatureRepository the repository for housing unit feature entities
    * @param unitFeatureMappingRepository the repository for mapping housing units to features
+   * @param unitUserMappingRepository the repository for mapping users to housing units
    * @param objectMapper the object mapper used for creating JSON objects in response bodies
    */
   public HousingUnitController(
@@ -99,6 +100,7 @@ public class HousingUnitController {
       BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
       HousingUnitFeatureRepositoryInterface unitFeatureRepository,
       HousingUnitFeatureHousingUnitMappingRepositoryInterface unitFeatureMappingRepository,
+      HousingUnitUserMappingRepositoryInterface unitUserMappingRepository,
       UserRepositoryInterface userRepository,
       ObjectMapper objectMapper
   ) {
@@ -107,6 +109,7 @@ public class HousingUnitController {
     this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
     this.unitFeatureRepository = unitFeatureRepository;
     this.unitFeatureMappingRepository = unitFeatureMappingRepository;
+    this.unitUserMappingRepository = unitUserMappingRepository;
     this.userRepository = userRepository;
     this.objectMapper = objectMapper;
   }
@@ -443,7 +446,7 @@ public class HousingUnitController {
     }
 
     List<HousingUnitUserMappingEntity> result =
-        this.housingUnitUserMappingRepository.findByUserId(id);
+        this.unitUserMappingRepository.findByUserId(id);
 
     return result.stream().map(mapping -> {
       HousingUnitEntity unit = mapping.getHousingUnit();
