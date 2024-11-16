@@ -367,6 +367,8 @@ public class BuildingController {
     }).collect(Collectors.toList());
   }
 
+
+
   /**
    * Retrieves a specific building by its ID and returns the details as a JSON object.
    *
