@@ -1,6 +1,7 @@
 package dev.coms4156.project.kebabcase.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
@@ -367,29 +368,14 @@ public class BuildingController {
     }).collect(Collectors.toList());
   }
 
-
-
   /**
-   * Retrieves a specific building by its ID and returns the details as a JSON object.
+   * Helper method to create the base JSON structure for a building entity.
    *
-   * @param id The ID of the building to retrieve.
-   * @return An ObjectNode JSON object containing the building details.
-   * @throws ResponseStatusException if the building with the given ID is not found,
-   *     with an HTTP status of 404.
+   * @param building the building entity to convert to JSON
+   * @return an {@link ObjectNode} containing the building's base information
    */
-  @GetMapping("/building/{id}")
-  public ObjectNode getBuildingById(@PathVariable int id) {
-
-    Optional<BuildingEntity> buildingRepositoryResult = this.buildingRepository.findById(id);
-    if (buildingRepositoryResult.isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Building with id " + id + " not found"
-      );
-    }
-
-    BuildingEntity building = buildingRepositoryResult.get();
-
-    ObjectNode json = this.objectMapper.createObjectNode();
+  private ObjectNode createBuildingJson(BuildingEntity building) {
+    ObjectNode json = objectMapper.createObjectNode();
     json.put("id", building.getId());
     json.put("address", building.getAddress());
     json.put("city", building.getCity());
@@ -397,34 +383,77 @@ public class BuildingController {
     json.put("zip_code", building.getZipCode());
     json.put("created_datetime", building.getCreatedDatetime().toString());
     json.put("modified_datetime", building.getModifiedDatetime().toString());
-
     return json;
   }
 
-  @GetMapping("/user/{id}/buildings")
-  public List<ObjectNode> getUserBuildings(@PathVariable int id) {
+  /**
+   * Retrieves detailed information for a specific building by its ID, including its address,
+   * creation and modification dates, and associated building features.
+   *
+   * @param id the ID of the building to retrieve
+   * @return a {@link ResponseEntity} containing the building details in JSON format or
+   *         a 404 Not Found response if the building is not found
+   */
+  @GetMapping("/building/{id}")
+  public ResponseEntity<?> getBuildingById(@PathVariable int id) {
 
-    Optional<UserEntity> user = this.userRepository.findById(id);
-
-    if (user.isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "User with id " + id + " not found."
-      );
+    Optional<BuildingEntity> buildingRepositoryResult = this.buildingRepository.findById(id);
+    if (buildingRepositoryResult.isEmpty()) {
+      String errorMessage = "Building with id " + id + " not found.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }
 
-    List<BuildingUserMappingEntity> result =
-        this.buildingUserMappingRepository.findByUserId(id);
+    BuildingEntity building = buildingRepositoryResult.get();
+    ObjectNode json = createBuildingJson(building);
 
-    return result.stream().map(mapping -> {
+    // Add building features
+    ArrayNode buildingFeaturesJson = json.putArray("features");
+    List<BuildingFeatureBuildingMappingEntity> buildingFeatures = 
+        this.buildingFeatureMappingRepository.findByBuilding(building);
+
+    for (BuildingFeatureBuildingMappingEntity featureMapping : buildingFeatures) {
+      buildingFeaturesJson.add(featureMapping.getBuildingFeature().getName());
+    }
+
+    return ResponseEntity.ok(json);
+  }
+
+  /**
+   * Retrieves a list of buildings associated with a specific user by their user ID, 
+   * including building addresses and features.
+   *
+   * @param id the ID of the user whose associated buildings are to be retrieved
+   * @return a {@link ResponseEntity} containing a list of buildings in JSON format, or
+   *         a 404 Not Found response if the user is not found
+   */
+  @GetMapping("/user/{id}/buildings")
+  public ResponseEntity<?> getUserBuildings(@PathVariable int id) {
+
+    Optional<UserEntity> user = this.userRepository.findById(id);
+    if (user.isEmpty()) {
+      String errorMessage = "User with id " + id + " not found.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+    }
+
+    List<BuildingUserMappingEntity> result = this.buildingUserMappingRepository.findByUserId(id);
+    List<ObjectNode> buildings = result.stream().map(mapping -> {
       BuildingEntity building = mapping.getBuilding();
-      ObjectNode json = objectMapper.createObjectNode();
-      json.put("id", building.getId());
-      json.put("building_address", building.getAddress());
-      json.put("city", building.getCity());
-      json.put("state", building.getState());
-      json.put("zipcode", building.getZipCode());
+      
+      // Create JSON for building information and add features
+      ObjectNode json = createBuildingJson(building);
+      ArrayNode buildingFeaturesJson = json.putArray("features");
+
+      List<BuildingFeatureBuildingMappingEntity> buildingFeatures = 
+          this.buildingFeatureMappingRepository.findByBuilding(building);
+
+      for (BuildingFeatureBuildingMappingEntity featureMapping : buildingFeatures) {
+        buildingFeaturesJson.add(featureMapping.getBuildingFeature().getName());
+      }
+
       return json;
     }).collect(Collectors.toList());
+
+    return ResponseEntity.ok(buildings);
   }
 
 }

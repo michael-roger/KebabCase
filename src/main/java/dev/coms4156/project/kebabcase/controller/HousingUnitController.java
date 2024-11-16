@@ -369,6 +369,12 @@ public class HousingUnitController {
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 
+  /**
+   * Helper method to create the base JSON structure for a housing unit entity.
+   *
+   * @param unit the housing unit entity to convert to JSON
+   * @return an {@link ObjectNode} containing the housing unit's base information
+   */
   private ObjectNode getHousingUnitInfo(HousingUnitEntity unit) {
     ObjectNode json = objectMapper.createObjectNode();
     json.put("id", unit.getId());

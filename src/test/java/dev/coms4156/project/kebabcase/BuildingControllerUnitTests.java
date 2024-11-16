@@ -73,7 +73,7 @@ class BuildingControllerUnitTests {
     when(jsonNode.put(anyString(), anyString())).thenReturn(jsonNode);
 
     // Act
-    ObjectNode result = buildingController.getBuildingById(1);
+    ResponseEntity<?> result = buildingController.getBuildingById(1);
 
     // Assert
     assertNotNull(result); // Check that the result is not null
@@ -86,10 +86,12 @@ class BuildingControllerUnitTests {
     // Arrange
     when(buildingRepository.findById(999)).thenReturn(Optional.empty());
 
-    // Act & Assert
-    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-        () -> buildingController.getBuildingById(999));
-    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    // Act
+    ResponseEntity<?> response = buildingController.getBuildingById(999);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Building with id 999 not found.", response.getBody());
     verify(buildingRepository, times(1)).findById(999);
   }
 
