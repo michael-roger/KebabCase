@@ -469,25 +469,31 @@ public class BuildingController {
    *         or building does not exist, and 409 Conflict if the link already exists.
    */
   @PostMapping("/user/{userId}/buildings/{buildingId}")
-  public ResponseEntity<?> addExistingBuildingToUser(@PathVariable int userId, @PathVariable int buildingId) {
+  public ResponseEntity<?> addExistingBuildingToUser(@PathVariable int userId, 
+                                                      @PathVariable int buildingId) {
     // Check if the user exists
     Optional<UserEntity> userOpt = userRepository.findById(userId);
     if (userOpt.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with id " + userId + " not found.");
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("User with id " + userId + " not found.");
     }
     UserEntity user = userOpt.get();
 
     // Check if the building exists
     Optional<BuildingEntity> buildingOpt = buildingRepository.findById(buildingId);
     if (buildingOpt.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Building with id " + buildingId + " not found.");
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("Building with id " + buildingId + " not found.");
     }
     BuildingEntity building = buildingOpt.get();
 
     // Check if the mapping already exists
-    Optional<BuildingUserMappingEntity> existingMapping = buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId);
+    Optional<BuildingUserMappingEntity> existingMapping = 
+        buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId);
+
     if (existingMapping.isPresent()) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).body("This building is already linked to the user.");
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body("This building is already linked to the user.");
     }
 
     // Create and save the mapping

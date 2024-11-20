@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
-import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
@@ -478,25 +477,31 @@ public class HousingUnitController {
    *         or unit does not exist, and 409 Conflict if the link already exists.
    */
   @PostMapping("/user/{userId}/housing-unit/{housingUnitId}")
-  public ResponseEntity<?> addExistingUnitToUser(@PathVariable int userId, @PathVariable int housingUnitId) {
+  public ResponseEntity<?> addExistingUnitToUser(@PathVariable int userId, 
+                                                  @PathVariable int housingUnitId) {
     // Check if the user exists
     Optional<UserEntity> userOpt = userRepository.findById(userId);
     if (userOpt.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with id " + userId + " not found.");
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("User with id " + userId + " not found.");
     }
     UserEntity user = userOpt.get();
 
     // Check if the unit exists
     Optional<HousingUnitEntity> unitOpt = housingUnitRepository.findById(housingUnitId);
     if (unitOpt.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Housing unit with id " + housingUnitId + " not found.");
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("Housing unit with id " + housingUnitId + " not found.");
     }
     HousingUnitEntity unit = unitOpt.get();
 
     // Check if the mapping already exists
-    Optional<HousingUnitUserMappingEntity> existingMapping = unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId);
+    Optional<HousingUnitUserMappingEntity> existingMapping = 
+        unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId);
+
     if (existingMapping.isPresent()) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).body("This housing unit is already linked to the user.");
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body("This housing unit is already linked to the user.");
     }
 
     // Create and save the mapping

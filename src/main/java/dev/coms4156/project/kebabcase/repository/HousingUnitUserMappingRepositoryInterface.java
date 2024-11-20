@@ -3,7 +3,6 @@ package dev.coms4156.project.kebabcase.repository;
 import dev.coms4156.project.kebabcase.entity.HousingUnitUserMappingEntity;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -41,5 +40,6 @@ public interface HousingUnitUserMappingRepositoryInterface
    * @return An {@link Optional} containing the {@link HousingUnitUserMappingEntity} if a 
    *         mapping exists; otherwise, an empty {@link Optional}.
    */
-  Optional<HousingUnitUserMappingEntity> findByUserIdAndHousingUnitId(int userId, int housingUnitId);
+  Optional<HousingUnitUserMappingEntity> 
+      findByUserIdAndHousingUnitId(int userId, int housingUnitId);
 }
