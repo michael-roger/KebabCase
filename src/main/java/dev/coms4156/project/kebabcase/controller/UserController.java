@@ -66,10 +66,10 @@ public class UserController {
 
     UserEntity user = userResult.get();
 
-    if (user.getPassword().equals(password)) {
-      return ResponseEntity.status(HttpStatus.OK).body(user.getId());
+    if (!user.getPassword().equals(password)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 
-    return ResponseEntity.status(HttpStatus.OK).body(null);
+    return ResponseEntity.status(HttpStatus.OK).body(user.getId());
   }
 }
