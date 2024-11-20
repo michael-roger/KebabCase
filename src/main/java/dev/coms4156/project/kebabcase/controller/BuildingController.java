@@ -456,4 +456,56 @@ public class BuildingController {
     return ResponseEntity.ok(buildings);
   }
 
+  /**
+   * Adds an existing building to an existing user by creating a new entry in the 
+   * `building_user_mappings` table. If the user or building does not exist, returns
+   * a 404 Not Found status. If the building is already linked to the user, returns 
+   * a 409 Conflict status.
+   *
+   * @param userId The ID of the user to whom the building will be linked.
+   * @param buildingId The ID of the building to be linked to the user.
+   * @return ResponseEntity containing a JSON response with the linkage status. 
+   *         Returns a 201 Created status if successful, 404 Not Found if the user
+   *         or building does not exist, and 409 Conflict if the link already exists.
+   */
+  @PostMapping("/user/{userId}/buildings/{buildingId}")
+  public ResponseEntity<?> addExistingBuildingToUser(@PathVariable int userId, @PathVariable int buildingId) {
+    // Check if the user exists
+    Optional<UserEntity> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with id " + userId + " not found.");
+    }
+    UserEntity user = userOpt.get();
+
+    // Check if the building exists
+    Optional<BuildingEntity> buildingOpt = buildingRepository.findById(buildingId);
+    if (buildingOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Building with id " + buildingId + " not found.");
+    }
+    BuildingEntity building = buildingOpt.get();
+
+    // Check if the mapping already exists
+    Optional<BuildingUserMappingEntity> existingMapping = buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId);
+    if (existingMapping.isPresent()) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body("This building is already linked to the user.");
+    }
+
+    // Create and save the mapping
+    BuildingUserMappingEntity mapping = new BuildingUserMappingEntity();
+    mapping.setUser(user);
+    mapping.setBuilding(building);
+    mapping.setCreatedDatetime(OffsetDateTime.now());
+    mapping.setModifiedDatetime(OffsetDateTime.now());
+
+    buildingUserMappingRepository.save(mapping);
+
+    // Return a success response
+    ObjectNode responseJson = objectMapper.createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("building_id", buildingId);
+    responseJson.put("status", "Building successfully linked to user.");
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseJson);
+  }
+
 }
