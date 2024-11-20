@@ -657,4 +657,103 @@ class HousingUnitControllerUnitTests {
     verify(unitUserMappingRepository, times(1)).findByUserId(userId);
   }
 
+  @Test
+  void testAddExistingUnitToUser_UserNotFound() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 100;
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.addExistingUnitToUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("User with id " + userId + " not found.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verifyNoInteractions(housingUnitRepository, unitUserMappingRepository);
+  }
+
+  @Test
+  void testAddExistingUnitToUser_UnitNotFound() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.addExistingUnitToUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Housing unit with id " + housingUnitId + " not found.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(housingUnitRepository, times(1)).findById(housingUnitId);
+    verifyNoInteractions(unitUserMappingRepository);
+  }
+
+  @Test
+  void testAddExistingUnitToUser_ConflictExistingMapping() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(housingUnitId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(unit));
+    when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
+        .thenReturn(Optional.of(new HousingUnitUserMappingEntity()));
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.addExistingUnitToUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    assertEquals("This housing unit is already linked to the user.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(housingUnitRepository, times(1)).findById(housingUnitId);
+    verify(unitUserMappingRepository, times(1)).findByUserIdAndHousingUnitId(userId, housingUnitId);
+  }
+
+  @Test
+  void testAddExistingUnitToUser_Success() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(housingUnitId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(unit));
+    when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
+        .thenReturn(Optional.empty());
+
+    // Mock creation of the JSON response
+    ObjectNode responseJson = new ObjectMapper().createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("housing_unit_id", housingUnitId);
+    responseJson.put("status", "Housing unit successfully linked to user.");
+
+    when(objectMapper.createObjectNode()).thenReturn(responseJson);
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.addExistingUnitToUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertEquals(responseJson, response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(housingUnitRepository, times(1)).findById(housingUnitId);
+    verify(unitUserMappingRepository, times(1)).findByUserIdAndHousingUnitId(userId, housingUnitId);
+    verify(unitUserMappingRepository, times(1)).save(any(HousingUnitUserMappingEntity.class));
+  }
+
 }

@@ -429,4 +429,103 @@ class BuildingControllerUnitTests {
     verify(buildingUserMappingRepository, times(1)).findByUserId(userId);
     verifyNoInteractions(buildingFeatureMappingRepository);
   }
+
+  @Test
+  void testAddExistingBuildingToUser_UserNotFound() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 100;
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.addExistingBuildingToUser(userId, buildingId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("User with id " + userId + " not found.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verifyNoInteractions(buildingRepository, buildingUserMappingRepository);
+  }
+
+  @Test
+  void testAddExistingBuildingToUser_BuildingNotFound() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.addExistingBuildingToUser(userId, buildingId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Building with id " + buildingId + " not found.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(buildingRepository, times(1)).findById(buildingId);
+    verifyNoInteractions(buildingUserMappingRepository);
+  }
+
+  @Test
+  void testAddExistingBuildingToUser_ConflictExistingMapping() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    BuildingEntity building = new BuildingEntity();
+    building.setId(buildingId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+    when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
+        .thenReturn(Optional.of(new BuildingUserMappingEntity()));
+
+    // Act
+    ResponseEntity<?> response = buildingController.addExistingBuildingToUser(userId, buildingId);
+
+    // Assert
+    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    assertEquals("This building is already linked to the user.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(buildingRepository, times(1)).findById(buildingId);
+    verify(buildingUserMappingRepository, times(1)).findByUserIdAndBuildingId(userId, buildingId);
+  }
+
+  @Test
+  void testAddExistingBuildingToUser_Success() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    BuildingEntity building = new BuildingEntity();
+    building.setId(buildingId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+    when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
+        .thenReturn(Optional.empty());
+
+    // Mock creation of the JSON response
+    ObjectNode responseJson = new ObjectMapper().createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("building_id", buildingId);
+    responseJson.put("status", "Building successfully linked to user.");
+
+    when(objectMapper.createObjectNode()).thenReturn(responseJson);
+
+    // Act
+    ResponseEntity<?> response = buildingController.addExistingBuildingToUser(userId, buildingId);
+
+    // Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertEquals(responseJson, response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(buildingRepository, times(1)).findById(buildingId);
+    verify(buildingUserMappingRepository, times(1)).findByUserIdAndBuildingId(userId, buildingId);
+    verify(buildingUserMappingRepository, times(1)).save(any(BuildingUserMappingEntity.class));
+  }
 }
