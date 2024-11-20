@@ -2,17 +2,23 @@ package dev.coms4156.project.kebabcase;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.controller.BuildingController;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.BuildingUserMappingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 
 import java.time.OffsetDateTime;
@@ -25,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.server.ResponseStatusException;
 
 class BuildingControllerUnitTests {
 
@@ -37,6 +42,12 @@ class BuildingControllerUnitTests {
 
   @Mock
   private BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository;
+
+  @Mock
+  private BuildingUserMappingRepositoryInterface buildingUserMappingRepository;
+
+  @Mock
+  private UserRepositoryInterface userRepository;
 
   @Mock
   private ObjectMapper objectMapper;
@@ -313,5 +324,109 @@ class BuildingControllerUnitTests {
     // Assert
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     assertTrue(response.getBody().toString().contains("Could not find any of the building features requested."));
+  }
+
+  @Test
+  void testGetUserBuildings_UserNotFound() {
+    // Arrange
+    int userId = 999;
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.getUserBuildings(userId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("User with id " + userId + " not found.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verifyNoInteractions(buildingUserMappingRepository);
+    verifyNoInteractions(buildingFeatureMappingRepository);
+  }
+
+  @Test
+  void testGetUserBuildings_SuccessWithExistingUser() {
+    // Arrange
+    int userId = 1;
+
+    // Mock UserEntity
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+    // Mock Building and Mapping Entities
+    BuildingEntity building = new BuildingEntity();
+    building.setId(2);
+    building.setAddress("456 Oak Ave");
+    building.setCity("Brooklyn");
+    building.setState("NY");
+    building.setZipCode("46142");
+    building.setCreatedDatetime(OffsetDateTime.parse("2024-02-22T14:30Z"));
+    building.setModifiedDatetime(OffsetDateTime.parse("2024-10-17T20:10:10.803236Z"));
+
+    BuildingUserMappingEntity buildingUserMapping = new BuildingUserMappingEntity();
+    buildingUserMapping.setUser(user);
+    buildingUserMapping.setBuilding(building);
+
+    // Mock BuildingFeature and Mapping
+    BuildingFeatureEntity feature = new BuildingFeatureEntity();
+    feature.setName("Near Hospital");
+    BuildingFeatureBuildingMappingEntity featureMapping = new BuildingFeatureBuildingMappingEntity();
+    featureMapping.setBuilding(building);
+    featureMapping.setBuildingFeature(feature);
+
+    // Setup repository responses
+    when(buildingUserMappingRepository.findByUserId(userId)).thenReturn(List.of(buildingUserMapping));
+    when(buildingFeatureMappingRepository.findByBuilding(building)).thenReturn(List.of(featureMapping));
+
+    // Mock ObjectNode creation for building JSON
+    ObjectNode buildingJson = mock(ObjectNode.class);
+    ArrayNode featureArray = mock(ArrayNode.class);
+    when(objectMapper.createObjectNode()).thenReturn(buildingJson);
+    when(buildingJson.put(anyString(), anyString())).thenReturn(buildingJson);
+    when(buildingJson.put(anyString(), anyInt())).thenReturn(buildingJson);
+    when(buildingJson.putArray("features")).thenReturn(featureArray);
+    when(featureArray.add(anyString())).thenReturn(featureArray);
+
+    // Act
+    ResponseEntity<?> response = buildingController.getUserBuildings(userId);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    List<ObjectNode> responseBody = (List<ObjectNode>) response.getBody();
+    assertEquals(1, responseBody.size());
+
+    // Verify interactions and feature addition
+    verify(userRepository, times(1)).findById(userId);
+    verify(buildingUserMappingRepository, times(1)).findByUserId(userId);
+    verify(buildingFeatureMappingRepository, times(1)).findByBuilding(building);
+    verify(buildingJson, times(1)).put("address", "456 Oak Ave");
+    verify(buildingJson, times(1)).put("city", "Brooklyn");
+    verify(buildingJson, times(1)).put("state", "NY");
+    verify(buildingJson, times(1)).put("zip_code", "46142");
+    verify(featureArray, times(1)).add("Near Hospital");
+  }
+
+  @Test
+  void testGetUserBuildings_UserWithNoBuildings() {
+    // Arrange
+    int userId = 1;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(buildingUserMappingRepository.findByUserId(userId)).thenReturn(List.of());
+
+    // Act
+    ResponseEntity<?> response = buildingController.getUserBuildings(userId);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    List<?> responseBody = (List<?>) response.getBody();
+    assertNotNull(responseBody);
+    assertTrue(responseBody.isEmpty());
+    verify(userRepository, times(1)).findById(userId);
+    verify(buildingUserMappingRepository, times(1)).findByUserId(userId);
+    verifyNoInteractions(buildingFeatureMappingRepository);
   }
 }
