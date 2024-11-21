@@ -61,7 +61,7 @@ public class UserController {
     Optional<UserEntity> userResult = userRepository.findByEmailAddress(email);
 
     if (userResult.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.OK).body(null);
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     UserEntity user = userResult.get();
