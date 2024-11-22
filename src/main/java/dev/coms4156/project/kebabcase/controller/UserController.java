@@ -91,7 +91,6 @@ public class UserController {
       OffsetDateTime time = OffsetDateTime.now();
       newUser.setCreatedDatetime(time);
       newUser.setModifiedDatetime(time);
-      System.out.println(newUser.getEmailAddress());
       UserEntity savedUser = userRepository.save(newUser);
 
       String response = "User was added successfully! User ID: "

@@ -31,17 +31,20 @@ class UserControllerUnitTests {
   }
 
   @Test
-  public void testFindByEmail() {
-    Optional<UserEntity> user = userRepository.findByEmailAddress("john.doe@example.com");
-    assertTrue(user.isPresent(), "User found!");
-  }
-
-  @Test
   void testCreateUserSuccess() {
     String firstName = "Sue";
     String lastName = "Donym";
     String emailAddress = "notapseudonym@example.com";
     String password = "alias?notI";
+
+    UserEntity user = new UserEntity();
+    user.setId(100);
+
+    when(userRepository.findByEmailAddress(
+            emailAddress))
+            .thenReturn(Optional.empty());
+
+    when(userRepository.save(any(UserEntity.class))).thenReturn(user);
 
     ResponseEntity<?> response = userController.createUser(firstName,
             lastName, emailAddress, password);
@@ -59,8 +62,17 @@ class UserControllerUnitTests {
     String emailAddress = "emily.johnson@example.com";
     String password = "password789";
 
+    UserEntity user = new UserEntity();
+    user.setEmailAddress(emailAddress);
+
+    when(userRepository.findByEmailAddress(
+            emailAddress))
+            .thenReturn(Optional.of(user));
+
     ResponseEntity<?> response = userController.createUser(firstName,
             lastName, emailAddress, password);
+
+
 
     assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
     assertTrue(response.getBody().toString().contains(
