@@ -7,6 +7,7 @@ import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
@@ -513,5 +514,41 @@ public class BuildingController {
 
     return ResponseEntity.status(HttpStatus.CREATED).body(responseJson);
   }
+  @GetMapping("/buildings")
+  public ResponseEntity<List<BuildingEntity>> getBuildings() {
+    // Fetch all buildings from the repository
+    List<BuildingEntity> buildings = buildingRepository.findAll();
+
+    // Return NO_CONTENT if no buildings are found
+    if (buildings.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
+    // Return OK with the list of buildings
+    return ResponseEntity.status(HttpStatus.OK).body(buildings);
+}
+
+
+@GetMapping("/buildings/{buildingId}/housing-units")
+public ResponseEntity<Set<HousingUnitEntity>> getHousingUnitsByBuilding(@PathVariable Integer buildingId) {
+    // Find the building by ID
+    Optional<BuildingEntity> building = buildingRepository.findById(buildingId);
+
+    // Return NOT_FOUND if the building does not exist
+    if (building.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    // Get housing units for the building
+    Set<HousingUnitEntity> housingUnits = building.get().getHousingUnits();
+
+    // Return NO_CONTENT if the building has no housing units
+    if (housingUnits.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
+    // Return OK with the set of housing units
+    return ResponseEntity.status(HttpStatus.OK).body(housingUnits);
+}
 
 }
