@@ -55,7 +55,7 @@ public class UserController {
    * @param emailAddress the email of the user, which will be used for login.
    * @param password the user's selected password, which will be hashed and used for login.
    * @return a {@link ResponseEntity} containing the resulting user and the new
-   *    ID. If the email is in use by another user, an HTTP 409 conflict is returned.
+   *     ID. If the email is in use by another user, an HTTP 409 conflict is returned.
    */
   @PostMapping("/users")
   public ResponseEntity<?> createUser(
@@ -75,8 +75,7 @@ public class UserController {
       byte[] bytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
       BigInteger number = new BigInteger(1, bytes);
       StringBuilder hexString = new StringBuilder(number.toString(16));
-      while (hexString.length() < 64)
-      {
+      while (hexString.length() < 64) {
         hexString.insert(0, '0');
       }
 
@@ -103,6 +102,7 @@ public class UserController {
     }
 
   }
+
   /**
    * Authenticates a user by email and password.
    *
@@ -110,6 +110,7 @@ public class UserController {
    * @param password the plain-text password of that user.
    * @return the user ID if authentication is successful, or null if not.
    */
+
   @PostMapping("/authenticate")
   public ResponseEntity<Integer> authenticate(
       @RequestParam String email, @RequestParam String password) {
