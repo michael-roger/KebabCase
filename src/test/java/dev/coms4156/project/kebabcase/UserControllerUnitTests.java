@@ -7,6 +7,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 import dev.coms4156.project.kebabcase.controller.UserController;
@@ -35,15 +38,35 @@ class UserControllerUnitTests {
     MockitoAnnotations.openMocks(this);
   }
 
+  private String hashPassword(String password) {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] encodedHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+      StringBuilder hexString = new StringBuilder();
+      for (byte b : encodedHash) {
+        String hex = Integer.toHexString(0xff & b);
+        if (hex.length() == 1) {
+          hexString.append('0');
+        }
+        hexString.append(hex);
+      }
+      return hexString.toString();
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException("Error hashing password", e);
+    }
+  }
+
   @Test
   void testAuthenticate_Success() {
     // Arrange
     String email = "test@example.com";
     String password = "password123";
+    String hashedPassword = hashPassword(password);
+
     UserEntity user = new UserEntity();
     user.setId(1);
     user.setEmailAddress(email);
-    user.setPassword(password);
+    user.setPassword(hashedPassword);
 
     when(userRepository.findByEmailAddress(email)).thenReturn(Optional.of(user));
 
@@ -79,10 +102,12 @@ class UserControllerUnitTests {
     String email = "test@example.com";
     String correctPassword = "password123";
     String wrongPassword = "wrongpassword";
+    String hashedCorrectPassword = hashPassword(correctPassword);
+
     UserEntity user = new UserEntity();
     user.setId(1);
     user.setEmailAddress(email);
-    user.setPassword(correctPassword);
+    user.setPassword(hashedCorrectPassword);
 
     when(userRepository.findByEmailAddress(email)).thenReturn(Optional.of(user));
 
