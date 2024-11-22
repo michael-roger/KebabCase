@@ -514,41 +514,54 @@ public class BuildingController {
 
     return ResponseEntity.status(HttpStatus.CREATED).body(responseJson);
   }
+  
+  /**
+   * Retrieves a list of all buildings from the repository,
+   * returns all buildings in the repository as a list. 
+   *
+   * @return ResponseEntity containing the list of buildings as a JSON response.
+   *         Returns a 200 OK status if buildings are found, or 204 No Content if no 
+   *         buildings exist in the repository.
+   */
   @GetMapping("/buildings")
   public ResponseEntity<List<BuildingEntity>> getBuildings() {
-    // Fetch all buildings from the repository
     List<BuildingEntity> buildings = buildingRepository.findAll();
 
-    // Return NO_CONTENT if no buildings are found
     if (buildings.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
-    // Return OK with the list of buildings
     return ResponseEntity.status(HttpStatus.OK).body(buildings);
-}
+  }
 
-
-@GetMapping("/buildings/{buildingId}/housing-units")
-public ResponseEntity<Set<HousingUnitEntity>> getHousingUnitsByBuilding(@PathVariable Integer buildingId) {
-    // Find the building by ID
+  /**
+   * Retrieves all housing units associated with a specific building,
+   * given a building ID, this method fetches the building and retrieves the housing units,
+   * linked to it. 
+   *
+   * @param buildingId The ID of the building for which housing units are being fetched.
+   * @return {@link ResponseEntity} containing:
+   *           200 OK: If housing units are successfully retrieved and units.
+   *           204 No Content: If the building has no associated housing units.
+   *           404 Not Found: If the building does not exist.
+   */
+  @GetMapping("/buildings/{buildingId}/housing-units")
+  public ResponseEntity<Set<HousingUnitEntity>> 
+      getHousingUnitsByBuilding(@PathVariable Integer buildingId) {
     Optional<BuildingEntity> building = buildingRepository.findById(buildingId);
-
-    // Return NOT_FOUND if the building does not exist
+    
     if (building.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
-    // Get housing units for the building
     Set<HousingUnitEntity> housingUnits = building.get().getHousingUnits();
 
     // Return NO_CONTENT if the building has no housing units
     if (housingUnits.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
-    // Return OK with the set of housing units
     return ResponseEntity.status(HttpStatus.OK).body(housingUnits);
-}
+  }
 
 }
