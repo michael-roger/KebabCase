@@ -122,15 +122,54 @@ public class UserController {
     Optional<UserEntity> userResult = userRepository.findByEmailAddress(email);
 
     if (userResult.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.OK).body(null);
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     UserEntity user = userResult.get();
 
-    if (user.getPassword().equals(password)) {
-      return ResponseEntity.status(HttpStatus.OK).body(user.getId());
-    }
+    try {
+      String hashedInputPassword = hashPassword(password);
 
-    return ResponseEntity.status(HttpStatus.OK).body(null);
+      if (!hashedInputPassword.equals(user.getPassword())) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+      }
+
+      return ResponseEntity.status(HttpStatus.OK).body(user.getId());
+    } catch (NoSuchAlgorithmException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
   }
+
+  /**
+   * Hashes the password using SHA-256.
+   *
+   * @param password the plain-text password to hash.
+   * @return the hashed password as a hexadecimal string.
+   * @throws NoSuchAlgorithmException if SHA-256 is not available.
+   */
+  private String hashPassword(String password) throws NoSuchAlgorithmException {
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    byte[] encodedHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+    return bytesToHex(encodedHash);
+  }
+
+  /**
+   * Converts a byte array to a hexadecimal string.
+   *
+   * @param hash the byte array to convert.
+   * @return the hexadecimal string representation of the byte array.
+   */
+  private String bytesToHex(byte[] hash) {
+    StringBuilder hexString = new StringBuilder();
+    for (byte b : hash) {
+      String hex = Integer.toHexString(0xff & b);
+      if (hex.length() == 1) {
+        hexString.append('0');
+      }
+      hexString.append(hex);
+    }
+    return hexString.toString();
+  }
+  
 }
+
