@@ -8,11 +8,15 @@ import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntit
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureHousingUnitMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.HousingUnitUserMappingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -66,6 +70,8 @@ public class HousingUnitController {
   private final HousingUnitFeatureRepositoryInterface unitFeatureRepository;
   private final HousingUnitFeatureHousingUnitMappingRepositoryInterface 
                   unitFeatureMappingRepository;
+  private final HousingUnitUserMappingRepositoryInterface unitUserMappingRepository;
+  private final UserRepositoryInterface userRepository;
   private final ObjectMapper objectMapper;
   private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
@@ -81,6 +87,7 @@ public class HousingUnitController {
    * @param buildingRepository the repository for building entities
    * @param unitFeatureRepository the repository for housing unit feature entities
    * @param unitFeatureMappingRepository the repository for mapping housing units to features
+   * @param unitUserMappingRepository the repository for mapping users to housing units
    * @param objectMapper the object mapper used for creating JSON objects in response bodies
    */
   public HousingUnitController(
@@ -89,6 +96,8 @@ public class HousingUnitController {
       BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
       HousingUnitFeatureRepositoryInterface unitFeatureRepository,
       HousingUnitFeatureHousingUnitMappingRepositoryInterface unitFeatureMappingRepository,
+      HousingUnitUserMappingRepositoryInterface unitUserMappingRepository,
+      UserRepositoryInterface userRepository,
       ObjectMapper objectMapper
   ) {
     this.housingUnitRepository = housingUnitRepository;
@@ -96,6 +105,8 @@ public class HousingUnitController {
     this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
     this.unitFeatureRepository = unitFeatureRepository;
     this.unitFeatureMappingRepository = unitFeatureMappingRepository;
+    this.unitUserMappingRepository = unitUserMappingRepository;
+    this.userRepository = userRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -133,67 +144,6 @@ public class HousingUnitController {
       json.put("unit_number", housingUnit.getUnitNumber());
       return json;
     }).collect(Collectors.toList());
-  }
-
-  /**
-   * Retrieves a specific housing unit by its ID.
-   * 
-   * <p>This method fetches a housing unit based on its ID and returns its details as a JSON object.
-   * If the unit is not found, a 404 Not Found response is returned.
-   * </p>
-   *
-   *
-   * @param id the ID of the housing unit to retrieve
-   * @return a {@link ResponseEntity} containing the housing unit's details in JSON format, or 
-   *         a 404 Not Found response if the unit is not found
-   */
-  @GetMapping("/housing-unit/{id}")
-  public ResponseEntity<?> getHousingUnit(@PathVariable int id) {
-    
-    Optional<HousingUnitEntity> housingUnitRepoResult = this.housingUnitRepository.findById(id);
-
-    if (housingUnitRepoResult.isEmpty()) {
-      String errorMessage = "Housing unit with id " + id + " not found";
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
-    }
-
-    HousingUnitEntity unit = housingUnitRepoResult.get();
-
-    // Initialize JSON structure for housing unit
-    ObjectNode json = this.objectMapper.createObjectNode();
-    json.put("id", unit.getId());
-    json.put("unit_number", unit.getUnitNumber());
-    json.put("created_datetime", unit.getCreatedDatetime().format(formatter));
-    json.put("modified_datetime", unit.getModifiedDatetime().format(formatter));
-
-    // Retrieve building and add building information
-    final BuildingEntity building = unit.getBuilding();
-    ObjectNode buildingJson = json.putObject("building");
-    buildingJson.put("id", building.getId());
-    buildingJson.put("address", building.getAddress());
-    buildingJson.put("city", building.getCity());
-    buildingJson.put("state", building.getState());
-    buildingJson.put("zip_code", building.getZipCode());
-
-    // Add building features
-    ArrayNode buildingFeaturesJson = buildingJson.putArray("features");
-    List<BuildingFeatureBuildingMappingEntity> buildingFeatures = 
-        this.buildingFeatureMappingRepository.findByBuilding(building);
-
-    for (BuildingFeatureBuildingMappingEntity featureMapping : buildingFeatures) {
-      buildingFeaturesJson.add(featureMapping.getBuildingFeature().getName());
-    }
-
-    // Add housing unit features
-    ArrayNode housingUnitFeaturesJson = json.putArray("housing_unit_features");
-    List<HousingUnitFeatureHousingUnitMappingEntity> unitFeatures = 
-        this.unitFeatureMappingRepository.findByHousingUnit(unit);
-
-    for (HousingUnitFeatureHousingUnitMappingEntity featureMapping : unitFeatures) {
-      housingUnitFeaturesJson.add(featureMapping.getHousingUnitFeature().getName());
-    }
-
-    return ResponseEntity.ok(json);
   }
 
   /**
@@ -417,6 +367,159 @@ public class HousingUnitController {
                         + savedUnit.getId().toString();
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
+  }
+
+  /**
+   * Helper method to create the base JSON structure for a housing unit entity.
+   *
+   * @param unit the housing unit entity to convert to JSON
+   * @return an {@link ObjectNode} containing the housing unit's base information
+   */
+  private ObjectNode getHousingUnitInfo(HousingUnitEntity unit) {
+    ObjectNode json = objectMapper.createObjectNode();
+    json.put("id", unit.getId());
+    json.put("unit_number", unit.getUnitNumber());
+    json.put("created_datetime", unit.getCreatedDatetime().format(formatter));
+    json.put("modified_datetime", unit.getModifiedDatetime().format(formatter));
+
+    // Retrieve building and add building information
+    BuildingEntity building = unit.getBuilding();
+    ObjectNode buildingJson = json.putObject("building");
+    buildingJson.put("id", building.getId());
+    buildingJson.put("address", building.getAddress());
+    buildingJson.put("city", building.getCity());
+    buildingJson.put("state", building.getState());
+    buildingJson.put("zip_code", building.getZipCode());
+
+    // Add building features
+    ArrayNode buildingFeaturesJson = buildingJson.putArray("features");
+    List<BuildingFeatureBuildingMappingEntity> buildingFeatures = 
+        buildingFeatureMappingRepository.findByBuilding(building);
+    for (BuildingFeatureBuildingMappingEntity featureMapping : buildingFeatures) {
+      buildingFeaturesJson.add(featureMapping.getBuildingFeature().getName());
+    }
+
+    // Add housing unit features
+    ArrayNode housingUnitFeaturesJson = json.putArray("housing_unit_features");
+    List<HousingUnitFeatureHousingUnitMappingEntity> unitFeatures = 
+        unitFeatureMappingRepository.findByHousingUnit(unit);
+    for (HousingUnitFeatureHousingUnitMappingEntity featureMapping : unitFeatures) {
+      housingUnitFeaturesJson.add(featureMapping.getHousingUnitFeature().getName());
+    }
+
+    return json;
+  }
+
+  /**
+   * Retrieves a specific housing unit by its ID.
+   * 
+   * <p>This method fetches a housing unit based on its ID and returns its details as a JSON object.
+   * If the unit is not found, a 404 Not Found response is returned.
+   * </p>
+   *
+   *
+   * @param id the ID of the housing unit to retrieve
+   * @return a {@link ResponseEntity} containing the housing unit's details in JSON format, or 
+   *         a 404 Not Found response if the unit is not found
+   */
+  @GetMapping("/housing-unit/{id}")
+  public ResponseEntity<?> getHousingUnit(@PathVariable int id) {
+    Optional<HousingUnitEntity> housingUnitRepoResult = housingUnitRepository.findById(id);
+    if (housingUnitRepoResult.isEmpty()) {
+      String errorMessage = "Housing unit with id " + id + " not found";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+    }
+
+    HousingUnitEntity unit = housingUnitRepoResult.get();
+    ObjectNode json = getHousingUnitInfo(unit);
+    return ResponseEntity.ok(json);
+  }
+
+  /**
+   * Retrieves all housing units associated with a specific user by their user ID.
+   *
+   * <p>This endpoint fetches all housing units linked to the specified user ID by querying
+   * the `HousingUnitUserMapping` entities and obtaining each corresponding housing unit's 
+   * information. If the user does not exist, a 404 Not Found response is returned.
+   * </p>
+   *
+   * @param id the ID of the user for whom to retrieve associated housing units
+   * @return a {@link ResponseEntity} containing a list of {@link ObjectNode} JSON objects,
+   *         each representing detailed information about a housing unit. If the user is not
+   *         found, returns a 404 Not Found response with an error message.
+   */
+  @GetMapping("/user/{id}/housing-units")
+  public ResponseEntity<?> getUserHousingUnits(@PathVariable int id) {
+    Optional<UserEntity> user = userRepository.findById(id);
+    if (user.isEmpty()) {
+      String errorMessage = "User with id " + id + " not found.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+    }
+
+    List<HousingUnitUserMappingEntity> result = unitUserMappingRepository.findByUserId(id);
+    List<ObjectNode> housingUnits = result.stream()
+        .map(mapping -> getHousingUnitInfo(mapping.getHousingUnit()))
+        .collect(Collectors.toList());
+
+    return ResponseEntity.ok(housingUnits);
+  }
+
+  /**
+   * Adds an existing unit to an existing user by creating a new entry in the 
+   * `housing_unit_user_mappings` table. If the user or unit does not exist, returns
+   * a 404 Not Found status. If the unnit is already linked to the user, returns 
+   * a 409 Conflict status.
+   *
+   * @param userId The ID of the user to whom the building will be linked.
+   * @param housingUnitId The ID of the housing unit to be linked to the user.
+   * @return ResponseEntity containing a JSON response with the linkage status. 
+   *         Returns a 201 Created status if successful, 404 Not Found if the user
+   *         or unit does not exist, and 409 Conflict if the link already exists.
+   */
+  @PostMapping("/user/{userId}/housing-unit/{housingUnitId}")
+  public ResponseEntity<?> addExistingUnitToUser(@PathVariable int userId, 
+                                                  @PathVariable int housingUnitId) {
+    // Check if the user exists
+    Optional<UserEntity> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("User with id " + userId + " not found.");
+    }
+    UserEntity user = userOpt.get();
+
+    // Check if the unit exists
+    Optional<HousingUnitEntity> unitOpt = housingUnitRepository.findById(housingUnitId);
+    if (unitOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("Housing unit with id " + housingUnitId + " not found.");
+    }
+    HousingUnitEntity unit = unitOpt.get();
+
+    // Check if the mapping already exists
+    Optional<HousingUnitUserMappingEntity> existingMapping = 
+        unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId);
+
+    if (existingMapping.isPresent()) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body("This housing unit is already linked to the user.");
+    }
+
+    // Create and save the mapping
+    HousingUnitUserMappingEntity mapping = new HousingUnitUserMappingEntity();
+    mapping.setUser(user);
+    mapping.setHousingUnit(unit);
+    mapping.setCreatedDatetime(OffsetDateTime.now());
+    mapping.setModifiedDatetime(OffsetDateTime.now());
+
+    unitUserMappingRepository.save(mapping);
+
+    // Return a success response
+    ObjectNode responseJson = objectMapper.createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("housing_unit_id", housingUnitId);
+    responseJson.put("status", "Housing unit successfully linked to user.");
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseJson);
   }
 
 }

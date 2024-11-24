@@ -1,7 +1,9 @@
 package dev.coms4156.project.kebabcase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -14,6 +16,7 @@ import java.util.Optional;
 
 import dev.coms4156.project.kebabcase.controller.UserController;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +25,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 
 class UserControllerUnitTests {
 
@@ -135,4 +136,54 @@ class UserControllerUnitTests {
 
     verifyNoInteractions(userRepository);
   }
+
+  @Test
+  void testCreateUserSuccess() {
+    String firstName = "Sue";
+    String lastName = "Donym";
+    String emailAddress = "notapseudonym@example.com";
+    String password = "alias?notI";
+
+    UserEntity user = new UserEntity();
+    user.setId(100);
+
+    when(userRepository.findByEmailAddress(
+            emailAddress))
+            .thenReturn(Optional.empty());
+
+    when(userRepository.save(any(UserEntity.class))).thenReturn(user);
+
+    ResponseEntity<?> response = userController.createUser(firstName,
+            lastName, emailAddress, password);
+
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains(
+            "User was added successfully! User ID: "));
+    verify(userRepository, times(1)).save(any(UserEntity.class));
+  }
+
+  @Test
+  void testCreateUserFailure() {
+    String firstName = "Emily";
+    String lastName = "Johnson";
+    String emailAddress = "emily.johnson@example.com";
+    String password = "password789";
+
+    UserEntity user = new UserEntity();
+    user.setEmailAddress(emailAddress);
+
+    when(userRepository.findByEmailAddress(
+            emailAddress))
+            .thenReturn(Optional.of(user));
+
+    ResponseEntity<?> response = userController.createUser(firstName,
+            lastName, emailAddress, password);
+
+
+
+    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains(
+            "There is an account already associated with "));
+  }
+  
 }
