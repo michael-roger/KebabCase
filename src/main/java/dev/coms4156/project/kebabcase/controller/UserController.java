@@ -1,6 +1,10 @@
 package dev.coms4156.project.kebabcase.controller;
 
+import dev.coms4156.project.kebabcase.entity.ClientEntity;
+import dev.coms4156.project.kebabcase.entity.TokenEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
+import dev.coms4156.project.kebabcase.repository.ClientRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.TokenRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -8,6 +12,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.Random;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,15 +41,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
+  private static final String SALT_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+
+  private static final Integer SALT_LENGTH = 20;
+
   private final UserRepositoryInterface userRepository;
 
+  private final ClientRepositoryInterface clientRepository;
+
+  private final TokenRepositoryInterface tokenRepository;
+
   /**
-   * Constructs a new {@link AuthController}.
+   * Constructs a new {@link UserController}.
    *
    * @param userRepository the repository for user entities
+   * @param clientRepository the repository to get auth client information
    */
-  public UserController(UserRepositoryInterface userRepository) {
+  public UserController(
+      UserRepositoryInterface userRepository,
+      ClientRepositoryInterface clientRepository,
+      TokenRepositoryInterface tokenRepository
+  ) {
     this.userRepository = userRepository;
+    this.clientRepository = clientRepository;
+    this.tokenRepository = tokenRepository;
   }
 
   /**
@@ -71,15 +91,7 @@ public class UserController {
     }
 
     try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      byte[] bytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-      BigInteger number = new BigInteger(1, bytes);
-      StringBuilder hexString = new StringBuilder(number.toString(16));
-      while (hexString.length() < 64) {
-        hexString.insert(0, '0');
-      }
-
-      String hashedPassword = hexString.toString();
+      String hashedPassword = this.hashPassword(password);
 
       UserEntity newUser = new UserEntity();
 
@@ -100,7 +112,6 @@ public class UserController {
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException("Error: MD5 algorithm not found.", e);
     }
-
   }
 
   /**
@@ -112,14 +123,24 @@ public class UserController {
    */
 
   @PostMapping("/authenticate")
-  public ResponseEntity<Integer> authenticate(
-      @RequestParam String email, @RequestParam String password) {
+  public ResponseEntity<String> authenticate(
+      @RequestParam String email, @RequestParam String password, @RequestParam String clientName) {
 
-    if (email == null || email.isBlank() || password == null || password.isBlank()) {
+    if (email == null || email.isBlank()
+        || password == null || password.isBlank()
+        || clientName == null || clientName.isBlank()) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
 
-    Optional<UserEntity> userResult = userRepository.findByEmailAddress(email);
+    Optional<ClientEntity> clientResult = this.clientRepository.findByName(clientName);
+
+    if (clientResult.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    ClientEntity client = clientResult.get();
+
+    Optional<UserEntity> userResult = this.userRepository.findByEmailAddress(email);
 
     if (userResult.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -128,13 +149,22 @@ public class UserController {
     UserEntity user = userResult.get();
 
     try {
-      String hashedInputPassword = hashPassword(password);
+      String hashedInputPassword = this.hashPassword(password);
 
       if (!hashedInputPassword.equals(user.getPassword())) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
       }
 
-      return ResponseEntity.status(HttpStatus.OK).body(user.getId());
+      String tokenStringValue = this.generateRandomTokenString();
+
+      TokenEntity token = new TokenEntity();
+      token.setToken(tokenStringValue);
+      token.setUser(user);
+      token.setClient(client);
+
+      this.tokenRepository.save(token);
+
+      return ResponseEntity.status(HttpStatus.OK).body(tokenStringValue);
     } catch (NoSuchAlgorithmException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
@@ -169,6 +199,18 @@ public class UserController {
       hexString.append(hex);
     }
     return hexString.toString();
+  }
+
+  private String generateRandomTokenString() {
+    StringBuilder salt = new StringBuilder();
+    Random random = new Random();
+
+    while (salt.length() < this.SALT_LENGTH) {
+      int index = (int) (random.nextFloat() * this.SALT_CHARACTERS.length());
+      salt.append(this.SALT_CHARACTERS.charAt(index));
+    }
+
+    return salt.toString();
   }
   
 }
