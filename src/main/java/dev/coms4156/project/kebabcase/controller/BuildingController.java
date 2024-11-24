@@ -7,6 +7,7 @@ import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
@@ -512,6 +513,55 @@ public class BuildingController {
     responseJson.put("status", "Building successfully linked to user.");
 
     return ResponseEntity.status(HttpStatus.CREATED).body(responseJson);
+  }
+  
+  /**
+   * Retrieves a list of all buildings from the repository,
+   * returns all buildings in the repository as a list. 
+   *
+   * @return ResponseEntity containing the list of buildings as a JSON response.
+   *         Returns a 200 OK status if buildings are found, or 204 No Content if no 
+   *         buildings exist in the repository.
+   */
+  @GetMapping("/buildings")
+  public ResponseEntity<List<BuildingEntity>> getBuildings() {
+    List<BuildingEntity> buildings = buildingRepository.findAll();
+
+    if (buildings.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
+    return ResponseEntity.status(HttpStatus.OK).body(buildings);
+  }
+
+  /**
+   * Retrieves all housing units associated with a specific building,
+   * given a building ID, this method fetches the building and retrieves the housing units,
+   * linked to it. 
+   *
+   * @param buildingId The ID of the building for which housing units are being fetched.
+   * @return {@link ResponseEntity} containing:
+   *           200 OK: If housing units are successfully retrieved and units.
+   *           204 No Content: If the building has no associated housing units.
+   *           404 Not Found: If the building does not exist.
+   */
+  @GetMapping("/buildings/{buildingId}/housing-units")
+  public ResponseEntity<Set<HousingUnitEntity>> 
+      getHousingUnitsByBuilding(@PathVariable Integer buildingId) {
+    Optional<BuildingEntity> building = buildingRepository.findById(buildingId);
+    
+    if (building.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    Set<HousingUnitEntity> housingUnits = building.get().getHousingUnits();
+
+    // Return NO_CONTENT if the building has no housing units
+    if (housingUnits.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
+    return ResponseEntity.status(HttpStatus.OK).body(housingUnits);
   }
 
 }

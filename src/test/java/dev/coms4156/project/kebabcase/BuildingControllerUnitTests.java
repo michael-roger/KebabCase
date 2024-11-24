@@ -13,6 +13,7 @@ import dev.coms4156.project.kebabcase.controller.BuildingController;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
@@ -22,6 +23,7 @@ import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -527,5 +529,112 @@ class BuildingControllerUnitTests {
     verify(buildingRepository, times(1)).findById(buildingId);
     verify(buildingUserMappingRepository, times(1)).findByUserIdAndBuildingId(userId, buildingId);
     verify(buildingUserMappingRepository, times(1)).save(any(BuildingUserMappingEntity.class));
+  }
+
+  @Test
+  void testGetBuildingsSuccess() {
+    // Arrange
+    BuildingEntity building1 = new BuildingEntity();
+    building1.setId(1);
+    building1.setAddress("123 Test Street");
+    building1.setCity("Test City");
+    building1.setState("TS");
+    building1.setZipCode("12345");
+
+    BuildingEntity building2 = new BuildingEntity();
+    building2.setId(2);
+    building2.setAddress("456 Another Ave");
+    building2.setCity("Another City");
+    building2.setState("AC");
+    building2.setZipCode("67890");
+
+    List<BuildingEntity> buildings = List.of(building1, building2);
+
+    when(buildingRepository.findAll()).thenReturn(buildings);
+
+    // Act
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings();
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(2, response.getBody().size());
+    verify(buildingRepository, times(1)).findAll();
+  }
+
+  @Test
+  void testGetBuildingsNoContent() {
+    // Arrange
+    when(buildingRepository.findAll()).thenReturn(List.of());
+
+    // Act
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings();
+
+    // Assert
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    assertNull(response.getBody());
+    verify(buildingRepository, times(1)).findAll();
+  }
+
+  @Test
+  void testGetHousingUnitsByBuildingSuccess() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+
+    HousingUnitEntity unit1 = new HousingUnitEntity();
+    unit1.setId(1);
+    unit1.setUnitNumber("101");
+    unit1.setBuilding(building);
+
+    HousingUnitEntity unit2 = new HousingUnitEntity();
+    unit2.setId(2);
+    unit2.setUnitNumber("102");
+    unit2.setBuilding(building);
+
+    building.setHousingUnits(Set.of(unit1, unit2));
+
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+    // Act
+    ResponseEntity<Set<HousingUnitEntity>> response = buildingController.getHousingUnitsByBuilding(1);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(2, response.getBody().size());
+    verify(buildingRepository, times(1)).findById(1);
+  }
+
+  @Test
+  void testGetHousingUnitsByBuildingNotFound() {
+      // Arrange
+      when(buildingRepository.findById(999)).thenReturn(Optional.empty());
+  
+      // Act
+      ResponseEntity<Set<HousingUnitEntity>> response = buildingController.getHousingUnitsByBuilding(999);
+  
+      // Assert
+      assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+      assertNull(response.getBody());
+      verify(buildingRepository, times(1)).findById(999);
+  }
+  
+  @Test
+  void testGetHousingUnitsByBuildingNoContent() {
+    // Arrange
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    building.setHousingUnits(Set.of());
+
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+    // Act
+    ResponseEntity<Set<HousingUnitEntity>> response = buildingController.getHousingUnitsByBuilding(1);
+
+    // Assert
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    assertNull(response.getBody());
+    verify(buildingRepository, times(1)).findById(1);
   }
 }
