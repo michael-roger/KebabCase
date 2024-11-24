@@ -1,3 +1,7 @@
 entrypoint: java -jar target/KebabCase-0.0.1-SNAPSHOT.jar
 runtime: java17
 instance_class: F1
+inbound_services:
+  - warmup
+automatic_scaling:
+  min_idle_instances: 1

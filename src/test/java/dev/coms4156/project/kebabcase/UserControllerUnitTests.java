@@ -9,6 +9,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import dev.coms4156.project.kebabcase.entity.ClientEntity;
+import dev.coms4156.project.kebabcase.entity.TokenEntity;
+import dev.coms4156.project.kebabcase.repository.ClientRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.TokenRepositoryInterface;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +34,12 @@ class UserControllerUnitTests {
 
   @Mock
   private UserRepositoryInterface userRepository;
+
+  @Mock
+  private ClientRepositoryInterface clientRepository;
+
+  @Mock
+  private TokenRepositoryInterface tokenRepository;
 
   @InjectMocks
   private UserController userController;
@@ -63,21 +73,40 @@ class UserControllerUnitTests {
     String email = "test@example.com";
     String password = "password123";
     String hashedPassword = hashPassword(password);
+    String clientName = "testClientName";
+    String tokenValue = "testTokenValue";
+
+    ClientEntity client = new ClientEntity();
+    client.setId(1);
+    client.setName(clientName);
 
     UserEntity user = new UserEntity();
     user.setId(1);
     user.setEmailAddress(email);
     user.setPassword(hashedPassword);
 
+    TokenEntity token = new TokenEntity();
+    token.setId(1);
+    token.setToken(tokenValue);
+    token.setClient(client);
+
+    when(clientRepository.findByName(clientName)).thenReturn(Optional.of(client));
+
     when(userRepository.findByEmailAddress(email)).thenReturn(Optional.of(user));
 
+    when(tokenRepository.save(any(TokenEntity.class))).thenReturn(token);
+
     // Act
-    ResponseEntity<Integer> response = userController.authenticate(email, password);
+    ResponseEntity<String> response = userController.authenticate(
+        email,
+        password,
+        clientName
+    );
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(user.getId(), response.getBody());
     verify(userRepository, times(1)).findByEmailAddress(email);
+    verify(clientRepository, times(1)).findByName(clientName);
   }
 
   @Test
@@ -85,11 +114,18 @@ class UserControllerUnitTests {
     // Arrange
     String email = "missing@example.com";
     String password = "password123";
+    String clientName = "testClientName";
+
+    ClientEntity client = new ClientEntity();
+    client.setId(1);
+    client.setName(clientName);
+
+    when(clientRepository.findByName(clientName)).thenReturn(Optional.of(client));
 
     when(userRepository.findByEmailAddress(email)).thenReturn(Optional.empty());
 
     // Act
-    ResponseEntity<Integer> response = userController.authenticate(email, password);
+    ResponseEntity<String> response = userController.authenticate(email, password, clientName);
 
     // Assert
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -104,6 +140,13 @@ class UserControllerUnitTests {
     String correctPassword = "password123";
     String wrongPassword = "wrongpassword";
     String hashedCorrectPassword = hashPassword(correctPassword);
+    String clientName = "testClientName";
+
+    ClientEntity client = new ClientEntity();
+    client.setId(1);
+    client.setName(clientName);
+
+    when(clientRepository.findByName(clientName)).thenReturn(Optional.of(client));
 
     UserEntity user = new UserEntity();
     user.setId(1);
@@ -113,7 +156,7 @@ class UserControllerUnitTests {
     when(userRepository.findByEmailAddress(email)).thenReturn(Optional.of(user));
 
     // Act
-    ResponseEntity<Integer> response = userController.authenticate(email, wrongPassword);
+    ResponseEntity<String> response = userController.authenticate(email, wrongPassword, clientName);
 
     // Assert
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
@@ -123,9 +166,26 @@ class UserControllerUnitTests {
 
   @Test
   void testAuthenticate_BlankEmailOrPassword() {
+    String clientName = "testClientName";
+
+    ClientEntity client = new ClientEntity();
+    client.setId(1);
+    client.setName(clientName);
+
+    when(clientRepository.findByName(clientName)).thenReturn(Optional.of(client));
+
     // Act
-    ResponseEntity<Integer> responseWithBlankEmail = userController.authenticate("", "password123");
-    ResponseEntity<Integer> responseWithBlankPassword = userController.authenticate("test@example.com", "");
+    ResponseEntity<String> responseWithBlankEmail = userController.authenticate(
+        "",
+        "password123",
+        clientName
+    );
+
+    ResponseEntity<String> responseWithBlankPassword = userController.authenticate(
+        "test@example.com",
+        "",
+        clientName
+    );
 
     // Assert
     assertEquals(HttpStatus.BAD_REQUEST, responseWithBlankEmail.getStatusCode());
