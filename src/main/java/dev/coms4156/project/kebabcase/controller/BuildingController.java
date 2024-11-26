@@ -519,16 +519,24 @@ public class BuildingController {
    * Retrieves a list of all buildings from the repository,
    * returns all buildings in the repository as a list. 
    *
+   * @param  address an optional request parameter to select buildings containing
+   *         the specified address.
    * @return ResponseEntity containing the list of buildings as a JSON response.
    *         Returns a 200 OK status if buildings are found, or 204 No Content if no 
    *         buildings exist in the repository.
    */
   @GetMapping("/buildings")
-  public ResponseEntity<List<BuildingEntity>> getBuildings() {
+  public ResponseEntity<List<BuildingEntity>> getBuildings(
+           @RequestParam(required = false) String address) {
     List<BuildingEntity> buildings = buildingRepository.findAll();
 
     if (buildings.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
+    if (address != null && !address.isEmpty()) {
+      buildings = buildingRepository.findAllByAddress(address);
+      return ResponseEntity.status(HttpStatus.OK).body(buildings);
     }
 
     return ResponseEntity.status(HttpStatus.OK).body(buildings);

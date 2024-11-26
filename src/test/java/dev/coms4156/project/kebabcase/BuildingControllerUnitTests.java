@@ -532,7 +532,7 @@ class BuildingControllerUnitTests {
   }
 
   @Test
-  void testGetBuildingsSuccess() {
+  void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
     BuildingEntity building1 = new BuildingEntity();
     building1.setId(1);
@@ -553,7 +553,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findAll()).thenReturn(buildings);
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings();
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -568,7 +568,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findAll()).thenReturn(List.of());
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings();
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null);
 
     // Assert
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
