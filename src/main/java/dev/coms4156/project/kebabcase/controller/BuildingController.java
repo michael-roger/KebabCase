@@ -16,6 +16,7 @@ import dev.coms4156.project.kebabcase.repository.BuildingUserMappingRepositoryIn
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -535,8 +536,12 @@ public class BuildingController {
     }
 
     if (address != null && !address.isEmpty()) {
-      buildings = buildingRepository.findAllByAddress(address);
-      return ResponseEntity.status(HttpStatus.OK).body(buildings);
+      Optional<BuildingEntity> building = buildingRepository.findByAddress(address);
+      if (building.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonList(building.get()));
     }
 
     return ResponseEntity.status(HttpStatus.OK).body(buildings);

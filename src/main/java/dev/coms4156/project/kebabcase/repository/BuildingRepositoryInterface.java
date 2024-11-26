@@ -37,12 +37,12 @@ public interface BuildingRepositoryInterface extends JpaRepository<BuildingEntit
                                                                       String state, 
                                                                       String zipCode);
   /**
-* Finds all building by given address.
+* Finds the building with the given address.
 *
 *
 * @param address the street address of the building
 * @return an {@link Optional} containing the buildings if found, or empty if not found
 */
 
-  List<BuildingEntity> findAllByAddress(String address);
+  Optional<BuildingEntity> findByAddress(String address);
 }
