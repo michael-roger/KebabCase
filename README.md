@@ -134,7 +134,7 @@ INSERT INTO clients (id, name, created_datetime, modified_datetime) VALUES
 (1, 'HousingForAll', '2024-01-05 09:30:00', '2024-01-05 09:30:00'),
 (2, 'AccessibleHomes', '2024-02-10 11:00:00', '2024-02-10 11:00:00'),
 (3, 'BronxHousing', '2024-02-05 11:00:00', '2024-02-10 11:00:00'),
-(4, 'BrooklynHousing', '2024-03-12 11:00:00', '2024-02-10 11:00:00');
+(4, 'HomeSweetHome', '2024-03-12 11:00:00', '2024-02-10 11:00:00');
 ```
 
 ### tokens
@@ -267,7 +267,7 @@ INSERT INTO permission_client_mappings (id, permission_id, client_id, created_da
 -- BronxHousing Permissions (view-only for housing units)
 (11, 1, 3, '2024-01-01 10:00:00', '2024-01-01 10:00:00'),  -- view_housing_units
 
--- BrooklynHousing Permissions (view-only for housing units and buildings)
+-- HomeSweetHome Permissions (view-only for housing units and buildings)
 (12, 1, 4, '2024-01-01 10:00:00', '2024-01-01 10:00:00'),  -- view_housing_units
 (13, 4, 4, '2024-01-01 10:00:00', '2024-01-01 10:00:00');  -- view_buildings
 ```
