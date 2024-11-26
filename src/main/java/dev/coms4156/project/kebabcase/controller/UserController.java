@@ -6,7 +6,6 @@ import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.ClientRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.TokenRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * REST controller for authenticating users.
@@ -119,11 +121,12 @@ public class UserController {
    *
    * @param email the email of the user as requested.
    * @param password the plain-text password of that user.
+   * @param clientName client service requesting authentication
    * @return the user ID if authentication is successful, or null if not.
    */
 
   @PostMapping("/authenticate")
-  public ResponseEntity<String> authenticate(
+  public ResponseEntity<ObjectNode> authenticate(
       @RequestParam String email, @RequestParam String password, @RequestParam String clientName) {
 
     if (email == null || email.isBlank()
@@ -164,7 +167,14 @@ public class UserController {
 
       this.tokenRepository.save(token);
 
-      return ResponseEntity.status(HttpStatus.OK).body(tokenStringValue);
+      // Create the JSON response
+      ObjectMapper objectMapper = new ObjectMapper();
+      ObjectNode responseJson = objectMapper.createObjectNode();
+      responseJson.put("token", tokenStringValue);
+      responseJson.put("user_name", user.getFirstName()); // Assuming user has a getName() method
+
+      return ResponseEntity.status(HttpStatus.OK).body(responseJson);
+
     } catch (NoSuchAlgorithmException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
