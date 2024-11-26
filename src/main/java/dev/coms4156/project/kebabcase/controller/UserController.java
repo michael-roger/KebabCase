@@ -1,5 +1,7 @@
 package dev.coms4156.project.kebabcase.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.entity.ClientEntity;
 import dev.coms4156.project.kebabcase.entity.TokenEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
@@ -17,9 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * REST controller for authenticating users.
@@ -86,6 +85,14 @@ public class UserController {
       @RequestParam String emailAddress,
       @RequestParam String password) {
 
+    if (firstName == null || firstName.isBlank()
+        || lastName == null || lastName.isBlank()
+        || emailAddress == null || emailAddress.isBlank()
+        || password == null || password.isBlank()) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("All fields are required and cannot be blank.");
+    }
+
     Optional<UserEntity> userResult = userRepository.findByEmailAddress(emailAddress);
     if (userResult.isPresent()) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -112,7 +119,7 @@ public class UserController {
       return new ResponseEntity<>(response, HttpStatus.CREATED);
 
     } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("Error: MD5 algorithm not found.", e);
+      throw new RuntimeException("Error: SHA-256 algorithm not found.", e);
     }
   }
 
@@ -171,7 +178,7 @@ public class UserController {
       ObjectMapper objectMapper = new ObjectMapper();
       ObjectNode responseJson = objectMapper.createObjectNode();
       responseJson.put("token", tokenStringValue);
-      responseJson.put("user_name", user.getFirstName()); // Assuming user has a getName() method
+      responseJson.put("name", user.getFirstName()); // Assuming user has a getName() method
 
       return ResponseEntity.status(HttpStatus.OK).body(responseJson);
 
