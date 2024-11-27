@@ -16,6 +16,7 @@ import dev.coms4156.project.kebabcase.repository.BuildingUserMappingRepositoryIn
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -519,12 +520,24 @@ public class BuildingController {
    * Retrieves a list of all buildings from the repository,
    * returns all buildings in the repository as a list. 
    *
+   * @param  address an optional request parameter to select buildings containing
+   *         the specified address.
    * @return ResponseEntity containing the list of buildings as a JSON response.
    *         Returns a 200 OK status if buildings are found, or 204 No Content if no 
    *         buildings exist in the repository.
    */
   @GetMapping("/buildings")
-  public ResponseEntity<List<BuildingEntity>> getBuildings() {
+  public ResponseEntity<List<BuildingEntity>> getBuildings(
+           @RequestParam(required = false) String address) {
+
+    if (address != null && !address.isEmpty()) {
+      Optional<BuildingEntity> building = buildingRepository.findByAddress(address);
+      if (building.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonList(building.get()));
+    }
+
     List<BuildingEntity> buildings = buildingRepository.findAll();
 
     if (buildings.isEmpty()) {
