@@ -1,6 +1,7 @@
 package dev.coms4156.project.kebabcase.repository;
 
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -21,27 +22,34 @@ import org.springframework.stereotype.Repository;
 public interface BuildingRepositoryInterface extends JpaRepository<BuildingEntity, Integer> {
 
   /**
- * Finds a building by its address, city, state, and zip code.
- *
- *
- * @param address the street address of the building
- * @param city the city where the building is located
- * @param state the state where the building is located
- * @param zipCode the zip code of the building
- * @return an {@link Optional} containing the building if found, or empty if not found
- */
+   * Finds a building by its address, city, state, and zip code.
+   *
+   * @param address the street address of the building
+   * @param city    the city where the building is located
+   * @param state   the state where the building is located
+   * @param zipCode the zip code of the building
+   * @return an {@link Optional} containing the building if found, or empty if not found
+   */
 
   Optional<BuildingEntity> findByAddressAndCityAndStateAndZipCode(String address,
-                                                                      String city, 
-                                                                      String state, 
-                                                                      String zipCode);
+                                                                  String city,
+                                                                  String state,
+                                                                  String zipCode);
+
   /**
-* Finds the building with the given address.
-*
-*
-* @param address the street address of the building
-* @return an {@link Optional} containing the buildings if found, or empty if not found
-*/
+   * Finds the building with the given address.
+   *
+   * @param address the  address of the building
+   * @return an {@link Optional} containing the building if found, or empty if not found
+   */
 
   Optional<BuildingEntity> findByAddress(String address);
+
+  /**
+   * Finds a list of buildings with the given city.
+   *
+   * @param city the city of the selected buildings
+   * @return an {@Link Optional} containing the buildings if found, or empty if not found
+   */
+  List<BuildingEntity> findByCity(String city);
 }
