@@ -628,6 +628,21 @@ class BuildingControllerUnitTests {
   }
 
   @Test
+  void testGetBuildingsStateNotFound() {
+  String state = "NY";
+  //Arrange
+  when(buildingRepository.findByState(state)).thenReturn(List.of()); //empty list
+
+  //Act
+  ResponseEntity<?> response = buildingController.getBuildings(null, null, state);
+
+  //Assert
+  assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+  verify(buildingRepository, times(1)).findByState(state);
+
+  }
+
+    @Test
   void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
     BuildingEntity building1 = new BuildingEntity();
