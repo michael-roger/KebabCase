@@ -192,7 +192,7 @@ public class UserController {
    *
    * @return the user ID if authentication is successful, or null if not.
    */
-  @GetMapping("/user-info")
+  @GetMapping("/me")
   public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
     String tokenString = request.getHeader("token");
 

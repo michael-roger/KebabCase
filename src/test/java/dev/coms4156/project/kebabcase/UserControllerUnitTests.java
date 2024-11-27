@@ -319,7 +319,7 @@ class UserControllerUnitTests {
     when(tokenRepository.findByToken(tokenString)).thenReturn(Optional.empty());
 
     // Act & Assert
-    mockMvc.perform(get("/user-info")
+    mockMvc.perform(get("/me")
             .header("token", tokenString))
             .andExpect(status().isNotFound());
   }
@@ -327,7 +327,7 @@ class UserControllerUnitTests {
   @Test
   public void testGetUserInfo_MissingTokenHeader() throws Exception {
     // Act & Assert
-    mockMvc.perform(get("/user-info"))
+    mockMvc.perform(get("/me"))
         .andExpect(status().isUnauthorized());
   }
 }
