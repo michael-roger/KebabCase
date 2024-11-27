@@ -528,7 +528,7 @@ public class BuildingController {
    *           <li>HTTP 404: User, building, or association not found.</li>
    *         </ul>
    */
-  @DeleteMapping("/user/{userId}/buildings/{buildingId}")
+  @DeleteMapping("/user/{userId}/building/{buildingId}")
   public ResponseEntity<?> removeBuildingFromUser(@PathVariable int userId, 
                                                 @PathVariable int buildingId) {
     // Check if the user exists
