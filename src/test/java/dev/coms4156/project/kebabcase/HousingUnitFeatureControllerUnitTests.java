@@ -47,7 +47,7 @@ class HousingUnitFeatureControllerUnitTests {
     when(housingUnitFeatureRepository.findAll()).thenReturn(features);
 
     ResponseEntity<List<HousingUnitFeatureEntity>> response =
-        housingUnitFeatureController.getBuildingFeatures();
+        housingUnitFeatureController.getHousingUnitFeatures();
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(2, response.getBody().size());
@@ -60,7 +60,7 @@ class HousingUnitFeatureControllerUnitTests {
     when(housingUnitFeatureRepository.findAll()).thenReturn(List.of());
 
     ResponseEntity<List<HousingUnitFeatureEntity>> response =
-            housingUnitFeatureController.getBuildingFeatures();
+            housingUnitFeatureController.getHousingUnitFeatures();
 
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     assertNull(response.getBody());

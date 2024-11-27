@@ -48,7 +48,7 @@ public class HousingUnitFeatureController {
    */
 
   @GetMapping("/housing-unit-features")
-  public ResponseEntity<List<HousingUnitFeatureEntity>> getBuildingFeatures() {
+  public ResponseEntity<List<HousingUnitFeatureEntity>> getHousingUnitFeatures() {
 
     List<HousingUnitFeatureEntity> featureEntities =
             this.housingUnitFeatureRepository.findAll();
