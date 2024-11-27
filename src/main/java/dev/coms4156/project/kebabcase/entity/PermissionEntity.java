@@ -13,16 +13,15 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * Entity detailing all the information held by a housing unit feature.
+ * Entity detailing a permission that a client can have.
  */
-
 @Accessors(chain = true)
 @Getter
 @Setter
 @NoArgsConstructor()
-@Entity(name = "HousingUnitFeature")
-@Table(name = "housing_unit_features")
-public class HousingUnitFeatureEntity {
+@Entity(name = "Permission")
+@Table(name = "permissions")
+public class PermissionEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)

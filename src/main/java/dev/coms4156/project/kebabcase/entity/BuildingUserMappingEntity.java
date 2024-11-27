@@ -2,9 +2,12 @@ package dev.coms4156.project.kebabcase.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import lombok.Getter;
@@ -13,23 +16,27 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * Entity detailing all the information held by a housing unit feature.
+ * Entity connecting a building and a user.
  */
-
 @Accessors(chain = true)
 @Getter
 @Setter
 @NoArgsConstructor()
-@Entity(name = "HousingUnitFeature")
-@Table(name = "housing_unit_features")
-public class HousingUnitFeatureEntity {
+@Entity(name = "BuildingUserMapping")
+@Table(name = "building_user_mappings")
+public class BuildingUserMappingEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)
   private Integer id;
 
-  @Column(name = "name")
-  private String name;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "building_id")
+  private BuildingEntity building;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id")
+  private UserEntity user;
 
   @Column(name = "created_datetime")
   private OffsetDateTime createdDatetime;

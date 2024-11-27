@@ -3,20 +3,19 @@ package dev.coms4156.project.kebabcase.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Sanity check controller. */
+/** Warmup controller used by Google App Engine. */
 @RestController
-public class IndexController {
+public class WarmupController {
 
   /**
-   * Basic sanity check controller showing string
-   * welcome message.
+   * Allows for Google App Engine's warmup feature.
    *
-   * @return String welcome message.
+   * @return String simple message.
    */
-  @GetMapping({"/", "/index", "/home"})
+  @GetMapping({"/_ah/warmup"})
   public String index() {
     return """
-            Welcome!\
+            Warmup!\
             """;
   }
 }

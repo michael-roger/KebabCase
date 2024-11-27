@@ -1,10 +1,10 @@
 package dev.coms4156.project.kebabcase;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Class contains all the startup logic for the application.
@@ -16,6 +16,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "dev.coms4156.project.kebabcase.repository",
 })
 @SpringBootApplication
+@EnableTransactionManagement
+@SuppressWarnings({"PMD", "checkstyle:hideutilityclassconstructor"})
 public class App {
 
   /**

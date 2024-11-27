@@ -15,6 +15,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+/**
+ * Entity detailing all the information held by a mapping between
+ *     housing units and their corresponding features.
+ */
+
 @Accessors(chain = true)
 @Getter
 @Setter
@@ -22,22 +27,22 @@ import lombok.experimental.Accessors;
 @Entity(name = "HousingUnitFeatureHousingUnitMapping")
 @Table(name = "housing_unit_feature_housing_unit_mappings")
 public class HousingUnitFeatureHousingUnitMappingEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "housing_unit_id")
-    private HousingUnitEntity housingUnit;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "housing_unit_id")
+  private HousingUnitEntity housingUnit;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "housing_unit_feature_id")
-    private HousingUnitFeatureEntity housingUnitFeature;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "housing_unit_feature_id")
+  private HousingUnitFeatureEntity housingUnitFeature;
 
-    @Column(name = "created_datetime")
-    private OffsetDateTime createdDatetime;
+  @Column(name = "created_datetime")
+  private OffsetDateTime createdDatetime;
 
-    @Column(name = "modified_datetime")
-    private OffsetDateTime modifiedDatetime;
+  @Column(name = "modified_datetime")
+  private OffsetDateTime modifiedDatetime;
 }
