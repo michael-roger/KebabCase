@@ -31,9 +31,6 @@ public class ClientEntity {
   @Column(name = "name")
   private String name;
 
-  @Column(name = "last_name")
-  private String lastName;
-
   @Column(name = "created_datetime")
   private OffsetDateTime createdDatetime;
 
