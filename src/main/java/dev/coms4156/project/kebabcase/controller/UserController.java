@@ -1,12 +1,14 @@
 package dev.coms4156.project.kebabcase.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.entity.ClientEntity;
 import dev.coms4156.project.kebabcase.entity.TokenEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.ClientRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.TokenRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
-import java.math.BigInteger;
+import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import java.util.Random;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,14 +45,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private static final String SALT_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-
   private static final Integer SALT_LENGTH = 20;
-
   private final UserRepositoryInterface userRepository;
-
   private final ClientRepositoryInterface clientRepository;
-
   private final TokenRepositoryInterface tokenRepository;
+  private final ObjectMapper objectMapper;
 
   /**
    * Constructs a new {@link UserController}.
@@ -60,11 +60,13 @@ public class UserController {
   public UserController(
       UserRepositoryInterface userRepository,
       ClientRepositoryInterface clientRepository,
-      TokenRepositoryInterface tokenRepository
+      TokenRepositoryInterface tokenRepository,
+      ObjectMapper objectMapper
   ) {
     this.userRepository = userRepository;
     this.clientRepository = clientRepository;
     this.tokenRepository = tokenRepository;
+    this.objectMapper = objectMapper;
   }
 
   /**
@@ -83,6 +85,14 @@ public class UserController {
       @RequestParam String lastName,
       @RequestParam String emailAddress,
       @RequestParam String password) {
+
+    if (firstName == null || firstName.isBlank()
+        || lastName == null || lastName.isBlank()
+        || emailAddress == null || emailAddress.isBlank()
+        || password == null || password.isBlank()) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("All fields are required and cannot be blank.");
+    }
 
     Optional<UserEntity> userResult = userRepository.findByEmailAddress(emailAddress);
     if (userResult.isPresent()) {
@@ -110,7 +120,7 @@ public class UserController {
       return new ResponseEntity<>(response, HttpStatus.CREATED);
 
     } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("Error: MD5 algorithm not found.", e);
+      throw new RuntimeException("Error: SHA-256 algorithm not found.", e);
     }
   }
 
@@ -119,9 +129,9 @@ public class UserController {
    *
    * @param email the email of the user as requested.
    * @param password the plain-text password of that user.
+   * @param clientName client service requesting authentication
    * @return the user ID if authentication is successful, or null if not.
    */
-
   @PostMapping("/authenticate")
   public ResponseEntity<String> authenticate(
       @RequestParam String email, @RequestParam String password, @RequestParam String clientName) {
@@ -162,12 +172,51 @@ public class UserController {
       token.setUser(user);
       token.setClient(client);
 
+      OffsetDateTime now = OffsetDateTime.now();
+      token.setCreatedDatetime(now);
+      token.setModifiedDatetime(now);
+
+      OffsetDateTime expirationDatetime = now.plusMonths(3);
+      token.setExpirationDatetime(expirationDatetime);
+
       this.tokenRepository.save(token);
 
       return ResponseEntity.status(HttpStatus.OK).body(tokenStringValue);
     } catch (NoSuchAlgorithmException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
+  }
+
+  /**
+   * Retrieves user info.
+   *
+   * @return the user ID if authentication is successful, or null if not.
+   */
+  @GetMapping("/me")
+  public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+    String tokenString = request.getHeader("token");
+
+    if (tokenString == null || tokenString.isEmpty()) {
+      String text = "Token header is missing or empty.";
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(text);
+    }
+
+    Optional<TokenEntity> tokenResult = this.tokenRepository.findByToken(tokenString);
+
+    if (tokenResult.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    TokenEntity token = tokenResult.get();
+    UserEntity user = token.getUser();
+
+    ObjectNode json = objectMapper.createObjectNode();
+    json.put("id", user.getId());
+    json.put("firstName", user.getFirstName());
+    json.put("lastName", user.getLastName());
+    json.put("emailAddress", user.getEmailAddress());
+
+    return ResponseEntity.status(HttpStatus.OK).body(json);
   }
 
   /**

@@ -531,8 +531,26 @@ class BuildingControllerUnitTests {
     verify(buildingUserMappingRepository, times(1)).save(any(BuildingUserMappingEntity.class));
   }
 
+ @Test
+ void testGetBuildingsSuccessWithAddress(){
+     // Arrange
+     BuildingEntity building = new BuildingEntity();
+     building.setId(1);
+     String address = "33 some st";
+     building.setAddress(address);
+     when(buildingRepository.findByAddress(address)).thenReturn(Optional.of(building));
+
+     // Act
+     ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(address);
+
+     // Assert
+     assertEquals(HttpStatus.OK, response.getStatusCode());
+     assertNotNull(response.getBody());
+     assertEquals(1, response.getBody().size());
+     verify(buildingRepository, times(1)).findByAddress(address);
+ }
   @Test
-  void testGetBuildingsSuccess() {
+  void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
     BuildingEntity building1 = new BuildingEntity();
     building1.setId(1);
@@ -553,7 +571,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findAll()).thenReturn(buildings);
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings();
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -568,7 +586,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findAll()).thenReturn(List.of());
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings();
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null);
 
     // Assert
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());

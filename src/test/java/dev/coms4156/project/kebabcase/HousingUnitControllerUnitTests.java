@@ -69,9 +69,6 @@ class HousingUnitControllerUnitTests {
   @Mock
   private UserRepositoryInterface userRepository;
 
-  // @Mock
-  // private ObjectMapper objectMapper;
-
   @Spy
   private ObjectMapper objectMapper = new ObjectMapper();
 
