@@ -10,6 +10,8 @@ import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.ClientRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.TokenRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -47,14 +49,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private static final String SALT_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-
   private static final Integer SALT_LENGTH = 20;
-
   private final UserRepositoryInterface userRepository;
-
   private final ClientRepositoryInterface clientRepository;
-
   private final TokenRepositoryInterface tokenRepository;
+  private final ObjectMapper objectMapper;
 
   /**
    * Constructs a new {@link UserController}.
@@ -65,11 +64,13 @@ public class UserController {
   public UserController(
       UserRepositoryInterface userRepository,
       ClientRepositoryInterface clientRepository,
-      TokenRepositoryInterface tokenRepository
+      TokenRepositoryInterface tokenRepository,
+      ObjectMapper objectMapper
   ) {
     this.userRepository = userRepository;
     this.clientRepository = clientRepository;
     this.tokenRepository = tokenRepository;
+    this.objectMapper = objectMapper;
   }
 
   /**
@@ -135,7 +136,6 @@ public class UserController {
    * @param clientName client service requesting authentication
    * @return the user ID if authentication is successful, or null if not.
    */
-
   @PostMapping("/authenticate")
   public ResponseEntity<String> authenticate(
       @RequestParam String email, @RequestParam String password, @RequestParam String clientName) {
@@ -191,9 +191,31 @@ public class UserController {
     }
   }
 
+  /**
+   * Retrieves user info.
+   *
+   * @return the user ID if authentication is successful, or null if not.
+   */
   @GetMapping("/user-info")
-  public ResponseEntity<?> getUserInfo() {
-    
+  public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+    String tokenString = request.getHeader("token");
+
+    Optional<TokenEntity> tokenResult = this.tokenRepository.findByToken(tokenString);
+
+    if (tokenResult.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    TokenEntity token = tokenResult.get();
+    UserEntity user = token.getUser();
+
+    ObjectNode json = objectMapper.createObjectNode();
+    json.put("id", user.getId());
+    json.put("firstName", user.getFirstName());
+    json.put("lastName", user.getLastName());
+    json.put("emailAddress", user.getEmailAddress());
+
+    return ResponseEntity.status(HttpStatus.OK).body(json);
   }
 
   /**
