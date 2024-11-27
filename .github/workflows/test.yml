@@ -25,6 +25,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
       - name: Linting
         run: ./mvnw checkstyle:check
       - name: PMD check
