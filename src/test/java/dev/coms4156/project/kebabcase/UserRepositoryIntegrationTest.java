@@ -2,16 +2,26 @@ package dev.coms4156.project.kebabcase;
 
 import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
-import org.assertj.core.api.Assertions;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 @SpringBootTest
 @Transactional // Optional: Rollback transactions after each test
 class UserRepositoryIntegrationTest {
 
+  @Container
+  @ServiceConnection
+  private static final MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0")
+      .withDatabaseName("testdb")
+      .withUsername("testuser")
+      .withPassword("testpass");
+  
   @Autowired
   private UserRepositoryInterface userRepository;
 
