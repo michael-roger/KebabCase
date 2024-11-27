@@ -133,7 +133,7 @@ public class UserController {
    */
 
   @PostMapping("/authenticate")
-  public ResponseEntity<ObjectNode> authenticate(
+  public ResponseEntity<String> authenticate(
       @RequestParam String email, @RequestParam String password, @RequestParam String clientName) {
 
     if (email == null || email.isBlank()
@@ -174,14 +174,7 @@ public class UserController {
 
       this.tokenRepository.save(token);
 
-      // Create the JSON response
-      ObjectMapper objectMapper = new ObjectMapper();
-      ObjectNode responseJson = objectMapper.createObjectNode();
-      responseJson.put("token", tokenStringValue);
-      responseJson.put("name", user.getFirstName()); // Assuming user has a getName() method
-
-      return ResponseEntity.status(HttpStatus.OK).body(responseJson);
-
+      return ResponseEntity.status(HttpStatus.OK).body(tokenStringValue);
     } catch (NoSuchAlgorithmException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
