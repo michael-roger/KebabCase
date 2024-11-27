@@ -575,6 +575,30 @@ class BuildingControllerUnitTests {
   }
 
   @Test
+  void testGetBuildingsSuccessWithState(){
+    // Arrange
+    BuildingEntity building1 = new BuildingEntity();
+    BuildingEntity building2 = new BuildingEntity();
+    building1.setId(1);
+    building2.setId(2);
+    String state = "NY";
+    building1.setState(state);
+    building2.setState(state);
+    when(buildingRepository.findByState(state)).thenReturn(List.of(building1, building2));
+
+    // Act
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, state);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().isEmpty());
+    assertEquals(2, response.getBody().size());
+    verify(buildingRepository, times(1)).findByState(state);
+
+  }
+
+  @Test
   void testGetBuildingsAddressNotFound(){
   }
 

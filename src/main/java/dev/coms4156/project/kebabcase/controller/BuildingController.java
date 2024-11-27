@@ -520,7 +520,7 @@ public class BuildingController {
    * Retrieves a list of all buildings from the repository,
    * returns all buildings in the repository as a list. 
    *
-   * @param  address an optional request parameter to select the building containing
+   * @param  address an optional request parameter to select buildings containing
    *         the specified address.
    * @param city an optional request parameter to select buildings with the specified
    *         city.
