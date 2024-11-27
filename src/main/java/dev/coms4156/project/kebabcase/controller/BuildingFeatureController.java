@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for managing building feature entities and their associated features.
+ * REST controller for managing building feature entities.
  * <p>
  * Provides endpoints to get all building features.
  * </p>

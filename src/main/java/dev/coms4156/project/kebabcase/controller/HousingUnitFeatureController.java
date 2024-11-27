@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for managing building feature entities and their associated features.
+ * REST controller for managing housing unit feature entities.
  * <p>
- * Provides endpoints to get all building features.
+ * Provides endpoints to get all housing unit features.
  * </p>
  * 
  * <h2>Endpoints:</h2>
  * <ul>
- *   <li><strong>GET /housing-unit-features</strong>: Finds all building features.</li>
+ *   <li><strong>GET /housing-unit-features</strong>: Finds all housing unit features.</li>
  * </ul>
  *
  */
