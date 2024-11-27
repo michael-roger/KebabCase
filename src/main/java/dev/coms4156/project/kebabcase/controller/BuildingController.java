@@ -529,19 +529,19 @@ public class BuildingController {
   @GetMapping("/buildings")
   public ResponseEntity<List<BuildingEntity>> getBuildings(
            @RequestParam(required = false) String address) {
-    List<BuildingEntity> buildings = buildingRepository.findAll();
-
-    if (buildings.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-    }
 
     if (address != null && !address.isEmpty()) {
       Optional<BuildingEntity> building = buildingRepository.findByAddress(address);
       if (building.isEmpty()) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
-
       }
       return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonList(building.get()));
+    }
+
+    List<BuildingEntity> buildings = buildingRepository.findAll();
+
+    if (buildings.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 
     return ResponseEntity.status(HttpStatus.OK).body(buildings);
