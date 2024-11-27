@@ -531,6 +531,24 @@ class BuildingControllerUnitTests {
     verify(buildingUserMappingRepository, times(1)).save(any(BuildingUserMappingEntity.class));
   }
 
+ @Test
+ void testGetBuildingsSuccessWithAddress(){
+     // Arrange
+     BuildingEntity building = new BuildingEntity();
+     building.setId(1);
+     String address = "33 some st";
+     building.setAddress(address);
+     when(buildingRepository.findByAddress(address)).thenReturn(Optional.of(building));
+
+     // Act
+     ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(address);
+
+     // Assert
+     assertEquals(HttpStatus.OK, response.getStatusCode());
+     assertNotNull(response.getBody());
+     assertEquals(1, response.getBody().size());
+     verify(buildingRepository, times(1)).findByAddress(address);
+ }
   @Test
   void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
