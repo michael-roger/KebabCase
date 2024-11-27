@@ -340,9 +340,10 @@ class BuildingControllerUnitTests {
 
   // Assert
   assertEquals(HttpStatus.OK, response.getStatusCode());
+  assertEquals("someCity", building.getCity());
   assertEquals("Building info has been successfully updated!", response.getBody());
   verify(buildingRepository, times(1))
-            .save(any(BuildingEntity.class));
+            .save(building);
   }
 
   @Test
@@ -358,8 +359,9 @@ class BuildingControllerUnitTests {
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Building info has been successfully updated!", response.getBody());
+    assertEquals("MA", building.getState());
     verify(buildingRepository, times(1))
-            .save(any(BuildingEntity.class));
+            .save(building);
   }
 
   @Test
@@ -375,8 +377,9 @@ class BuildingControllerUnitTests {
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Building info has been successfully updated!", response.getBody());
+    assertEquals("02113", building.getZipCode());
     verify(buildingRepository, times(1))
-            .save(any(BuildingEntity.class));
+            .save(building);
   }
 
   @Test
