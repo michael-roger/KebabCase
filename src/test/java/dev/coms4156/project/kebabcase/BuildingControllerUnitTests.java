@@ -546,9 +546,38 @@ class BuildingControllerUnitTests {
      // Assert
      assertEquals(HttpStatus.OK, response.getStatusCode());
      assertNotNull(response.getBody());
+     assertFalse(response.getBody().isEmpty());
      assertEquals(1, response.getBody().size());
      verify(buildingRepository, times(1)).findByAddress(address);
  }
+
+ @Test
+ void testGetBuildingsSuccessWithCity(){
+     // Arrange
+     BuildingEntity building1 = new BuildingEntity();
+     BuildingEntity building2 = new BuildingEntity();
+     building1.setId(1);
+     building2.setId(2);
+     String city = "someCity";
+     building1.setCity(city);
+     building2.setCity(city);
+     when(buildingRepository.findByCity(city)).thenReturn(List.of(building1, building2));
+
+    // Act
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, city);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().isEmpty());
+    assertEquals(2, response.getBody().size());
+    verify(buildingRepository, times(1)).findByCity(city);
+ }
+
+  @Test
+  void testGetBuildingsAddressNotFound(){
+  }
+
   @Test
   void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
