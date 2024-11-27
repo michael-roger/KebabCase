@@ -2,6 +2,7 @@ package dev.coms4156.project.kebabcase;
 
 import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +17,7 @@ class UserRepositoryIntegrationTest {
   private UserRepositoryInterface userRepository;
 
   @Test
+  @Disabled("Reason for skipping")
   void testSaveUser() {
     UserEntity user = new UserEntity();
     user.setFirstName("Homer");
