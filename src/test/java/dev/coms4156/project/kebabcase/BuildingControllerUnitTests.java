@@ -598,8 +598,33 @@ class BuildingControllerUnitTests {
 
   }
 
+//  @Test
+//  void testGetBuildingsAddressNotFound(){
+//
+//    String address = "999 Lincoln St";
+//    // Arrange
+//    when(buildingRepository.findByAddress(address)).thenReturn(Optional.empty());
+//
+//    // Act
+//    ResponseEntity<?> response = buildingController.getBuildings(address, null, null);
+//
+//    // Assert
+//    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+//    verify(buildingRepository, times(1)).findByAddress(address);
+//  }
+
   @Test
-  void testGetBuildingsAddressNotFound(){
+  void testGetBuildingsCityNotFound(){
+    String city = "Boston";
+    // Arrange
+    when(buildingRepository.findByCity(city)).thenReturn(List.of()); //empty list
+
+    // Act
+    ResponseEntity<?> response = buildingController.getBuildings(null, city, null);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    verify(buildingRepository, times(1)).findByCity(city);
   }
 
   @Test
