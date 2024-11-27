@@ -1,15 +1,22 @@
 package dev.coms4156.project.kebabcase.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
+import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
+import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.BuildingUserMappingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -58,11 +65,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class BuildingController {
   
   private final BuildingRepositoryInterface buildingRepository;
-
   private final BuildingFeatureRepositoryInterface buildingFeatureRepository;
-
   private final BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository;
-
+  private final BuildingUserMappingRepositoryInterface buildingUserMappingRepository;
+  private final UserRepositoryInterface userRepository;
   private final ObjectMapper objectMapper;
 
   /**
@@ -71,16 +77,22 @@ public class BuildingController {
    * @param buildingRepository the repository used to interact with building entities
    * @param buildingFeatureRepository the repository used for building features
    * @param buildingFeatureMappingRepository the repository for mapping building features
+   * @param buildingUserMappingRepository the repository for mapping users to buildings
+   * @param userRepository the repository used to interact with user entities
    */
   public BuildingController(
       BuildingRepositoryInterface buildingRepository,
       BuildingFeatureRepositoryInterface buildingFeatureRepository,
       BuildingFeatureBuildingMappingRepositoryInterface buildingFeatureMappingRepository,
+      BuildingUserMappingRepositoryInterface buildingUserMappingRepository,
+      UserRepositoryInterface userRepository,
       ObjectMapper objectMapper
   ) {
     this.buildingRepository = buildingRepository;
     this.buildingFeatureRepository = buildingFeatureRepository;
     this.buildingFeatureMappingRepository = buildingFeatureMappingRepository;
+    this.buildingUserMappingRepository = buildingUserMappingRepository;
+    this.userRepository = userRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -346,7 +358,6 @@ public class BuildingController {
     List<BuildingFeatureBuildingMappingEntity> result =
         this.buildingFeatureMappingRepository.findByBuildingFeatureId(id);
 
-
     return result.stream().map(mapping -> {
       BuildingEntity building = mapping.getBuilding();
       ObjectNode json = objectMapper.createObjectNode();
@@ -360,26 +371,13 @@ public class BuildingController {
   }
 
   /**
-   * Retrieves a specific building by its ID and returns the details as a JSON object.
+   * Helper method to create the base JSON structure for a building entity.
    *
-   * @param id The ID of the building to retrieve.
-   * @return An ObjectNode JSON object containing the building details.
-   * @throws ResponseStatusException if the building with the given ID is not found,
-   *     with an HTTP status of 404.
+   * @param building the building entity to convert to JSON
+   * @return an {@link ObjectNode} containing the building's base information
    */
-  @GetMapping("/building/{id}")
-  public ObjectNode getBuildingById(@PathVariable int id) {
-
-    Optional<BuildingEntity> buildingRepositoryResult = this.buildingRepository.findById(id);
-    if (buildingRepositoryResult.isEmpty()) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Building with id " + id + " not found"
-      );
-    }
-
-    BuildingEntity building = buildingRepositoryResult.get();
-
-    ObjectNode json = this.objectMapper.createObjectNode();
+  private ObjectNode createBuildingJson(BuildingEntity building) {
+    ObjectNode json = objectMapper.createObjectNode();
     json.put("id", building.getId());
     json.put("address", building.getAddress());
     json.put("city", building.getCity());
@@ -387,8 +385,219 @@ public class BuildingController {
     json.put("zip_code", building.getZipCode());
     json.put("created_datetime", building.getCreatedDatetime().toString());
     json.put("modified_datetime", building.getModifiedDatetime().toString());
-
     return json;
+  }
+
+  /**
+   * Retrieves detailed information for a specific building by its ID, including its address,
+   * creation and modification dates, and associated building features.
+   *
+   * @param id the ID of the building to retrieve
+   * @return a {@link ResponseEntity} containing the building details in JSON format or
+   *         a 404 Not Found response if the building is not found
+   */
+  @GetMapping("/building/{id}")
+  public ResponseEntity<?> getBuildingById(@PathVariable int id) {
+
+    Optional<BuildingEntity> buildingRepositoryResult = this.buildingRepository.findById(id);
+    if (buildingRepositoryResult.isEmpty()) {
+      String errorMessage = "Building with id " + id + " not found.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+    }
+
+    BuildingEntity building = buildingRepositoryResult.get();
+    ObjectNode json = createBuildingJson(building);
+
+    // Add building features
+    ArrayNode buildingFeaturesJson = json.putArray("features");
+    List<BuildingFeatureBuildingMappingEntity> buildingFeatures = 
+        this.buildingFeatureMappingRepository.findByBuilding(building);
+
+    for (BuildingFeatureBuildingMappingEntity featureMapping : buildingFeatures) {
+      buildingFeaturesJson.add(featureMapping.getBuildingFeature().getName());
+    }
+
+    return ResponseEntity.ok(json);
+  }
+
+  /**
+   * Retrieves a list of buildings associated with a specific user by their user ID, 
+   * including building addresses and features.
+   *
+   * @param id the ID of the user whose associated buildings are to be retrieved
+   * @return a {@link ResponseEntity} containing a list of buildings in JSON format, or
+   *         a 404 Not Found response if the user is not found
+   */
+  @GetMapping("/user/{id}/buildings")
+  public ResponseEntity<?> getUserBuildings(@PathVariable int id) {
+
+    Optional<UserEntity> user = this.userRepository.findById(id);
+    if (user.isEmpty()) {
+      String errorMessage = "User with id " + id + " not found.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+    }
+
+    List<BuildingUserMappingEntity> result = this.buildingUserMappingRepository.findByUserId(id);
+    List<ObjectNode> buildings = result.stream().map(mapping -> {
+      BuildingEntity building = mapping.getBuilding();
+      
+      // Create JSON for building information and add features
+      ObjectNode json = createBuildingJson(building);
+      ArrayNode buildingFeaturesJson = json.putArray("features");
+
+      List<BuildingFeatureBuildingMappingEntity> buildingFeatures = 
+          this.buildingFeatureMappingRepository.findByBuilding(building);
+
+      for (BuildingFeatureBuildingMappingEntity featureMapping : buildingFeatures) {
+        buildingFeaturesJson.add(featureMapping.getBuildingFeature().getName());
+      }
+
+      return json;
+    }).collect(Collectors.toList());
+
+    return ResponseEntity.ok(buildings);
+  }
+
+  /**
+   * Adds an existing building to an existing user by creating a new entry in the 
+   * `building_user_mappings` table. If the user or building does not exist, returns
+   * a 404 Not Found status. If the building is already linked to the user, returns 
+   * a 409 Conflict status.
+   *
+   * @param userId The ID of the user to whom the building will be linked.
+   * @param buildingId The ID of the building to be linked to the user.
+   * @return ResponseEntity containing a JSON response with the linkage status. 
+   *         Returns a 201 Created status if successful, 404 Not Found if the user
+   *         or building does not exist, and 409 Conflict if the link already exists.
+   */
+  @PostMapping("/user/{userId}/buildings/{buildingId}")
+  public ResponseEntity<?> addExistingBuildingToUser(@PathVariable int userId, 
+                                                      @PathVariable int buildingId) {
+    // Check if the user exists
+    Optional<UserEntity> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("User with id " + userId + " not found.");
+    }
+    UserEntity user = userOpt.get();
+
+    // Check if the building exists
+    Optional<BuildingEntity> buildingOpt = buildingRepository.findById(buildingId);
+    if (buildingOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("Building with id " + buildingId + " not found.");
+    }
+    BuildingEntity building = buildingOpt.get();
+
+    // Check if the mapping already exists
+    Optional<BuildingUserMappingEntity> existingMapping = 
+        buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId);
+
+    if (existingMapping.isPresent()) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body("This building is already linked to the user.");
+    }
+
+    // Create and save the mapping
+    BuildingUserMappingEntity mapping = new BuildingUserMappingEntity();
+    mapping.setUser(user);
+    mapping.setBuilding(building);
+    mapping.setCreatedDatetime(OffsetDateTime.now());
+    mapping.setModifiedDatetime(OffsetDateTime.now());
+
+    buildingUserMappingRepository.save(mapping);
+
+    // Return a success response
+    ObjectNode responseJson = objectMapper.createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("building_id", buildingId);
+    responseJson.put("status", "Building successfully linked to user.");
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseJson);
+  }
+  
+  /**
+   * Retrieves a list of all buildings from the repository,
+   * returns all buildings in the repository as a list. 
+   *
+   * @param  address an optional request parameter to select buildings containing
+   *         the specified address.
+   * @param city an optional request parameter to select buildings with the specified
+   *         city.
+   * @return ResponseEntity containing the list of buildings as a JSON response.
+   *         Returns a 200 OK status if buildings are found, or 204 No Content if no 
+   *         buildings exist in the repository.
+   */
+  @GetMapping("/buildings")
+  public ResponseEntity<List<BuildingEntity>> getBuildings(
+           @RequestParam(required = false) String address,
+           @RequestParam(required = false) String city,
+           @RequestParam(required = false) String state) {
+
+    // filter by address
+    if (address != null && !address.isEmpty()) {
+      Optional<BuildingEntity> building = buildingRepository.findByAddress(address);
+      if (building.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonList(building.get()));
+    }
+
+    // filter by city
+    if (city != null && !city.isEmpty()) {
+      List<BuildingEntity> buildings = buildingRepository.findByCity(city);
+      if (buildings.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(buildings);
+    }
+
+    // filter by state
+    if (state != null && !state.isEmpty()) {
+      List<BuildingEntity> buildings = buildingRepository.findByState(state);
+      if (buildings.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(buildings);
+    }
+
+    List<BuildingEntity> buildings = buildingRepository.findAll();
+
+    if (buildings.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
+    return ResponseEntity.status(HttpStatus.OK).body(buildings);
+  }
+
+  /**
+   * Retrieves all housing units associated with a specific building,
+   * given a building ID, this method fetches the building and retrieves the housing units,
+   * linked to it. 
+   *
+   * @param buildingId The ID of the building for which housing units are being fetched.
+   * @return {@link ResponseEntity} containing:
+   *           200 OK: If housing units are successfully retrieved and units.
+   *           204 No Content: If the building has no associated housing units.
+   *           404 Not Found: If the building does not exist.
+   */
+  @GetMapping("/buildings/{buildingId}/housing-units")
+  public ResponseEntity<Set<HousingUnitEntity>> 
+      getHousingUnitsByBuilding(@PathVariable Integer buildingId) {
+    Optional<BuildingEntity> building = buildingRepository.findById(buildingId);
+    
+    if (building.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    Set<HousingUnitEntity> housingUnits = building.get().getHousingUnits();
+
+    // Return NO_CONTENT if the building has no housing units
+    if (housingUnits.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+
+    return ResponseEntity.status(HttpStatus.OK).body(housingUnits);
   }
 
 }

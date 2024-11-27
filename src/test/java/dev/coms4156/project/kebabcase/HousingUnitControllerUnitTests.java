@@ -11,6 +11,8 @@ import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
+import dev.coms4156.project.kebabcase.entity.HousingUnitUserMappingEntity;
+import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureHousingUnitMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureRepositoryInterface;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,7 +31,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +43,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.HousingUnitUserMappingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 
 class HousingUnitControllerUnitTests {
 
@@ -57,7 +64,13 @@ class HousingUnitControllerUnitTests {
   private HousingUnitFeatureHousingUnitMappingRepositoryInterface unitFeatureMappingRepository;
 
   @Mock
-  private ObjectMapper objectMapper;
+  private HousingUnitUserMappingRepositoryInterface unitUserMappingRepository;
+
+  @Mock
+  private UserRepositoryInterface userRepository;
+
+  @Spy
+  private ObjectMapper objectMapper = new ObjectMapper();
 
   @InjectMocks
   private HousingUnitController housingUnitController;
@@ -468,4 +481,276 @@ class HousingUnitControllerUnitTests {
     assertEquals(HttpStatus.OK, result.getStatusCode());
     assertEquals("Housing unit info has been successfully updated!", result.getBody());
   }
+
+  @Test
+  void testGetUserHousingUnits_UserNotFound() {
+    // Arrange
+    int userId = 999;
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.getUserHousingUnits(userId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("User with id " + userId + " not found.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verifyNoInteractions(unitUserMappingRepository);
+  }
+
+  @Test
+  void testGetUserHousingUnits_SuccessWithExistingUser() {
+    when(objectMapper.createObjectNode()).thenAnswer(invocation -> new ObjectMapper().createObjectNode());
+
+    // Arrange
+    int userId = 1;
+
+    // Mock UserEntity
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+    // Mock HousingUnit and Building Entities
+    HousingUnitEntity housingUnit1 = new HousingUnitEntity();
+    housingUnit1.setId(3);
+    housingUnit1.setUnitNumber("2A");
+    housingUnit1.setCreatedDatetime(OffsetDateTime.parse("2024-02-23T10:00:00Z"));
+    housingUnit1.setModifiedDatetime(OffsetDateTime.parse("2024-02-23T10:00:00Z"));
+
+    HousingUnitEntity housingUnit2 = new HousingUnitEntity();
+    housingUnit2.setId(6);
+    housingUnit2.setUnitNumber("4A");
+    housingUnit2.setCreatedDatetime(OffsetDateTime.parse("2024-07-08T10:00:00Z"));
+    housingUnit2.setModifiedDatetime(OffsetDateTime.parse("2024-03-16T10:00:00Z"));
+
+    BuildingEntity building1 = new BuildingEntity();
+    building1.setId(2);
+    building1.setAddress("456 Oak Ave");
+    building1.setCity("Brooklyn");
+    building1.setState("NY");
+    building1.setZipCode("46142");
+
+    BuildingEntity building2 = new BuildingEntity();
+    building2.setId(4);
+    building2.setAddress("111 Jojo St");
+    building2.setCity("Bronx");
+    building2.setState("NY");
+    building2.setZipCode("99999");
+
+    housingUnit1.setBuilding(building1);
+    housingUnit2.setBuilding(building2);
+
+    // Mock Mappings and Features
+    HousingUnitUserMappingEntity mapping1 = new HousingUnitUserMappingEntity();
+    mapping1.setUser(user);
+    mapping1.setHousingUnit(housingUnit1);
+
+    HousingUnitUserMappingEntity mapping2 = new HousingUnitUserMappingEntity();
+    mapping2.setUser(user);
+    mapping2.setHousingUnit(housingUnit2);
+
+    HousingUnitFeatureEntity feature1 = new HousingUnitFeatureEntity();
+    feature1.setName("Ground Floor");
+
+    HousingUnitFeatureEntity feature2 = new HousingUnitFeatureEntity();
+    feature2.setName("Wheelchair Accessible");
+
+    HousingUnitFeatureHousingUnitMappingEntity featureMapping1 = new HousingUnitFeatureHousingUnitMappingEntity();
+    featureMapping1.setHousingUnit(housingUnit1);
+    featureMapping1.setHousingUnitFeature(feature1);
+
+    HousingUnitFeatureHousingUnitMappingEntity featureMapping2 = new HousingUnitFeatureHousingUnitMappingEntity();
+    featureMapping2.setHousingUnit(housingUnit2);
+    featureMapping2.setHousingUnitFeature(feature2);
+
+    BuildingFeatureEntity buildingFeature1 = new BuildingFeatureEntity();
+    buildingFeature1.setName("Near Hospital");
+
+    BuildingFeatureEntity buildingFeature2 = new BuildingFeatureEntity();
+    buildingFeature2.setName("Ramps");
+
+    BuildingFeatureEntity buildingFeature3 = new BuildingFeatureEntity();
+    buildingFeature3.setName("Elevator");
+
+    BuildingFeatureBuildingMappingEntity buildingFeatureMapping1 = new BuildingFeatureBuildingMappingEntity();
+    buildingFeatureMapping1.setBuilding(building1);
+    buildingFeatureMapping1.setBuildingFeature(buildingFeature1);
+
+    BuildingFeatureBuildingMappingEntity buildingFeatureMapping2 = new BuildingFeatureBuildingMappingEntity();
+    buildingFeatureMapping2.setBuilding(building2);
+    buildingFeatureMapping2.setBuildingFeature(buildingFeature2);
+
+    BuildingFeatureBuildingMappingEntity buildingFeatureMapping3 = new BuildingFeatureBuildingMappingEntity();
+    buildingFeatureMapping3.setBuilding(building2);
+    buildingFeatureMapping3.setBuildingFeature(buildingFeature3);
+
+    // Setup repository responses
+    when(unitUserMappingRepository.findByUserId(userId)).thenReturn(List.of(mapping1, mapping2));
+    when(unitFeatureMappingRepository.findByHousingUnit(housingUnit1)).thenReturn(List.of(featureMapping1));
+    when(unitFeatureMappingRepository.findByHousingUnit(housingUnit2)).thenReturn(List.of(featureMapping2));
+    when(buildingFeatureMappingRepository.findByBuilding(building1)).thenReturn(List.of(buildingFeatureMapping1));
+    when(buildingFeatureMappingRepository.findByBuilding(building2)).thenReturn(List.of(buildingFeatureMapping2, buildingFeatureMapping3));
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.getUserHousingUnits(userId);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    // Map the response body by housing unit id for easier access
+    List<ObjectNode> responseBody = (List<ObjectNode>) response.getBody();
+    assertNotNull(responseBody);
+    assertEquals(2, responseBody.size());
+
+    // Create a map of response JSON objects by their "id"
+    Map<Integer, ObjectNode> housingUnitsById = responseBody.stream()
+        .collect(Collectors.toMap(unit -> unit.get("id").asInt(), unit -> unit));
+
+    // Assert details of unit with id 3
+    ObjectNode unit1Json = housingUnitsById.get(3);
+    assertNotNull(unit1Json);
+    assertEquals("2A", unit1Json.get("unit_number").asText());
+    assertEquals("2024-02-23T10:00:00Z", unit1Json.get("created_datetime").asText());
+    assertEquals("2024-02-23T10:00:00Z", unit1Json.get("modified_datetime").asText());
+    assertEquals("456 Oak Ave", unit1Json.get("building").get("address").asText());
+    assertEquals("Brooklyn", unit1Json.get("building").get("city").asText());
+    assertEquals("NY", unit1Json.get("building").get("state").asText());
+    assertEquals("46142", unit1Json.get("building").get("zip_code").asText());
+    assertEquals("Near Hospital", unit1Json.get("building").get("features").get(0).asText());
+    assertEquals("Ground Floor", unit1Json.get("housing_unit_features").get(0).asText());
+
+    // Assert details of unit with id 6
+    ObjectNode unit2Json = housingUnitsById.get(6);
+    assertNotNull(unit2Json);
+    assertEquals("4A", unit2Json.get("unit_number").asText());
+    assertEquals("2024-07-08T10:00:00Z", unit2Json.get("created_datetime").asText());
+    assertEquals("2024-03-16T10:00:00Z", unit2Json.get("modified_datetime").asText());
+    assertEquals("111 Jojo St", unit2Json.get("building").get("address").asText());
+    assertEquals("Bronx", unit2Json.get("building").get("city").asText());
+    assertEquals("NY", unit2Json.get("building").get("state").asText());
+    assertEquals("99999", unit2Json.get("building").get("zip_code").asText());
+    assertEquals("Ramps", unit2Json.get("building").get("features").get(0).asText());
+    assertEquals("Elevator", unit2Json.get("building").get("features").get(1).asText());
+    assertEquals("Wheelchair Accessible", unit2Json.get("housing_unit_features").get(0).asText());
+  }
+
+  @Test
+  void testGetUserHousingUnits_UserWithNoHousingUnits() {
+    // Arrange
+    int userId = 1;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(unitUserMappingRepository.findByUserId(userId)).thenReturn(List.of());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.getUserHousingUnits(userId);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    List<?> responseBody = (List<?>) response.getBody();
+    assertNotNull(responseBody);
+    assertTrue(responseBody.isEmpty());
+    verify(userRepository, times(1)).findById(userId);
+    verify(unitUserMappingRepository, times(1)).findByUserId(userId);
+  }
+
+  @Test
+  void testAddExistingUnitToUser_UserNotFound() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 100;
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.addExistingUnitToUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("User with id " + userId + " not found.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verifyNoInteractions(housingUnitRepository, unitUserMappingRepository);
+  }
+
+  @Test
+  void testAddExistingUnitToUser_UnitNotFound() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.addExistingUnitToUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Housing unit with id " + housingUnitId + " not found.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(housingUnitRepository, times(1)).findById(housingUnitId);
+    verifyNoInteractions(unitUserMappingRepository);
+  }
+
+  @Test
+  void testAddExistingUnitToUser_ConflictExistingMapping() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(housingUnitId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(unit));
+    when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
+        .thenReturn(Optional.of(new HousingUnitUserMappingEntity()));
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.addExistingUnitToUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    assertEquals("This housing unit is already linked to the user.", response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(housingUnitRepository, times(1)).findById(housingUnitId);
+    verify(unitUserMappingRepository, times(1)).findByUserIdAndHousingUnitId(userId, housingUnitId);
+  }
+
+  @Test
+  void testAddExistingUnitToUser_Success() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 100;
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+    HousingUnitEntity unit = new HousingUnitEntity();
+    unit.setId(housingUnitId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(unit));
+    when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
+        .thenReturn(Optional.empty());
+
+    // Mock creation of the JSON response
+    ObjectNode responseJson = new ObjectMapper().createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("housing_unit_id", housingUnitId);
+    responseJson.put("status", "Housing unit successfully linked to user.");
+
+    when(objectMapper.createObjectNode()).thenReturn(responseJson);
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.addExistingUnitToUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    assertEquals(responseJson, response.getBody());
+    verify(userRepository, times(1)).findById(userId);
+    verify(housingUnitRepository, times(1)).findById(housingUnitId);
+    verify(unitUserMappingRepository, times(1)).findByUserIdAndHousingUnitId(userId, housingUnitId);
+    verify(unitUserMappingRepository, times(1)).save(any(HousingUnitUserMappingEntity.class));
+  }
+
 }
