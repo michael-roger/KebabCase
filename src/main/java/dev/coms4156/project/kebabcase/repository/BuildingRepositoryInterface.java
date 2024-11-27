@@ -49,7 +49,16 @@ public interface BuildingRepositoryInterface extends JpaRepository<BuildingEntit
    * Finds a list of buildings with the given city.
    *
    * @param city the city of the selected buildings
-   * @return an {@Link Optional} containing the buildings if found, or empty if not found
+   * @return a list of buildings containing the city if found, or empty list if not found
    */
+
   List<BuildingEntity> findByCity(String city);
+
+  /**
+   * Finds a list of buildings with the given state.
+   *
+   * @param state the state of the selected buildings
+   * @return a list of buildings containing the state if found, or empty list if not found
+   */
+  List<BuildingEntity> findByState(String state);
 }
