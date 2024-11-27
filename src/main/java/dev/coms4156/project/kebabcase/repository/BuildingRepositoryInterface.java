@@ -21,19 +21,27 @@ import org.springframework.stereotype.Repository;
 public interface BuildingRepositoryInterface extends JpaRepository<BuildingEntity, Integer> {
 
   /**
-   * Finds a building by its address, city, state, and zip code.
-   *
-   *
-   * @param address the street address of the building
-   * @param city the city where the building is located
-   * @param state the state where the building is located
-   * @param zipCode the zip code of the building
-   * @return an {@link Optional} containing the building if found, or empty if not found
-   */
+ * Finds a building by its address, city, state, and zip code.
+ *
+ *
+ * @param address the street address of the building
+ * @param city the city where the building is located
+ * @param state the state where the building is located
+ * @param zipCode the zip code of the building
+ * @return an {@link Optional} containing the building if found, or empty if not found
+ */
 
   Optional<BuildingEntity> findByAddressAndCityAndStateAndZipCode(String address,
                                                                       String city, 
                                                                       String state, 
                                                                       String zipCode);
+  /**
+* Finds the building with the given address.
+*
+*
+* @param address the street address of the building
+* @return an {@link Optional} containing the buildings if found, or empty if not found
+*/
 
+  Optional<BuildingEntity> findByAddress(String address);
 }

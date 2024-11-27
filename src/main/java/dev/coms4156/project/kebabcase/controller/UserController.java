@@ -6,7 +6,6 @@ import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.ClientRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.TokenRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
