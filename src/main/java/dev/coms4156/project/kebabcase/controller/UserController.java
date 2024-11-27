@@ -2,6 +2,8 @@ package dev.coms4156.project.kebabcase.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.ClientEntity;
 import dev.coms4156.project.kebabcase.entity.TokenEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
@@ -12,10 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -172,12 +176,24 @@ public class UserController {
       token.setUser(user);
       token.setClient(client);
 
+      OffsetDateTime now = OffsetDateTime.now();
+      token.setCreatedDatetime(now);
+      token.setModifiedDatetime(now);
+
+      OffsetDateTime expirationDatetime = now.plusMonths(3);
+      token.setExpirationDatetime(expirationDatetime);
+
       this.tokenRepository.save(token);
 
       return ResponseEntity.status(HttpStatus.OK).body(tokenStringValue);
     } catch (NoSuchAlgorithmException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
+  }
+
+  @GetMapping("/user-info")
+  public ResponseEntity<?> getUserInfo() {
+    
   }
 
   /**
