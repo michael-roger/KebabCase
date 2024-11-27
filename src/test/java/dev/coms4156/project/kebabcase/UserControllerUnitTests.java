@@ -3,34 +3,46 @@ package dev.coms4156.project.kebabcase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import dev.coms4156.project.kebabcase.entity.ClientEntity;
-import dev.coms4156.project.kebabcase.entity.TokenEntity;
 import dev.coms4156.project.kebabcase.repository.ClientRepositoryInterface;
+import dev.coms4156.project.kebabcase.entity.TokenEntity;
 import dev.coms4156.project.kebabcase.repository.TokenRepositoryInterface;
+import dev.coms4156.project.kebabcase.controller.UserController;
+import dev.coms4156.project.kebabcase.entity.UserEntity;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
-
-import dev.coms4156.project.kebabcase.controller.UserController;
-import dev.coms4156.project.kebabcase.entity.UserEntity;
-import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+@AutoConfigureMockMvc
 class UserControllerUnitTests {
+
+  @Autowired
+  private MockMvc mockMvc;
 
   @Mock
   private UserRepositoryInterface userRepository;
@@ -41,12 +53,16 @@ class UserControllerUnitTests {
   @Mock
   private TokenRepositoryInterface tokenRepository;
 
+  @Spy
+  private ObjectMapper objectMapper = new ObjectMapper();
+
   @InjectMocks
   private UserController userController;
 
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+    this.mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
   }
 
   private String hashPassword(String password) {
@@ -246,4 +262,72 @@ class UserControllerUnitTests {
             "There is an account already associated with "));
   }
   
+  @Test
+  public void testGetUserInfo_Success() throws Exception {
+    // Arrange
+    String tokenString = "valid-token";
+
+    UserEntity user = new UserEntity();
+    user.setId(1);
+    user.setFirstName("John");
+    user.setLastName("Doe");
+    user.setEmailAddress("john.doe@example.com");
+
+    TokenEntity token = new TokenEntity();
+    token.setToken(tokenString);
+    token.setUser(user);
+
+    // Mock token repository to return the token
+    when(tokenRepository.findByToken(tokenString)).thenReturn(Optional.of(token));
+
+    // Mock ObjectNode to simulate ObjectMapper's createObjectNode behavior
+    ObjectNode mockNode = mock(ObjectNode.class);
+
+    when(objectMapper.createObjectNode()).thenReturn(mockNode);
+    when(mockNode.put(eq("id"), eq(user.getId()))).thenReturn(mockNode);
+    when(mockNode.put(eq("firstName"), eq(user.getFirstName()))).thenReturn(mockNode);
+    when(mockNode.put(eq("lastName"), eq(user.getLastName()))).thenReturn(mockNode);
+    when(mockNode.put(eq("emailAddress"), eq(user.getEmailAddress()))).thenReturn(mockNode);
+
+    // Act
+    ResponseEntity<?> response = userController.getUserInfo(new MockHttpServletRequest() {
+        @Override
+        public String getHeader(String name) {
+            if ("token".equals(name)) {
+                return tokenString;
+            }
+            return null;
+        }
+    });
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(mockNode, response.getBody());
+    verify(tokenRepository, times(1)).findByToken(tokenString);
+    verify(objectMapper, times(1)).createObjectNode();
+    verify(mockNode, times(1)).put("id", user.getId());
+    verify(mockNode, times(1)).put("firstName", user.getFirstName());
+    verify(mockNode, times(1)).put("lastName", user.getLastName());
+    verify(mockNode, times(1)).put("emailAddress", user.getEmailAddress());
+  }
+
+  @Test
+  public void testGetUserInfo_TokenNotFound() throws Exception {
+    // Arrange
+    String tokenString = "invalid-token";
+
+    when(tokenRepository.findByToken(tokenString)).thenReturn(Optional.empty());
+
+    // Act & Assert
+    mockMvc.perform(get("/user-info")
+            .header("token", tokenString))
+            .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void testGetUserInfo_MissingTokenHeader() throws Exception {
+    // Act & Assert
+    mockMvc.perform(get("/user-info"))
+        .andExpect(status().isUnauthorized());
+  }
 }

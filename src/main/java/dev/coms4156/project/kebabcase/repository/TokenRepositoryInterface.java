@@ -15,12 +15,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository("TokenRepository")
 public interface TokenRepositoryInterface extends JpaRepository<TokenEntity, Integer> {
-	
-	/**
-   * Finds user associated with the given token
+
+  /**
+   * Finds user associated with the given token.
    *
    * @param token the token used by user
    * @return a {@link TokenEntity} of the user who owns the token
    */
-	Optional<TokenEntity> findByToken(String token);
+  Optional<TokenEntity> findByToken(String token);
 }

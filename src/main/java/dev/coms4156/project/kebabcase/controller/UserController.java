@@ -2,8 +2,6 @@ package dev.coms4156.project.kebabcase.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.ClientEntity;
 import dev.coms4156.project.kebabcase.entity.TokenEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
@@ -11,12 +9,10 @@ import dev.coms4156.project.kebabcase.repository.ClientRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.TokenRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import org.springframework.http.HttpStatus;
@@ -199,6 +195,11 @@ public class UserController {
   @GetMapping("/user-info")
   public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
     String tokenString = request.getHeader("token");
+
+    if (tokenString == null || tokenString.isEmpty()) {
+      String text = "Token header is missing or empty.";
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(text);
+    }
 
     Optional<TokenEntity> tokenResult = this.tokenRepository.findByToken(tokenString);
 
