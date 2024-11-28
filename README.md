@@ -1,4 +1,4 @@
-# KebabCase
+# KebabCase: Affordable and Inclusive Housing Access API
 Our API is designed to track housing options specifically for underserved communities. This service simplifies the process of finding affordable and inclusive housing that meets the unique needs of different groups. For instance, elderly individuals may prioritize housing that is near hospitals and healthcare facilities, while people with disabilities need accessible buildings with features like elevators and ramps. On the other hand, low-income families may focus on affordable housing near essential services such as food banks and social services.
 
 Our API stores detailed data on housing units, tracking key elements like location and accessibility features. It will dynamically update as new housing options become available and update units that are no longer active or have experienced changes. This real-time approach will provide users with up-to-date information, helping them find housing that suits their specific requirements quickly and efficiently.
