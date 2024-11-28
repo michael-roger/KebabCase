@@ -523,8 +523,12 @@ public class BuildingController {
    *
    * @param  address an optional request parameter to select buildings containing
    *         the specified address.
-   * @param city an optional request parameter to select buildings with the specified
+   * @param  city an optional request parameter to select buildings with the specified
    *         city.
+   * @param  state an optional request parameter to select buildings with the specified
+   *         state.
+   * @param  zipCode an optional request parameter to select buildings with the specified
+   *         zip code.
    * @return ResponseEntity containing the list of buildings as a JSON response.
    *         Returns a 200 OK status if buildings are found, or 204 No Content if no 
    *         buildings exist in the repository.
@@ -533,7 +537,8 @@ public class BuildingController {
   public ResponseEntity<List<BuildingEntity>> getBuildings(
            @RequestParam(required = false) String address,
            @RequestParam(required = false) String city,
-           @RequestParam(required = false) String state) {
+           @RequestParam(required = false) String state,
+           @RequestParam(required = false) String zipCode) {
 
     // filter by address
     if (address != null && !address.isEmpty()) {
@@ -556,6 +561,15 @@ public class BuildingController {
     // filter by state
     if (state != null && !state.isEmpty()) {
       List<BuildingEntity> buildings = buildingRepository.findByState(state);
+      if (buildings.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(buildings);
+    }
+
+    // filter by zipcode
+    if (zipCode != null && !zipCode.isEmpty()) {
+      List<BuildingEntity> buildings = buildingRepository.findByZipCode(zipCode);
       if (buildings.isEmpty()) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
       }

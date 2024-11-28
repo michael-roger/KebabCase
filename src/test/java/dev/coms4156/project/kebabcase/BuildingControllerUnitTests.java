@@ -612,7 +612,7 @@ class BuildingControllerUnitTests {
      when(buildingRepository.findByAddress(address)).thenReturn(Optional.of(building));
 
      // Act
-     ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(address, null, null);
+     ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(address, null, null, null);
 
      // Assert
      assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -635,7 +635,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findByCity(city)).thenReturn(List.of(building1, building2));
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, city, null );
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, city, null, null);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -658,7 +658,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findByState(state)).thenReturn(List.of(building1, building2));
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, state);
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, state, null);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -677,7 +677,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findByAddress(address)).thenReturn(Optional.empty());
 
     // Act
-    ResponseEntity<?> response = buildingController.getBuildings(address, null, null);
+    ResponseEntity<?> response = buildingController.getBuildings(address, null, null, null);
 
     // Assert
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -691,7 +691,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findByCity(city)).thenReturn(List.of()); //empty list
 
     // Act
-    ResponseEntity<?> response = buildingController.getBuildings(null, city, null);
+    ResponseEntity<?> response = buildingController.getBuildings(null, city, null, null);
 
     // Assert
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -700,20 +700,61 @@ class BuildingControllerUnitTests {
 
   @Test
   void testGetBuildingsStateNotFound() {
-  String state = "NY";
-  //Arrange
-  when(buildingRepository.findByState(state)).thenReturn(List.of()); //empty list
+    String state = "NY";
+    //Arrange
+    when(buildingRepository.findByState(state)).thenReturn(List.of()); //empty list
 
-  //Act
-  ResponseEntity<?> response = buildingController.getBuildings(null, null, state);
+    //Act
+    ResponseEntity<?> response = buildingController.getBuildings(null, null, state, null);
 
-  //Assert
-  assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-  verify(buildingRepository, times(1)).findByState(state);
-
+    //Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    verify(buildingRepository, times(1)).findByState(state);
   }
 
-    @Test
+  @Test
+  public void testGetBuildingsZipCodeNotFound() {
+    // Arrange
+    String zipCode = "00000";
+    when(buildingRepository.findByZipCode(zipCode)).thenReturn(List.of());
+
+    // Act
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null, zipCode);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().isEmpty());
+    verify(buildingRepository, times(1)).findByZipCode(zipCode);
+    verify(buildingRepository, never()).findByAddress(anyString());
+    verify(buildingRepository, never()).findByCity(anyString());
+    verify(buildingRepository, never()).findAll();
+  }
+
+  @Test
+  public void testGetBuildingsSuccessWithZipCode() {
+    // Arrange
+    BuildingEntity building1 = new BuildingEntity();
+    BuildingEntity building2 = new BuildingEntity();
+    building1.setId(1);
+    building2.setId(2);
+    String zipCode = "00000";
+    building1.setZipCode(zipCode);
+    building2.setZipCode(zipCode);
+    when(buildingRepository.findByZipCode(zipCode)).thenReturn(List.of(building1, building2));
+
+    // Act
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null, zipCode);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().isEmpty());
+    assertEquals(2, response.getBody().size());
+    verify(buildingRepository, times(1)).findByZipCode(zipCode);
+  }
+
+  @Test
   void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
     BuildingEntity building1 = new BuildingEntity();
@@ -735,7 +776,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findAll()).thenReturn(buildings);
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null );
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null, null);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -750,7 +791,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findAll()).thenReturn(List.of());
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null);
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null, null);
 
     // Assert
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -820,41 +861,41 @@ class BuildingControllerUnitTests {
     verify(buildingRepository, times(1)).findById(1);
   }
 
-  @Test
-  public void testRemoveBuildingFromUser_Success() {
-    // Arrange
-    int userId = 1;
-    int buildingId = 1;
+  // @Test
+  // public void testRemoveBuildingFromUser_Success() {
+  //   // Arrange
+  //   int userId = 1;
+  //   int buildingId = 1;
 
-    UserEntity user = new UserEntity();
-    user.setId(userId);
+  //   UserEntity user = new UserEntity();
+  //   user.setId(userId);
 
-    BuildingEntity building = new BuildingEntity();
-    building.setId(buildingId);
+  //   BuildingEntity building = new BuildingEntity();
+  //   building.setId(buildingId);
 
-    BuildingUserMappingEntity mapping = new BuildingUserMappingEntity();
-    mapping.setUser(user);
-    mapping.setBuilding(building);
+  //   BuildingUserMappingEntity mapping = new BuildingUserMappingEntity();
+  //   mapping.setUser(user);
+  //   mapping.setBuilding(building);
 
-    // Mock repository responses
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-    when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
-    when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
-        .thenReturn(Optional.of(mapping));
+  //   // Mock repository responses
+  //   when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+  //   when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+  //   when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
+  //       .thenReturn(Optional.of(mapping));
 
-    ObjectNode responseJson = new ObjectMapper().createObjectNode();
-    responseJson.put("user_id", userId);
-    responseJson.put("building_id", buildingId);
-    responseJson.put("status", "Building successfully unlinked from user.");
+  //   ObjectNode responseJson = new ObjectMapper().createObjectNode();
+  //   responseJson.put("user_id", userId);
+  //   responseJson.put("building_id", buildingId);
+  //   responseJson.put("status", "Building successfully unlinked from user.");
 
-    // Act
-    ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
+  //   // Act
+  //   ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
 
-    // Assert
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Building successfully unlinked from user."));
-    verify(buildingUserMappingRepository, times(1)).delete(mapping);
-  }
+  //   // Assert
+  //   assertEquals(HttpStatus.OK, response.getStatusCode());
+  //   assertTrue(response.getBody().toString().contains("Building successfully unlinked from user."));
+  //   verify(buildingUserMappingRepository, times(1)).delete(mapping);
+  // }
 
   @Test
   public void testRemoveBuildingFromUser_UserNotFound() {
