@@ -1,16 +1,10 @@
 # KebabCase: Affordable and Inclusive Housing Access API
-
 Our API is designed to track housing options specifically for underserved communities. This service simplifies the process of finding affordable and inclusive housing that meets the unique needs of different groups. For instance, elderly individuals may prioritize housing that is near hospitals and healthcare facilities, while people with disabilities need accessible buildings with features like elevators and ramps. On the other hand, low-income families may focus on affordable housing near essential services such as food banks and social services.
 
 Our API stores detailed data on housing units, tracking key elements like location and accessibility features. It will dynamically update as new housing options become available and update units that are no longer active or have experienced changes. This real-time approach will provide users with up-to-date information, helping them find housing that suits their specific requirements quickly and efficiently.
 
 Our goal is to make this API as flexible and inclusive as possible, accommodating the diverse needs of underserved communities. Over time, we plan to expand the service to support a broader range of housing options and criteria, making it a valuable and reliable resource for those seeking affordable, inclusive housing options.
 
-## Jira
-https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1
-
-## API Endpoints
-https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0
 
 ## API Usage Instructions
 
@@ -18,7 +12,7 @@ Welcome to our API! Follow these steps to get started and understand how to use 
 
 ### 1. Becoming a Client
 
-To start using our API, you must formally sign up as a client by contacting us. 
+To start using our API, you must formally sign up as a client by contacting us.
 Once approved, we will provide you with a client token that grants you specific privileges depending on your intended use case.
 
 ### 2. Client Privileges
@@ -26,11 +20,11 @@ Once approved, we will provide you with a client token that grants you specific 
 Your client token will determine your level of access and the actions you can perform.
 
 - Housing Agencies:
-  - Privileges: Create and edit privileges.
-  - Use Case: If you’re listing new buildings or updating existing ones, your token will allow you to create and edit buildings or housing units.
+    - Privileges: Create and edit privileges.
+    - Use Case: If you’re listing new buildings or updating existing ones, your token will allow you to create and edit buildings or housing units.
 - App Developers for Renters/Buyers:
-  - Privileges: Read-only privileges.
-  - Use Case: If your app displays housing information to users, your token will only allow you to view the data.
+    - Privileges: Read-only privileges.
+    - Use Case: If your app displays housing information to users, your token will only allow you to view the data.
 
 ### 3. User Accounts for Your App
 
@@ -61,6 +55,22 @@ token: <YOUR-TOKEN>
 
 For detailed instructions on how to use specific API endpoints (e.g., GET, POST, PATCH), refer to our [SwaggerHub Documentation](https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0). This includes endpoint descriptions, required parameters, example requests, and responses.
 
+## Jira
+https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1
+
+## API Endpoints
+https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0
+
+## Deployment
+This application has been deployed using Google Cloud App Engine.
+
+With appropriate permissions, it can be deployed using the command:
+gcloud app deploy
+
+When deployed, it lives at: https://miniproject-2024.ue.r.appspot.com/
+
+The database lives at Google Cloud and uses CloudSQL.
+
 ## Checkstyle Results
 Checkstyle results are updated on each push to the "main" branch.
 You can see the latest results in checkstyle-results.txt
@@ -69,16 +79,26 @@ You can see the latest results in checkstyle-results.txt
 PMD results are updated on each push to the "main" branch.
 You can see the latest results in pmd-results.txt
 
-## Test Results
-Test results are updated on each push to the "main" branch.
+## Unit/Integration Test Results
+Unit and integration test results are updated on each push to the "main" branch.
 You can see the latest results in test-results.txt
 
+## System Test Results
+System test results are updated on each push to the "main" branch.
+You can see the latest results in system-results.txt
+
+The system tests run using the Postman CLI.
+More information can be found at:
+
+https://kebabcase.postman.co/
+
 ## Testing
-This project uses **JUnit** for unit testing, **JaCoCo** for code coverage, Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.
+This project uses **JUnit** for unit testing, **JaCoCo** for code coverage,
+Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.
 
 ### Before you start testing, make sure you have the following:
 - **Maven**
--  **Java 17**
+- **Java 17**
 
 ## **JUnit Testing**
 Use the following command to run all unit tests located at src/test/java/:
@@ -105,9 +125,6 @@ To checkstyle, run the following command:
 ```
 ./mvnw checkstyle:check
 ```
-We seek for no checkstyle violations or warnings.  The following is our report as of October 18, 2024.
-
-![Checkstyle](/reports/checkstyle.png)
 
 ## First time startup instructions
 0. Install the "brew" if you don't have it installed:
