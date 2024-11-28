@@ -572,11 +572,25 @@ public class HousingUnitController {
     return ResponseEntity.status(HttpStatus.OK).body(responseJson);
   }
 
+  /**
+   * Retrieves a list of all housing units.
+   *
+   * <p>This method queries the repository to fetch all available housing units and returns 
+   * their details in a JSON response. Each housing unit's information is encapsulated as an 
+   * {@link ObjectNode}. If no housing units are found, a 204 No Content response is returned.
+   * </p>
+   *
+   * @return a {@link ResponseEntity} containing:
+   *         <ul>
+   *           <li>200 OK: A list of housing units as JSON objects if housing units exist.</li>
+   *           <li>204 No Content: If no housing units are available in the repository.</li>
+   *         </ul>
+   */
   @GetMapping("/housing-units")
   public ResponseEntity<List<ObjectNode>> getAllHousingUnits() {
     List<HousingUnitEntity> housingUnits = housingUnitRepository.findAll();
     if (housingUnits.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
     List<ObjectNode> response = housingUnits.stream()
         .map(this::getHousingUnitInfo)
