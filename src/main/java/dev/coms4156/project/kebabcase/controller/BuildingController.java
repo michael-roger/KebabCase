@@ -341,25 +341,24 @@ public class BuildingController {
    * Displays a list of all buildings with the desired building feature.
    *
    * @param id the ID of the desired building feature
-   * @return a list of {@link ObjectNode} containing the building
-   *     information with the desired building feature
-   * @throws ResponseStatusException if the building feature ID is not found
+   * @return a {@link ResponseEntity} containing the building
+   *     information with the desired building feature or a
+   *     404 Not Found response if the building feature is not found
    **/
 
   @GetMapping("/building-feature/{id}/buildings")
-  public List<ObjectNode> getBuildingHousingUnits(@PathVariable int id) {
+  public ResponseEntity<?> getBuildingHousingUnits(@PathVariable int id) {
 
     Optional<BuildingFeatureEntity> feature = this.buildingFeatureRepository.findById(id);
     if (feature.isEmpty()) {
-      throw new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "Building with feature id " + id + " not found"
-      );
+      String errorMessage = "Building feature with id " + id + " not found.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
     }
 
     List<BuildingFeatureBuildingMappingEntity> result =
         this.buildingFeatureMappingRepository.findByBuildingFeatureId(id);
 
-    return result.stream().map(mapping -> {
+    List<ObjectNode> buildingList = result.stream().map(mapping -> {
       BuildingEntity building = mapping.getBuilding();
       ObjectNode json = objectMapper.createObjectNode();
       json.put("id", building.getId());
@@ -369,6 +368,8 @@ public class BuildingController {
       json.put("zipcode", building.getZipCode());
       return json;
     }).collect(Collectors.toList());
+
+    return ResponseEntity.status(HttpStatus.OK).body(buildingList);
   }
 
   /**
