@@ -13,6 +13,14 @@ https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1
 ## API Endpoints
 https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0
 
+## Deployment
+This application has been deployed using Google Cloud App Engine.
+
+With appropriate permissions, it can be deployed using the command:
+gcloud app deploy
+
+When deployed, it lives at: https://miniproject-2024.ue.r.appspot.com/
+
 ## Checkstyle Results
 Checkstyle results are updated on each push to the "main" branch.
 You can see the latest results in checkstyle-results.txt
