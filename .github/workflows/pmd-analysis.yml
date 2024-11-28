@@ -20,7 +20,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Run PMD
-        run: ./mvnw pmd:check -f text > pmd-results.txt
+        run: ./mvnw pmd:check > pmd-results.txt
 
       - name: Update README with PMD Results
         run: |
