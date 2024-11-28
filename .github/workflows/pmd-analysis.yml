@@ -23,6 +23,9 @@ jobs:
         run: git config --list
 
       - name: Run PMD
+        run: ./mvnw pmd:check
+
+      - name: Run PMD
         run: ./mvnw pmd:check > pmd-results.txt
 
       - name: Update README with PMD Results
@@ -34,8 +37,8 @@ jobs:
         run: |
           git config user.name "Michael Roger"
           git config user.email "michael.roger@columbia.edu"
-          git pull
           git add README.md
+          git add pmd-results.txt
           git commit -m "Update PMD results in README [skip ci]"
           git push
         env:
