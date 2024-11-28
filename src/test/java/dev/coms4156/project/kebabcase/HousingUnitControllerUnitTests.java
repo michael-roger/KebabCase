@@ -753,4 +753,104 @@ class HousingUnitControllerUnitTests {
     verify(unitUserMappingRepository, times(1)).save(any(HousingUnitUserMappingEntity.class));
   }
 
+
+// @Test
+  // public void testRemoveHousingUnitFromUser_Success() {
+  //   // Arrange
+  //   int userId = 1;
+  //   int housingUnitId = 1;
+
+  //   UserEntity user = new UserEntity();
+  //   user.setId(userId);
+
+  //   HousingUnitEntity housingUnit = new HousingUnitEntity();
+  //   housingUnit.setId(housingUnitId);
+
+  //   HousingUnitUserMappingEntity mapping = new HousingUnitUserMappingEntity();
+  //   mapping.setUser(user);
+  //   mapping.setHousingUnit(housingUnit);
+
+  //   when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+  //   when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(housingUnit));
+  //   when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
+  //       .thenReturn(Optional.of(mapping));
+
+  //   // Act
+  //   ResponseEntity<?> response = housingUnitController.removeHousingUnitFromUser(userId, housingUnitId);
+
+  //   // Assert
+  //   assertEquals(HttpStatus.OK, response.getStatusCode());
+  //   assertTrue(response.getBody().toString().contains("Housing unit successfully unlinked from user."));
+  //   verify(unitUserMappingRepository, times(1)).delete(mapping);
+  // }
+
+  @Test
+  public void testRemoveHousingUnitFromUser_UserNotFound() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 1;
+
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.removeHousingUnitFromUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("User with id " + userId + " not found."));
+    verifyNoInteractions(housingUnitRepository);
+    verifyNoInteractions(unitUserMappingRepository);
+  }
+
+  @Test
+  public void testRemoveHousingUnitFromUser_HousingUnitNotFound() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 1;
+
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.removeHousingUnitFromUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Housing unit with id " + housingUnitId + " not found."));
+    verifyNoInteractions(unitUserMappingRepository);
+  }
+
+  @Test
+  public void testRemoveHousingUnitFromUser_MappingNotFound() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 1;
+
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+
+    HousingUnitEntity housingUnit = new HousingUnitEntity();
+    housingUnit.setId(housingUnitId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(housingUnit));
+    when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
+        .thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = housingUnitController.removeHousingUnitFromUser(userId, housingUnitId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("This housing unit is not linked to the user."));
+    // Verify that the mapping check occurred
+    verify(unitUserMappingRepository, times(1))
+        .findByUserIdAndHousingUnitId(userId, housingUnitId);
+    // Verify that no deletion occurred
+    verify(unitUserMappingRepository, never()).delete(any(HousingUnitUserMappingEntity.class));
+  }
+
 }
