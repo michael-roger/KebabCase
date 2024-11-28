@@ -852,5 +852,30 @@ class HousingUnitControllerUnitTests {
     // Verify that no deletion occurred
     verify(unitUserMappingRepository, never()).delete(any(HousingUnitUserMappingEntity.class));
   }
+  
+  // @Test
+  // void testGetAllHousingUnits_NoContent() {
+  //   // Arrange
+  //   when(housingUnitRepository.findAll()).thenReturn(new ArrayList<>());
+  //   // Act
+  //   ResponseEntity<List<ObjectNode>> response = housingUnitController.getAllHousingUnits();
+  //   // Assert
+  //   assertEquals(204, response.getStatusCode());
+  //   assertEquals(null, response.getBody());
+  //   verify(housingUnitRepository, times(1)).findAll();
+  // }
+
+  @Test
+  void testGetAllHousingUnits_ErrorHandling() {
+    // Arrange
+    when(housingUnitRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+    // Act & Assert
+    try {
+        housingUnitController.getAllHousingUnits();
+    } catch (RuntimeException e) {
+        assertEquals("Database error", e.getMessage());
+    }
+    verify(housingUnitRepository, times(1)).findAll();
+  }
 
 }

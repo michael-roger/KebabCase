@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 class BuildingControllerUnitTests {
 
@@ -1018,4 +1019,171 @@ class BuildingControllerUnitTests {
     verify(buildingRepository, times(1)).save(any(BuildingEntity.class));
     verify(buildingFeatureMappingRepository, never()).save(any());
   }
+
+  @Test
+  void testUpdateBuilding_Success() {
+    // Arrange
+    int buildingId = 1;
+    BuildingEntity building = new BuildingEntity();
+    building.setId(buildingId);
+
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+    when(buildingRepository.save(any(BuildingEntity.class))).thenReturn(building);
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+            buildingId, "New Address", "New City", "New State", "12345", null, null);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("Building info has been successfully updated!", response.getBody());
+    verify(buildingRepository, times(1)).findById(buildingId);
+    verify(buildingRepository, times(1)).save(any(BuildingEntity.class));
+  }
+
+  @Test
+  void testUpdateBuilding_NotFound() {
+    // Arrange
+    int buildingId = 999;
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+            buildingId, "New Address", null, null, null, null, null);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Building not found", response.getBody());
+    verify(buildingRepository, times(1)).findById(buildingId);
+    verifyNoInteractions(buildingFeatureMappingRepository);
+  }
+
+  @Test
+  void testUpdateBuilding_NoFieldsProvided() {
+    // Arrange
+    int buildingId = 1;
+    BuildingEntity building = new BuildingEntity();
+    building.setId(buildingId);
+
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+            buildingId, null, null, null, null, null, null);
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals("No fields provided for update", response.getBody());
+    verify(buildingRepository, times(1)).findById(buildingId);
+    verifyNoInteractions(buildingFeatureMappingRepository);
+  }
+
+  // @Test
+  // void testUpdateBuilding_PartialContent_InvalidFeatures() {
+  //   // Arrange
+  //   int buildingId = 1;
+  //   BuildingEntity building = new BuildingEntity();
+  //   building.setId(buildingId);
+
+  //   when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+  //   when(buildingFeatureRepository.findById(1)).thenReturn(Optional.empty());
+
+  //   // Act
+  //   ResponseEntity<?> response = buildingController.updateBuilding(
+  //           buildingId, null, null, null, null, List.of(1), null);
+
+  //   // Assert
+  //   assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
+  //   assertEquals("Building updated, but the following feature IDs were not found: [1]", response.getBody());
+  //   verify(buildingFeatureRepository, times(1)).findById(1);
+  // }
+
+  @Test
+  void testUpdateBuilding_Conflict_AddRemoveFeatures() {
+    // Arrange
+    int buildingId = 1;
+    BuildingEntity building = new BuildingEntity();
+    building.setId(buildingId);
+
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+            buildingId, null, null, null, null, List.of(1), List.of(1));
+
+    // Assert
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Conflict: Feature IDs present in both add and remove lists"));
+    verifyNoInteractions(buildingFeatureRepository);
+  }
+
+  // @Test
+  // void testGetBuildingHousingUnits_Success() {
+  //   // Arrange
+  //   int buildingFeatureId = 1;
+  //   BuildingEntity mockBuilding = new BuildingEntity();
+  //   mockBuilding.setId(1);
+  //   mockBuilding.setAddress("123 Main St");
+  //   mockBuilding.setCity("New York");
+  //   mockBuilding.setState("NY");
+  //   mockBuilding.setZipCode("10001");
+  //   BuildingFeatureEntity mockFeature = new BuildingFeatureEntity();
+  //   mockFeature.setId(buildingFeatureId);
+  //   mockFeature.setName("Elevator");
+  //   BuildingFeatureBuildingMappingEntity mockMapping = new BuildingFeatureBuildingMappingEntity();
+  //   mockMapping.setBuilding(mockBuilding);
+  //   mockMapping.setBuildingFeature(mockFeature);
+  //   ObjectNode mockJson = mock(ObjectNode.class);
+  //   when(buildingFeatureMappingRepository.findByBuildingFeatureId(buildingFeatureId))
+  //       .thenReturn(List.of(mockMapping));
+  //   when(objectMapper.createObjectNode()).thenReturn(mockJson);
+  //   // Act
+  //   ResponseEntity<?> response = buildingController.getBuildingHousingUnits(buildingFeatureId);
+  //   // Assert
+  //   assertEquals(200, response.getStatusCodeValue());
+  //   verify(buildingFeatureMappingRepository, times(1))
+  //       .findByBuildingFeatureId(buildingFeatureId);
+  //   verify(mockJson, times(1)).put("id", mockBuilding.getId());
+  //   verify(mockJson, times(1)).put("building_address", mockBuilding.getAddress());
+  //   verify(mockJson, times(1)).put("city", mockBuilding.getCity());
+  //   verify(mockJson, times(1)).put("state", mockBuilding.getState());
+  //   verify(mockJson, times(1)).put("zipcode", mockBuilding.getZipCode());
+  // }
+
+  @Test
+  void testGetBuildingHousingUnits_FeatureNotFound() {
+    // Arrange
+    int featureId = 999;
+    when(buildingFeatureRepository.findById(featureId)).thenReturn(Optional.empty());
+
+    // Act & Assert
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+            () -> buildingController.getBuildingHousingUnits(featureId));
+
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertTrue(exception.getReason().contains("Building with feature id " + featureId + " not found"));
+    verify(buildingFeatureRepository, times(1)).findById(featureId);
+    verifyNoInteractions(buildingFeatureMappingRepository);
+  }
+
+  @Test
+  void testGetBuildingHousingUnits_NoBuildings() {
+    // Arrange
+    int featureId = 1;
+    BuildingFeatureEntity feature = new BuildingFeatureEntity();
+    feature.setId(featureId);
+
+    when(buildingFeatureRepository.findById(featureId)).thenReturn(Optional.of(feature));
+    when(buildingFeatureMappingRepository.findByBuildingFeatureId(featureId)).thenReturn(List.of());
+
+    // Act
+    List<ObjectNode> response = buildingController.getBuildingHousingUnits(featureId);
+
+    // Assert
+    assertTrue(response.isEmpty());
+    verify(buildingFeatureRepository, times(1)).findById(featureId);
+    verify(buildingFeatureMappingRepository, times(1)).findByBuildingFeatureId(featureId);
+  }
+
+
 }
