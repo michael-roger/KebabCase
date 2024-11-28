@@ -1,17 +1,65 @@
-# KebabCase
+# KebabCase: Affordable and Inclusive Housing Access API
 
-Home Sweet Home is an application that aims to assist underserved communities in finding inclusive housing that satisfies the needs of each unique individual. 
-Buildings and housing units can be sorted based on their amenities so that users can easily filter for their own personal perusal. 
-Individual units that users deem most compatible can also be added to a user's "Favorites" for them to return to at a later time.
-Our previous iteration did not have the "Favorites" functionality, which now streamlines the process of considering multiple units.
-Furthermore, all building features and housing unit features are now displayed, which is also new to this iteration.
-This allows users to clearly see the extent of our service and which particular features of a building and unit can be tracked on Home Sweet Home.
+Our API is designed to track housing options specifically for underserved communities. This service simplifies the process of finding affordable and inclusive housing that meets the unique needs of different groups. For instance, elderly individuals may prioritize housing that is near hospitals and healthcare facilities, while people with disabilities need accessible buildings with features like elevators and ramps. On the other hand, low-income families may focus on affordable housing near essential services such as food banks and social services.
+
+Our API stores detailed data on housing units, tracking key elements like location and accessibility features. It will dynamically update as new housing options become available and update units that are no longer active or have experienced changes. This real-time approach will provide users with up-to-date information, helping them find housing that suits their specific requirements quickly and efficiently.
+
+Our goal is to make this API as flexible and inclusive as possible, accommodating the diverse needs of underserved communities. Over time, we plan to expand the service to support a broader range of housing options and criteria, making it a valuable and reliable resource for those seeking affordable, inclusive housing options.
 
 ## Jira
 https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1
 
 ## API Endpoints
 https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0
+
+## API Usage Instructions
+
+Welcome to our API! Follow these steps to get started and understand how to use our API effectively.
+
+### 1. Becoming a Client
+
+To start using our API, you must formally sign up as a client by contacting us. 
+Once approved, we will provide you with a client token that grants you specific privileges depending on your intended use case.
+
+### 2. Client Privileges
+
+Your client token will determine your level of access and the actions you can perform.
+
+- Housing Agencies:
+  - Privileges: Create and edit privileges.
+  - Use Case: If you’re listing new buildings or updating existing ones, your token will allow you to create and edit buildings or housing units.
+- App Developers for Renters/Buyers:
+  - Privileges: Read-only privileges.
+  - Use Case: If your app displays housing information to users, your token will only allow you to view the data.
+
+### 3. User Accounts for Your App
+
+If your application allows users to interact with our API (e.g., save/like housing units or buildings), here’s how it works:
+
+1. User Account Creation:
+    - Your app users can create an account by sending a request to our `POST /users` endpoint.
+2. User Authentication:
+    - When users log in, you must send a `POST /authenticate` request with their credentials and your client name (e.g., HomeSweetHome) in the request body.
+    - Upon successful authentication, a user token will be generated and returned. This token:
+        - Links the user to your app.
+        - Allows the user to save or interact with buildings and housing units.
+        - Expires after a set period (a new token is issued with each login).
+
+### 4. Making API Requests
+
+When interacting with our API, always include the following in your requests:
+
+- **Token in HTTP Request Headers**: Provide your token in the request headers as follows:
+
+```
+token: <YOUR-TOKEN>
+```
+
+- **Correct Privileges**: The token will be checked for the required privileges (e.g., `create`, `edit`, `view`). Ensure your token aligns with the operation you’re attempting.
+
+### 5. Endpoint Reference
+
+For detailed instructions on how to use specific API endpoints (e.g., GET, POST, PATCH), refer to our [SwaggerHub Documentation](https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0). This includes endpoint descriptions, required parameters, example requests, and responses.
 
 ## Checkstyle Results
 Checkstyle results are updated on each push to the "main" branch.
