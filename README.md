@@ -92,6 +92,12 @@ More information can be found at:
 
 https://kebabcase.postman.co/
 
+## Manual Test Plan
+The file "manual-testing-checklist.txt" contains
+the manual testing plan for the client application "Home Sweet Home"
+that lives at https://home-sweet-home-lemon.vercel.app/
+
+
 ## Testing
 This project uses **JUnit** for unit testing, **JaCoCo** for code coverage,
 Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.

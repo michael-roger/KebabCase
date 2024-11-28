@@ -20,6 +20,8 @@ Use same e-mail address and password as above
 
 Success state: You are now logged in
 
++++++++++++++++++
+
 Testing Login Process - SUCCESS:
 
 Go to https://home-sweet-home-lemon.vercel.app/
@@ -33,6 +35,8 @@ Fill out “Password” you would have used when first signing up
 Click “Log in”
 
 Success state: You are now logged in
+
++++++++++++++++++
 
 Testing Login Process - FAILURE due to incorrect email:
 
@@ -48,6 +52,8 @@ Click “Log in”
 
 Failure state: A message appears on the page: No account found with the provided email.
 
++++++++++++++++++
+
 Testing Login Process - FAILURE due to incorrect password:
 
 Go to https://home-sweet-home-lemon.vercel.app/
@@ -60,6 +66,8 @@ Password: user fills out Password with a Password that is not associated with th
 Click “Log in”
 
 Failure state: A message appears on the page: Invalid password. Please try again.
+
++++++++++++++++++
 
 Testing Login Process - SUCCESS after a failed attempt:
 
@@ -82,6 +90,8 @@ Click “Log in”
 
 Success state: User is now logged in
 
++++++++++++++++++
+
 Testing View of All Buildings - SUCCESS:
 
 Navigate to https://home-sweet-home-lemon.vercel.app/
@@ -89,6 +99,8 @@ Navigate to https://home-sweet-home-lemon.vercel.app/
 Click “Buildings” on the top blue menu of the page
 
 Success state: A page displaying all buildings
+
++++++++++++++++++
 
 Testing View Details of Building listed - SUCCESS:
 
@@ -105,6 +117,7 @@ A list of all the building’s accessibility features below it i.e. Elevator, Ra
 A list of all the Housing Units belonging to the Building
 Each Housing unit is identified by its distinct Unit Number and unique features (i.e. Wheelchair Accessible, Walk-in Shower).
 
++++++++++++++++++
 
 Testing Search Bar - SUCCESS
 
@@ -118,6 +131,7 @@ User clicks Search or hits enter
 
 Success state: a page appears with the search bar cleared of the query and the result showing a list of Buildings address strings that contain “ma” in them.
 
++++++++++++++++++
 
 Testing Search Bar - SUCCESS searching for buildings and housing units that contain some query feature
 
@@ -131,6 +145,8 @@ User clicks Search or hits enter
 
 Success state: a page appears with the search bar cleared of the query and the result showing a list of buildings and housing units that contain the quay feature. In the example of ground floor search query, resulting page shows the words: Search Results, then Housing Unit Features, then Ground Floor.
 
++++++++++++++++++
+
 Testing Search Bar - FAILURE
 
 Login to https://home-sweet-home-lemon.vercel.app/
@@ -143,7 +159,9 @@ User clicks Search or hits enter
 
 Failure state: a page appears with the search bar cleared of the query, the words “Search Results” on the page and a message underneath it: “ No results found for "reee.“
 
-*******SHOWING RESULTS:
++++++++++++++++++
+
+SHOWING RESULTS:
 Testing view your Favorites - EMPTY LIST
 
 Login to https://home-sweet-home-lemon.vercel.app/
@@ -155,6 +173,8 @@ Click “Your Favorites” at the top right of the blue menu bar on the page
 Success state: A page with user’s first name, last name, email address, and buttons to view either Saved Buildings or Saved Housing Units. Saved Buildings button tab is selected by default to show an empty table of saved buildings by the columns: building’s address, city, state, features and actions.
 Listing of buildings is empty because no favorited buildings by the user. When Saved Housing Units button tab clicked, a table appears with columns:  housing unit’s Unit Number, Unit Features, Building, Building Features, Actions. Table is also empty since user did not favorite any buildings
 
++++++++++++++++++
+
 Testing Log Out Process - SUCCESS
 
 Go to https://home-sweet-home-lemon.vercel.app/
@@ -164,6 +184,7 @@ Log in with valid email and password combination credentials of an existing user
 Click the “Log Out” button on the blue menu at the top of the page
 Success State: User is logged out of their account and on the welcome page of the app, which has a Login and Signup Option
 
++++++++++++++++++
 
 Testing Log back in SUCCESS
 
@@ -179,6 +200,8 @@ Fill in valid combination for existing user of email and password
 
 Success State: The user is logged back in
 
++++++++++++++++++
+
 TODO
 
 Testing Browse Building Accessibility Features: Elevator Ramps Near Hospital Gym Pool
@@ -188,6 +211,3 @@ Testing Browse Unit Accessibility Features: Wheelchair Accessible, Walk-in Showe
 Testing using search bar when no user is logged in
 
 Test sign up (does email format matter (needs @ sign)
-
-
-

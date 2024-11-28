@@ -84,6 +84,16 @@ class UserControllerUnitTests {
   }
 
   @Test
+  void testCreateUserWithBlankFieldsReturnsBadRequest() {
+    // Act
+    ResponseEntity<?> response = userController.createUser("", "", "", "");
+
+    // Assert
+    assertEquals(400, response.getStatusCodeValue()); // Expect HTTP 400
+    assertEquals("All fields are required and cannot be blank.", response.getBody()); // Expect the specific error message
+  }
+
+  @Test
   void testAuthenticate_Success() {
     // Arrange
     String email = "test@example.com";
@@ -123,6 +133,20 @@ class UserControllerUnitTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     verify(userRepository, times(1)).findByEmailAddress(email);
     verify(clientRepository, times(1)).findByName(clientName);
+  }
+
+  @Test
+  void testAuthenticateClientResultIsEmpty() {
+    // Arrange: Simulate no client exists with the provided client name
+    when(clientRepository.findByName("UnknownClient")).thenReturn(Optional.empty());
+
+    // Act: Call the authenticate method
+    ResponseEntity<String> response = userController.authenticate(
+        "john.doe@example.com", "password123", "UnknownClient");
+
+    // Assert: Verify the response
+    assertEquals(404, response.getStatusCodeValue()); // Expect HTTP 404 Not Found
+    assertEquals(null, response.getBody()); // Expect the body to be null
   }
 
   @Test
