@@ -733,4 +733,105 @@ class BuildingControllerUnitTests {
     assertNull(response.getBody());
     verify(buildingRepository, times(1)).findById(1);
   }
+
+  // @Test
+  // public void testRemoveBuildingFromUser_Success() {
+  //   // Arrange
+  //   int userId = 1;
+  //   int buildingId = 1;
+
+  //   UserEntity user = new UserEntity();
+  //   user.setId(userId);
+
+  //   BuildingEntity building = new BuildingEntity();
+  //   building.setId(buildingId);
+
+  //   BuildingUserMappingEntity mapping = new BuildingUserMappingEntity();
+  //   mapping.setUser(user);
+  //   mapping.setBuilding(building);
+
+  //   // Mock repository responses
+  //   when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+  //   when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+  //   when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
+  //       .thenReturn(Optional.of(mapping));
+
+  //   ObjectNode responseJson = new ObjectMapper().createObjectNode();
+  //   responseJson.put("user_id", userId);
+  //   responseJson.put("building_id", buildingId);
+  //   responseJson.put("status", "Building successfully unlinked from user.");
+
+  //   // Act
+  //   ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
+
+  //   // Assert
+  //   assertEquals(HttpStatus.OK, response.getStatusCode());
+  //   assertTrue(response.getBody().toString().contains("Building successfully unlinked from user."));
+  //   verify(buildingUserMappingRepository, times(1)).delete(mapping);
+  // }
+
+  @Test
+  public void testRemoveBuildingFromUser_UserNotFound() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 1;
+
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("User with id " + userId + " not found."));
+    verifyNoInteractions(buildingRepository);
+    verifyNoInteractions(buildingUserMappingRepository);
+  }
+
+  @Test
+  public void testRemoveBuildingFromUser_BuildingNotFound() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 1;
+
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Building with id " + buildingId + " not found."));
+    verifyNoInteractions(buildingUserMappingRepository);
+  }
+
+  @Test
+  public void testRemoveBuildingFromUser_MappingNotFound() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 1;
+
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+
+    BuildingEntity building = new BuildingEntity();
+    building.setId(buildingId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+    when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
+        .thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("This building is not linked to the user."));
+    verify(buildingUserMappingRepository, times(0)).delete(any());
+  }
 }
