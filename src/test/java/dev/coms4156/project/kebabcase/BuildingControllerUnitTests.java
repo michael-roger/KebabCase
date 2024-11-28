@@ -820,41 +820,41 @@ class BuildingControllerUnitTests {
     verify(buildingRepository, times(1)).findById(1);
   }
 
-  // @Test
-  // public void testRemoveBuildingFromUser_Success() {
-  //   // Arrange
-  //   int userId = 1;
-  //   int buildingId = 1;
+  @Test
+  public void testRemoveBuildingFromUser_Success() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 1;
 
-  //   UserEntity user = new UserEntity();
-  //   user.setId(userId);
+    UserEntity user = new UserEntity();
+    user.setId(userId);
 
-  //   BuildingEntity building = new BuildingEntity();
-  //   building.setId(buildingId);
+    BuildingEntity building = new BuildingEntity();
+    building.setId(buildingId);
 
-  //   BuildingUserMappingEntity mapping = new BuildingUserMappingEntity();
-  //   mapping.setUser(user);
-  //   mapping.setBuilding(building);
+    BuildingUserMappingEntity mapping = new BuildingUserMappingEntity();
+    mapping.setUser(user);
+    mapping.setBuilding(building);
 
-  //   // Mock repository responses
-  //   when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-  //   when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
-  //   when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
-  //       .thenReturn(Optional.of(mapping));
+    // Mock repository responses
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
+    when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
+        .thenReturn(Optional.of(mapping));
 
-  //   ObjectNode responseJson = new ObjectMapper().createObjectNode();
-  //   responseJson.put("user_id", userId);
-  //   responseJson.put("building_id", buildingId);
-  //   responseJson.put("status", "Building successfully unlinked from user.");
+    ObjectNode responseJson = new ObjectMapper().createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("building_id", buildingId);
+    responseJson.put("status", "Building successfully unlinked from user.");
 
-  //   // Act
-  //   ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
+    // Act
+    ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
 
-  //   // Assert
-  //   assertEquals(HttpStatus.OK, response.getStatusCode());
-  //   assertTrue(response.getBody().toString().contains("Building successfully unlinked from user."));
-  //   verify(buildingUserMappingRepository, times(1)).delete(mapping);
-  // }
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Building successfully unlinked from user."));
+    verify(buildingUserMappingRepository, times(1)).delete(mapping);
+  }
 
   @Test
   public void testRemoveBuildingFromUser_UserNotFound() {
