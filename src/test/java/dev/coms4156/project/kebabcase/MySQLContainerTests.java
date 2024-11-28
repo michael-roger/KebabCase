@@ -5,7 +5,7 @@ import org.testcontainers.containers.MySQLContainer;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MySQLContainerTest {
+class MySQLContainerTests {
 
   @Test
   void testContainerStarts() {

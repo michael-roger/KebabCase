@@ -13,7 +13,7 @@ public class WarmupController {
    * @return String simple message.
    */
   @GetMapping({"/_ah/warmup"})
-  public String index() {
+  public String warmup() {
     return """
             Warmup!\
             """;

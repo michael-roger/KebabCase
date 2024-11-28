@@ -1,12 +1,9 @@
 package dev.coms4156.project.kebabcase;
 
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
-import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
-import dev.coms4156.project.kebabcase.entity.BuildingFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingUserMappingEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
 import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
-import dev.coms4156.project.kebabcase.repository.BuildingFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingUserMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitRepositoryInterface;
@@ -23,7 +20,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.http.*;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.util.List;
 import java.util.Optional;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -32,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @SpringJUnitConfig
-class BuildingControllerIntegrationTest {
+class BuildingControllerIntegrationTests {
 
   @Container
   @ServiceConnection
