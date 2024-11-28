@@ -40,6 +40,9 @@ If your application allows users to interact with our API (e.g., save/like housi
         - Expires after a set period (a new token is issued with each login).
 
 ### 4. Making API Requests
+
+When interacting with our API, always include the following in your requests:
+
 - **Token in HTTP Request Headers**: Provide your token in the request headers as follows:
 
 ```
