@@ -42,4 +42,12 @@ public interface HousingUnitRepositoryInterface extends JpaRepository<HousingUni
    */
   Optional<HousingUnitEntity> 
       findByBuildingAndUnitNumber(BuildingEntity building, String unitNumber);
+
+  /**
+   * Retrieves all housing units in the repository.
+   *
+   * @return a list of all {@link HousingUnitEntity} in the repository
+   */
+  @Override
+  List<HousingUnitEntity> findAll();
 }
