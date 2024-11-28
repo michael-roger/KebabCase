@@ -4,42 +4,42 @@ KebabCollection
 
 → GET /
 
-  GET https://miniproject-2024.ue.r.appspot.com/ [200 OK, 525B, 109ms]
+  GET https://miniproject-2024.ue.r.appspot.com/ [200 OK, 521B, 114ms]
   ✓  Status test
 
 → GET /buildings
 
-  GET https://miniproject-2024.ue.r.appspot.com/buildings [200 OK, 1.9kB, 61ms]
+  GET https://miniproject-2024.ue.r.appspot.com/buildings [200 OK, 1.89kB, 87ms]
   ✓  Status test
   ✓  Response must be valid and have a body
   ✓  Contains required fields
 
 → GET /building/1
 
-  GET https://miniproject-2024.ue.r.appspot.com/building/1 [200 OK, 699B, 57ms]
+  GET https://miniproject-2024.ue.r.appspot.com/building/1 [200 OK, 699B, 103ms]
   ✓  Status test
   ✓  response must be valid and have a body
   ✓  Contains required fields
 
 → GET /housing-units
 
-  GET https://miniproject-2024.ue.r.appspot.com/housing-units [404 Not Found, 616B, 94ms]
+  GET https://miniproject-2024.ue.r.appspot.com/housing-units [404 Not Found, 616B, 78ms]
 
 → GET /housing-unit/1
 
-  GET https://miniproject-2024.ue.r.appspot.com/housing-unit/1 [200 OK, 811B, 200ms]
+  GET https://miniproject-2024.ue.r.appspot.com/housing-unit/1 [200 OK, 811B, 110ms]
   ✓  Status test
   ✓  response must be valid and have a body
   ✓  Contains required fields
 
 → GET /not-found
 
-  GET https://miniproject-2024.ue.r.appspot.com/not-found [404 Not Found, 611B, 40ms]
+  GET https://miniproject-2024.ue.r.appspot.com/not-found [404 Not Found, 611B, 120ms]
   ✓  Status test
 
 → GET /me
 
-  GET https://miniproject-2024.ue.r.appspot.com/me [200 OK, 588B, 47ms]
+  GET https://miniproject-2024.ue.r.appspot.com/me [200 OK, 588B, 50ms]
   ✓  Status test
   ✓  response must be valid and have a body
   ✓  Contains required fields
@@ -58,12 +58,12 @@ KebabCollection
 [90m├─────────────────────────[39m[90m┼───────────────────[39m[90m┼───────────────────┤[39m
 [90m│[39m              assertions [90m│[39m                15 [90m│[39m                 0 [90m│[39m
 [90m├─────────────────────────┴───────────────────┴───────────────────┤[39m
-[90m│[39m total run duration: 720ms                                       [90m│[39m
+[90m│[39m total run duration: 777ms                                       [90m│[39m
 [90m├─────────────────────────────────────────────────────────────────┤[39m
 [90m│[39m total data received: 2.17kB (approx)                            [90m│[39m
 [90m├─────────────────────────────────────────────────────────────────┤[39m
-[90m│[39m average response time: 86ms [min: 40ms, max: 200ms, s.d.: 51ms] [90m│[39m
+[90m│[39m average response time: 94ms [min: 50ms, max: 120ms, s.d.: 22ms] [90m│[39m
 [90m└─────────────────────────────────────────────────────────────────┘[39m
 
 Postman CLI run data uploaded to Postman Cloud successfully.
-You can view the run data in Postman at: https://go.postman.co/workspace/fa5491e2-66fe-4c92-890b-f2faa10a0aa0/api/e68bd309-f00b-4271-9bcb-9acc4d2f1f83/run/40058464-6683d5fc-a296-427f-8338-17d84b6bfcee
+You can view the run data in Postman at: https://go.postman.co/workspace/fa5491e2-66fe-4c92-890b-f2faa10a0aa0/api/e68bd309-f00b-4271-9bcb-9acc4d2f1f83/run/40058464-bb5da638-f0ed-415d-a517-f7e188040239
