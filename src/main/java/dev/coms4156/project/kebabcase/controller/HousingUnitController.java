@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -520,6 +521,55 @@ public class HousingUnitController {
     responseJson.put("status", "Housing unit successfully linked to user.");
 
     return ResponseEntity.status(HttpStatus.CREATED).body(responseJson);
+  }
+
+  /**
+   * Removes the association between a user and a housing unit.
+   *
+   * @param userId the ID of the user.
+   * @param housingUnitId the ID of the housing unit.
+   * @return a {@link ResponseEntity} containing the status of the operation.
+   *         <ul>
+   *           <li>HTTP 200: Association removed successfully.</li>
+   *           <li>HTTP 404: User, housing unit, or association not found.</li>
+   *         </ul>
+   */
+  @DeleteMapping("/user/{userId}/housing-unit/{housingUnitId}")
+  public ResponseEntity<?> removeHousingUnitFromUser(@PathVariable int userId, 
+                                                   @PathVariable int housingUnitId) {
+    // Check if the user exists
+    Optional<UserEntity> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("User with id " + userId + " not found.");
+    }
+
+    // Check if the housing unit exists
+    Optional<HousingUnitEntity> housingUnitOpt = housingUnitRepository.findById(housingUnitId);
+    if (housingUnitOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("Housing unit with id " + housingUnitId + " not found.");
+    }
+
+    // Check if the mapping exists
+    Optional<HousingUnitUserMappingEntity> mappingOpt = 
+        unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId);
+
+    if (mappingOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("This housing unit is not linked to the user.");
+    }
+
+    // Remove the mapping
+    unitUserMappingRepository.delete(mappingOpt.get());
+
+    // Return a success response
+    ObjectNode responseJson = objectMapper.createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("housing_unit_id", housingUnitId);
+    responseJson.put("status", "Housing unit successfully unlinked from user.");
+
+    return ResponseEntity.status(HttpStatus.OK).body(responseJson);
   }
 
 }
