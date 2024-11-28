@@ -1,0 +1,25 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< dev.coms4156.project:KebabCase >-------------------
+[INFO] Building KebabCase 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> pmd:3.25.0:check (default-cli) > :pmd @ KebabCase >>>
+[INFO] 
+[INFO] --- pmd:3.25.0:pmd (pmd) @ KebabCase ---
+[WARNING] Unable to locate Source XRef to link to - DISABLED
+[INFO] PMD version: 7.3.0
+[WARNING] Unable to find a URL to the parent project. The parent menu will NOT be added.
+[INFO] Rendering content with org.apache.maven.skins:maven-fluido-skin:jar:2.0.0-M9 skin
+[INFO] 
+[INFO] <<< pmd:3.25.0:check (default-cli) < :pmd @ KebabCase <<<
+[INFO] 
+[INFO] 
+[INFO] --- pmd:3.25.0:check (default-cli) @ KebabCase ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.430 s
+[INFO] Finished at: 2024-11-28T02:07:54Z
+[INFO] ------------------------------------------------------------------------
