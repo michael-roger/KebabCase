@@ -19,6 +19,9 @@ jobs:
           java-version: 17
           distribution: 'temurin'
 
+      - name: Check user info
+        run: git config --list
+
       - name: Run PMD
         run: ./mvnw pmd:check > pmd-results.txt
 
