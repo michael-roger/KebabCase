@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  run-pmd:
+  create-code-reports:
     runs-on: ubuntu-latest
 
     steps:
