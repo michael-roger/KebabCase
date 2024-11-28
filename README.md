@@ -13,6 +13,55 @@ https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1
 ## API Endpoints
 https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0
 
+## API Usage Instructions
+
+Welcome to our API! Follow these steps to get started and understand how to use our API effectively.
+
+### 1. Becoming a Client
+
+To start using our API, you must formally sign up as a client by contacting us. 
+Once approved, we will provide you with a client token that grants you specific privileges depending on your intended use case.
+
+### 2. Client Privileges
+
+Your client token will determine your level of access and the actions you can perform.
+
+- Housing Agencies:
+  - Privileges: Create and edit privileges.
+  - Use Case: If you’re listing new buildings or updating existing ones, your token will allow you to create and edit buildings or housing units.
+- App Developers for Renters/Buyers:
+  - Privileges: Read-only privileges.
+  - Use Case: If your app displays housing information to users, your token will only allow you to view the data.
+
+### 3. User Accounts for Your App
+
+If your application allows users to interact with our API (e.g., save/like housing units or buildings), here’s how it works:
+
+1. User Account Creation:
+    - Your app users can create an account by sending a request to our `POST /users` endpoint.
+2. User Authentication:
+    - When users log in, you must send a `POST /authenticate` request with their credentials and your client name (e.g., HomeSweetHome) in the request body.
+    - Upon successful authentication, a user token will be generated and returned. This token:
+        - Links the user to your app.
+        - Allows the user to save or interact with buildings and housing units.
+        - Expires after a set period (a new token is issued with each login).
+
+### 4. Making API Requests
+
+When interacting with our API, always include the following in your requests:
+
+- **Token in HTTP Request Headers**: Provide your token in the request headers as follows:
+
+```
+token: <YOUR-TOKEN>
+```
+
+- **Correct Privileges**: The token will be checked for the required privileges (e.g., `create`, `edit`, `view`). Ensure your token aligns with the operation you’re attempting.
+
+### 5. Endpoint Reference
+
+For detailed instructions on how to use specific API endpoints (e.g., GET, POST, PATCH), refer to our [SwaggerHub Documentation](https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0). This includes endpoint descriptions, required parameters, example requests, and responses.
+
 ## Checkstyle Results
 Checkstyle results are updated on each push to the "main" branch.
 You can see the latest results in checkstyle-results.txt
