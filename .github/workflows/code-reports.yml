@@ -25,6 +25,20 @@ jobs:
       - name: Linting
         run: ./mvnw checkstyle:check > checkstyle-results.txt
 
+      - name: Update README with Checkstyle results
+        run: |
+          if [ -f checkstyle-results.txt ]; then
+            violations=$(grep -oP "You have \K\d+(?= Checkstyle violations)" checkstyle-results.txt)
+          else
+            violations=0
+          fi
+          
+          # Ensure a default value if no violations are found
+          violations=${violations:-0}
+        
+          # Update the README
+          sed -i "s/<!--CHECKSTYLE-RESULTS-->/Checkstyle Violations: $violations/g" README.md
+
       - name: PMD check
         run: ./mvnw pmd:check > pmd-results.txt
 
