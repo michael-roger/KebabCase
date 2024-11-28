@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -598,6 +599,55 @@ public class BuildingController {
     }
 
     return ResponseEntity.status(HttpStatus.OK).body(housingUnits);
+  }
+
+  /**
+   * Removes the association between a user and a building.
+   *
+   * @param userId the ID of the user.
+   * @param buildingId the ID of the building.
+   * @return a {@link ResponseEntity} containing the status of the operation.
+   *         <ul>
+   *           <li>HTTP 200: Association removed successfully.</li>
+   *           <li>HTTP 404: User, building, or association not found.</li>
+   *         </ul>
+   */
+  @DeleteMapping("/user/{userId}/building/{buildingId}")
+  public ResponseEntity<?> removeBuildingFromUser(@PathVariable int userId, 
+                                                @PathVariable int buildingId) {
+    // Check if the user exists
+    Optional<UserEntity> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("User with id " + userId + " not found.");
+    }
+
+    // Check if the building exists
+    Optional<BuildingEntity> buildingOpt = buildingRepository.findById(buildingId);
+    if (buildingOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("Building with id " + buildingId + " not found.");
+    }
+
+    // Check if the mapping exists
+    Optional<BuildingUserMappingEntity> mappingOpt = 
+        buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId);
+
+    if (mappingOpt.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("This building is not linked to the user.");
+    }
+
+    // Remove the mapping
+    buildingUserMappingRepository.delete(mappingOpt.get());
+
+    // Return a success response
+    ObjectNode responseJson = objectMapper.createObjectNode();
+    responseJson.put("user_id", userId);
+    responseJson.put("building_id", buildingId);
+    responseJson.put("status", "Building successfully unlinked from user.");
+
+    return ResponseEntity.status(HttpStatus.OK).body(responseJson);
   }
 
 }
