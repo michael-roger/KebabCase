@@ -329,6 +329,77 @@ class BuildingControllerUnitTests {
   }
 
   @Test
+  void testUpdateBuildingdCityOnly() {
+  BuildingEntity building = new BuildingEntity();
+  building.setId(1);
+  when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+  // Act
+  ResponseEntity<?> response = buildingController.updateBuilding(
+            1, null, "someCity", null, null, null, null);
+
+  // Assert
+  assertEquals(HttpStatus.OK, response.getStatusCode());
+  assertEquals("someCity", building.getCity());
+  assertEquals("Building info has been successfully updated!", response.getBody());
+  verify(buildingRepository, times(1))
+            .save(building);
+  }
+
+  @Test
+  void testUpdateBuildingStateOnly() {
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+            1, null, null, "MA", null, null, null);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("Building info has been successfully updated!", response.getBody());
+    assertEquals("MA", building.getState());
+    verify(buildingRepository, times(1))
+            .save(building);
+  }
+
+  @Test
+  void testUpdateBuildingZipCodeOnly() {
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+            1, null, null, null, "02113", null, null);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("Building info has been successfully updated!", response.getBody());
+    assertEquals("02113", building.getZipCode());
+    verify(buildingRepository, times(1))
+            .save(building);
+  }
+
+  @Test
+  void testUpdateBuildingCityAndStateOnly() {
+    BuildingEntity building = new BuildingEntity();
+    building.setId(1);
+    when(buildingRepository.findById(1)).thenReturn(Optional.of(building));
+
+    // Act
+    ResponseEntity<?> response = buildingController.updateBuilding(
+            1, null, "nyc", "NY", null, null, null);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("Building info has been successfully updated!", response.getBody());
+    verify(buildingRepository, times(1))
+            .save(any(BuildingEntity.class));
+  }
+
+  @Test
   void testGetUserBuildings_UserNotFound() {
     // Arrange
     int userId = 999;
@@ -628,6 +699,21 @@ class BuildingControllerUnitTests {
   }
 
   @Test
+  void testGetBuildingsStateNotFound() {
+  String state = "NY";
+  //Arrange
+  when(buildingRepository.findByState(state)).thenReturn(List.of()); //empty list
+
+  //Act
+  ResponseEntity<?> response = buildingController.getBuildings(null, null, state);
+
+  //Assert
+  assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+  verify(buildingRepository, times(1)).findByState(state);
+
+  }
+
+    @Test
   void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
     BuildingEntity building1 = new BuildingEntity();
