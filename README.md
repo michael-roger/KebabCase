@@ -21,6 +21,8 @@ gcloud app deploy
 
 When deployed, it lives at: https://miniproject-2024.ue.r.appspot.com/
 
+The database lives at Google Cloud and uses CloudSQL.
+
 ## Checkstyle Results
 Checkstyle results are updated on each push to the "main" branch.
 You can see the latest results in checkstyle-results.txt
@@ -29,16 +31,26 @@ You can see the latest results in checkstyle-results.txt
 PMD results are updated on each push to the "main" branch.
 You can see the latest results in pmd-results.txt
 
-## Test Results
-Test results are updated on each push to the "main" branch.
+## Unit/Integration Test Results
+Unit and integration test results are updated on each push to the "main" branch.
 You can see the latest results in test-results.txt
 
+## System Test Results
+System test results are updated on each push to the "main" branch.
+You can see the latest results in system-results.txt
+
+The system tests run using the Postman CLI.
+More information can be found at:
+
+https://kebabcase.postman.co/
+
 ## Testing
-This project uses **JUnit** for unit testing, **JaCoCo** for code coverage, Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.
+This project uses **JUnit** for unit testing, **JaCoCo** for code coverage,
+Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.
 
 ### Before you start testing, make sure you have the following:
 - **Maven**
--  **Java 17**
+- **Java 17**
 
 ## **JUnit Testing**
 Use the following command to run all unit tests located at src/test/java/:
@@ -65,9 +77,6 @@ To checkstyle, run the following command:
 ```
 ./mvnw checkstyle:check
 ```
-We seek for no checkstyle violations or warnings.  The following is our report as of October 18, 2024.
-
-![Checkstyle](/reports/checkstyle.png)
 
 ## First time startup instructions
 0. Install the "brew" if you don't have it installed:
