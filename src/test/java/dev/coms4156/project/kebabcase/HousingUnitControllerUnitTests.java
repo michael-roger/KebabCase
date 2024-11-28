@@ -753,37 +753,6 @@ class HousingUnitControllerUnitTests {
     verify(unitUserMappingRepository, times(1)).save(any(HousingUnitUserMappingEntity.class));
   }
 
-
-// @Test
-  // public void testRemoveHousingUnitFromUser_Success() {
-  //   // Arrange
-  //   int userId = 1;
-  //   int housingUnitId = 1;
-
-  //   UserEntity user = new UserEntity();
-  //   user.setId(userId);
-
-  //   HousingUnitEntity housingUnit = new HousingUnitEntity();
-  //   housingUnit.setId(housingUnitId);
-
-  //   HousingUnitUserMappingEntity mapping = new HousingUnitUserMappingEntity();
-  //   mapping.setUser(user);
-  //   mapping.setHousingUnit(housingUnit);
-
-  //   when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-  //   when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(housingUnit));
-  //   when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
-  //       .thenReturn(Optional.of(mapping));
-
-  //   // Act
-  //   ResponseEntity<?> response = housingUnitController.removeHousingUnitFromUser(userId, housingUnitId);
-
-  //   // Assert
-  //   assertEquals(HttpStatus.OK, response.getStatusCode());
-  //   assertTrue(response.getBody().toString().contains("Housing unit successfully unlinked from user."));
-  //   verify(unitUserMappingRepository, times(1)).delete(mapping);
-  // }
-
   @Test
   public void testRemoveHousingUnitFromUser_UserNotFound() {
     // Arrange
@@ -853,18 +822,6 @@ class HousingUnitControllerUnitTests {
     verify(unitUserMappingRepository, never()).delete(any(HousingUnitUserMappingEntity.class));
   }
   
-  // @Test
-  // void testGetAllHousingUnits_NoContent() {
-  //   // Arrange
-  //   when(housingUnitRepository.findAll()).thenReturn(new ArrayList<>());
-  //   // Act
-  //   ResponseEntity<List<ObjectNode>> response = housingUnitController.getAllHousingUnits();
-  //   // Assert
-  //   assertEquals(204, response.getStatusCode());
-  //   assertEquals(null, response.getBody());
-  //   verify(housingUnitRepository, times(1)).findAll();
-  // }
-
   @Test
   void testGetAllHousingUnits_ErrorHandling() {
     // Arrange

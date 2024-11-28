@@ -862,42 +862,6 @@ class BuildingControllerUnitTests {
     verify(buildingRepository, times(1)).findById(1);
   }
 
-  // @Test
-  // public void testRemoveBuildingFromUser_Success() {
-  //   // Arrange
-  //   int userId = 1;
-  //   int buildingId = 1;
-
-  //   UserEntity user = new UserEntity();
-  //   user.setId(userId);
-
-  //   BuildingEntity building = new BuildingEntity();
-  //   building.setId(buildingId);
-
-  //   BuildingUserMappingEntity mapping = new BuildingUserMappingEntity();
-  //   mapping.setUser(user);
-  //   mapping.setBuilding(building);
-
-  //   // Mock repository responses
-  //   when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-  //   when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
-  //   when(buildingUserMappingRepository.findByUserIdAndBuildingId(userId, buildingId))
-  //       .thenReturn(Optional.of(mapping));
-
-  //   ObjectNode responseJson = new ObjectMapper().createObjectNode();
-  //   responseJson.put("user_id", userId);
-  //   responseJson.put("building_id", buildingId);
-  //   responseJson.put("status", "Building successfully unlinked from user.");
-
-  //   // Act
-  //   ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
-
-  //   // Assert
-  //   assertEquals(HttpStatus.OK, response.getStatusCode());
-  //   assertTrue(response.getBody().toString().contains("Building successfully unlinked from user."));
-  //   verify(buildingUserMappingRepository, times(1)).delete(mapping);
-  // }
-
   @Test
   public void testRemoveBuildingFromUser_UserNotFound() {
     // Arrange
@@ -1078,26 +1042,6 @@ class BuildingControllerUnitTests {
     verifyNoInteractions(buildingFeatureMappingRepository);
   }
 
-  // @Test
-  // void testUpdateBuilding_PartialContent_InvalidFeatures() {
-  //   // Arrange
-  //   int buildingId = 1;
-  //   BuildingEntity building = new BuildingEntity();
-  //   building.setId(buildingId);
-
-  //   when(buildingRepository.findById(buildingId)).thenReturn(Optional.of(building));
-  //   when(buildingFeatureRepository.findById(1)).thenReturn(Optional.empty());
-
-  //   // Act
-  //   ResponseEntity<?> response = buildingController.updateBuilding(
-  //           buildingId, null, null, null, null, List.of(1), null);
-
-  //   // Assert
-  //   assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
-  //   assertEquals("Building updated, but the following feature IDs were not found: [1]", response.getBody());
-  //   verify(buildingFeatureRepository, times(1)).findById(1);
-  // }
-
   @Test
   void testUpdateBuilding_Conflict_AddRemoveFeatures() {
     // Arrange
@@ -1116,39 +1060,6 @@ class BuildingControllerUnitTests {
     assertTrue(response.getBody().toString().contains("Conflict: Feature IDs present in both add and remove lists"));
     verifyNoInteractions(buildingFeatureRepository);
   }
-
-  // @Test
-  // void testGetBuildingHousingUnits_Success() {
-  //   // Arrange
-  //   int buildingFeatureId = 1;
-  //   BuildingEntity mockBuilding = new BuildingEntity();
-  //   mockBuilding.setId(1);
-  //   mockBuilding.setAddress("123 Main St");
-  //   mockBuilding.setCity("New York");
-  //   mockBuilding.setState("NY");
-  //   mockBuilding.setZipCode("10001");
-  //   BuildingFeatureEntity mockFeature = new BuildingFeatureEntity();
-  //   mockFeature.setId(buildingFeatureId);
-  //   mockFeature.setName("Elevator");
-  //   BuildingFeatureBuildingMappingEntity mockMapping = new BuildingFeatureBuildingMappingEntity();
-  //   mockMapping.setBuilding(mockBuilding);
-  //   mockMapping.setBuildingFeature(mockFeature);
-  //   ObjectNode mockJson = mock(ObjectNode.class);
-  //   when(buildingFeatureMappingRepository.findByBuildingFeatureId(buildingFeatureId))
-  //       .thenReturn(List.of(mockMapping));
-  //   when(objectMapper.createObjectNode()).thenReturn(mockJson);
-  //   // Act
-  //   ResponseEntity<?> response = buildingController.getBuildingHousingUnits(buildingFeatureId);
-  //   // Assert
-  //   assertEquals(200, response.getStatusCodeValue());
-  //   verify(buildingFeatureMappingRepository, times(1))
-  //       .findByBuildingFeatureId(buildingFeatureId);
-  //   verify(mockJson, times(1)).put("id", mockBuilding.getId());
-  //   verify(mockJson, times(1)).put("building_address", mockBuilding.getAddress());
-  //   verify(mockJson, times(1)).put("city", mockBuilding.getCity());
-  //   verify(mockJson, times(1)).put("state", mockBuilding.getState());
-  //   verify(mockJson, times(1)).put("zipcode", mockBuilding.getZipCode());
-  // }
 
   @Test
   void testGetBuildingHousingUnits_FeatureNotFound() {
