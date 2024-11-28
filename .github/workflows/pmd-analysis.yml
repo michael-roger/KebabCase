@@ -1,0 +1,38 @@
+name: PMD Analysis
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-pmd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Run PMD
+        run: ./mvnw pmd:check -f text > pmd-results.txt
+
+      - name: Update README with PMD Results
+        run: |
+          violations=$(grep -c "^[^#]" pmd-results.txt || echo 0)
+          sed -i "s|<!--PMD-RESULTS-->|PMD Violations: $violations|g" README.md
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update PMD results in README [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

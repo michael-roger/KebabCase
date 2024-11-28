@@ -13,7 +13,7 @@ import org.testcontainers.junit.jupiter.Container;
 
 @SpringBootTest
 @Transactional // Optional: Rollback transactions after each test
-class UserRepositoryIntegrationTest {
+class UserRepositoryIntegrationTests {
 
   @Container
   @ServiceConnection

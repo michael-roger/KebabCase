@@ -8,7 +8,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @Testcontainers
-class MySQLIntegrationTest {
+class MySQLIntegrationTests {
 
   @Container
   @ServiceConnection
