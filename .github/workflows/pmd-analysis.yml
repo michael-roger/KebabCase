@@ -34,6 +34,7 @@ jobs:
         run: |
           git config user.name "Michael Roger"
           git config user.email "michael.roger@columbia.edu"
+          git pull
           git add README.md
           git commit -m "Update PMD results in README [skip ci]"
           git push
