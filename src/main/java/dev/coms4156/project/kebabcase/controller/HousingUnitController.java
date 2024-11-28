@@ -572,4 +572,18 @@ public class HousingUnitController {
     return ResponseEntity.status(HttpStatus.OK).body(responseJson);
   }
 
+  @GetMapping("/housing-units")
+  public ResponseEntity<List<ObjectNode>> getAllHousingUnits() {
+      List<HousingUnitEntity> housingUnits = housingUnitRepository.findAll();
+
+      if (housingUnits.isEmpty()) {
+          return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+      }
+
+      List<ObjectNode> response = housingUnits.stream()
+          .map(this::getHousingUnitInfo) 
+          .collect(Collectors.toList());
+
+      return ResponseEntity.ok(response);
+  }
 }
