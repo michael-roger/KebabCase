@@ -14,7 +14,16 @@ https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1
 https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0
 
 ## PMD Results
-PMD Violations: 1257
+Checkstyle results are updated on each push to the "main" branch.
+You can see the latest results in checkstyle-results.txt
+
+## PMD Results
+PMD results are updated on each push to the "main" branch.
+You can see the latest results in pmd-results.txt
+
+## Test Results
+Test results are updated on each push to the "main" branch.
+You can see the latest results in test-results.txt
 
 ## Testing
 This project uses **JUnit** for unit testing, **JaCoCo** for code coverage, Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.
