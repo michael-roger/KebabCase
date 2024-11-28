@@ -61,6 +61,10 @@ https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1
 ## API Endpoints
 https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0
 
+## JaCoCo Test Coverage Results
+Most recent JaCoCo Test Coverage report is at:
+jacoco-screenshot.png
+
 ## Deployment
 This application has been deployed using Google Cloud App Engine.
 
