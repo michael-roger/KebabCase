@@ -1,9 +1,15 @@
 package dev.coms4156.project.kebabcase;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import dev.coms4156.project.kebabcase.controller.HousingUnitController;
 import dev.coms4156.project.kebabcase.entity.BuildingEntity;
 import dev.coms4156.project.kebabcase.entity.BuildingFeatureBuildingMappingEntity;
@@ -13,11 +19,19 @@ import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitFeatureHousingUnitMappingEntity;
 import dev.coms4156.project.kebabcase.entity.HousingUnitUserMappingEntity;
 import dev.coms4156.project.kebabcase.entity.UserEntity;
+import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.BuildingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureHousingUnitMappingRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitFeatureRepositoryInterface;
 import dev.coms4156.project.kebabcase.repository.HousingUnitRepositoryInterface;
-
+import dev.coms4156.project.kebabcase.repository.HousingUnitUserMappingRepositoryInterface;
+import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -27,24 +41,6 @@ import org.mockito.Spy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
-import dev.coms4156.project.kebabcase.repository.BuildingFeatureBuildingMappingRepositoryInterface;
-import dev.coms4156.project.kebabcase.repository.HousingUnitUserMappingRepositoryInterface;
-import dev.coms4156.project.kebabcase.repository.UserRepositoryInterface;
 
 class HousingUnitControllerUnitTests {
 
@@ -754,35 +750,35 @@ class HousingUnitControllerUnitTests {
   }
 
 
-// @Test
-  // public void testRemoveHousingUnitFromUser_Success() {
-  //   // Arrange
-  //   int userId = 1;
-  //   int housingUnitId = 1;
+  @Test
+  public void testRemoveHousingUnitFromUser_Success() {
+    // Arrange
+    int userId = 1;
+    int housingUnitId = 1;
 
-  //   UserEntity user = new UserEntity();
-  //   user.setId(userId);
+    UserEntity user = new UserEntity();
+    user.setId(userId);
 
-  //   HousingUnitEntity housingUnit = new HousingUnitEntity();
-  //   housingUnit.setId(housingUnitId);
+    HousingUnitEntity housingUnit = new HousingUnitEntity();
+    housingUnit.setId(housingUnitId);
 
-  //   HousingUnitUserMappingEntity mapping = new HousingUnitUserMappingEntity();
-  //   mapping.setUser(user);
-  //   mapping.setHousingUnit(housingUnit);
+    HousingUnitUserMappingEntity mapping = new HousingUnitUserMappingEntity();
+    mapping.setUser(user);
+    mapping.setHousingUnit(housingUnit);
 
-  //   when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-  //   when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(housingUnit));
-  //   when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
-  //       .thenReturn(Optional.of(mapping));
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(housingUnitRepository.findById(housingUnitId)).thenReturn(Optional.of(housingUnit));
+    when(unitUserMappingRepository.findByUserIdAndHousingUnitId(userId, housingUnitId))
+       .thenReturn(Optional.of(mapping));
 
-  //   // Act
-  //   ResponseEntity<?> response = housingUnitController.removeHousingUnitFromUser(userId, housingUnitId);
+    // Act
+    ResponseEntity<?> response = housingUnitController.removeHousingUnitFromUser(userId, housingUnitId);
 
-  //   // Assert
-  //   assertEquals(HttpStatus.OK, response.getStatusCode());
-  //   assertTrue(response.getBody().toString().contains("Housing unit successfully unlinked from user."));
-  //   verify(unitUserMappingRepository, times(1)).delete(mapping);
-  // }
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Housing unit successfully unlinked from user."));
+    verify(unitUserMappingRepository, times(1)).delete(mapping);
+  }
 
   @Test
   public void testRemoveHousingUnitFromUser_UserNotFound() {
@@ -851,6 +847,22 @@ class HousingUnitControllerUnitTests {
         .findByUserIdAndHousingUnitId(userId, housingUnitId);
     // Verify that no deletion occurred
     verify(unitUserMappingRepository, never()).delete(any(HousingUnitUserMappingEntity.class));
+  }
+
+  @Test
+  public void testUpdateBuildingChangeUnitNumber() {
+
+    HousingUnitEntity unit = new HousingUnitEntity();
+    int id = 5;
+    unit.setId(id);
+    unit.setUnitNumber("1A");
+    when(housingUnitRepository.findById(id)).thenReturn(Optional.of(unit));
+
+    ResponseEntity<?> response = housingUnitController.updateBuilding(id, "3A", null, null);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Housing unit info has been successfully updated!"));
+
+
   }
 
 }
