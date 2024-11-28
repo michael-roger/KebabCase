@@ -961,4 +961,61 @@ class BuildingControllerUnitTests {
     assertTrue(response.getBody().toString().contains("This building is not linked to the user."));
     verify(buildingUserMappingRepository, times(0)).delete(any());
   }
+
+  @Test
+  void testGetBuildingsFindAllThrowsException() {
+    // Arrange
+    when(buildingRepository.findAll()).thenThrow(new RuntimeException("Database connection error"));
+
+    // Act & Assert
+    assertThrows(RuntimeException.class, () -> {
+        buildingController.getBuildings(null, null, null, null);
+    });
+    verify(buildingRepository, times(1)).findAll();
+  }
+
+  @Test
+  void testRemoveBuildingFromUser_UserHasNoMappings() {
+    // Arrange
+    int userId = 1;
+    int buildingId = 100;
+
+    UserEntity user = new UserEntity();
+    user.setId(userId);
+
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(buildingRepository.findById(buildingId)).thenReturn(Optional.empty());
+
+    // Act
+    ResponseEntity<?> response = buildingController.removeBuildingFromUser(userId, buildingId);
+
+    // Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Building with id " + buildingId + " not found."));
+    verify(buildingUserMappingRepository, never()).findByUserIdAndBuildingId(userId, buildingId);
+  }
+
+  @Test
+  void testCreateBuildingAllInvalidFeatures() {
+    // Arrange
+    String address = "789 Maple Lane";
+    String city = "Mapleton";
+    String state = "MT";
+    String zipCode = "67890";
+
+    when(buildingRepository.findByAddressAndCityAndStateAndZipCode(address, city, state, zipCode))
+        .thenReturn(Optional.empty()); // No duplicate address
+
+    when(buildingFeatureRepository.findById(anyInt())).thenReturn(Optional.empty()); // All features invalid
+
+    // Act
+    ResponseEntity<?> response = buildingController.createBuilding(
+        address, city, state, zipCode, List.of(-1, -2));
+
+    // Assert
+    assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode());
+    assertTrue(response.getBody().toString().contains("Building created, but the following feature IDs were not found: [-1, -2]"));
+    verify(buildingRepository, times(1)).save(any(BuildingEntity.class));
+    verify(buildingFeatureMappingRepository, never()).save(any());
+  }
 }
