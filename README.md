@@ -14,7 +14,7 @@ https://kebab-case.atlassian.net/jira/software/projects/KAN/boards/1
 https://app.swaggerhub.com/apis/TO2428/KebabCase/1.0.0
 
 ## PMD Results
-<!--PMD-RESULTS-->
+PMD Violations: 1257
 
 ## Testing
 This project uses **JUnit** for unit testing, **JaCoCo** for code coverage, Maven **Checkstyle** for enforcing code style, and **PMD** for static code analysis.
