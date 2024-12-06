@@ -61,4 +61,12 @@ public interface BuildingRepositoryInterface extends JpaRepository<BuildingEntit
    * @return a list of buildings containing the state if found, or empty list if not found
    */
   List<BuildingEntity> findByState(String state);
+
+  /**
+   * Finds a list of buildings with the given zip code.
+   *
+   * @param zipCode the zip code of the selected buildings
+   * @return a list of buildings containing the zip code if found, or empty list if not found
+   */
+  List<BuildingEntity> findByZipCode(String zipCode);
 }
