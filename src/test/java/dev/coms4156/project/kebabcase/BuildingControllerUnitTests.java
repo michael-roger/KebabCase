@@ -670,6 +670,30 @@ class BuildingControllerUnitTests {
   }
 
   @Test
+  void testGetBuildingsSuccessWithZipCode(){
+    // Arrange
+    BuildingEntity building1 = new BuildingEntity();
+    BuildingEntity building2 = new BuildingEntity();
+    building1.setId(1);
+    building2.setId(2);
+    String zipCode = "10027";
+    building1.setState(zipCode);
+    building2.setState(zipCode);
+    when(buildingRepository.findByZipCode(zipCode)).thenReturn(List.of(building1, building2));
+
+    // Act
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null, zipCode);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().isEmpty());
+    assertEquals(2, response.getBody().size());
+    verify(buildingRepository, times(1)).findByZipCode(zipCode);
+
+  }
+
+  @Test
   void testGetBuildingsAddressNotFound(){
 
     String address = "999 Lincoln St";
@@ -700,20 +724,33 @@ class BuildingControllerUnitTests {
 
   @Test
   void testGetBuildingsStateNotFound() {
-  String state = "NY";
-  //Arrange
-  when(buildingRepository.findByState(state)).thenReturn(List.of()); //empty list
+    String state = "NY";
+    //Arrange
+    when(buildingRepository.findByState(state)).thenReturn(List.of()); //empty list
 
-  //Act
-  ResponseEntity<?> response = buildingController.getBuildings(null, null, state, null);
+    //Act
+    ResponseEntity<?> response = buildingController.getBuildings(null, null, state, null);
 
-  //Assert
-  assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-  verify(buildingRepository, times(1)).findByState(state);
-
+    //Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    verify(buildingRepository, times(1)).findByState(state);
   }
 
-    @Test
+  @Test
+  void testGetBuildingsZipCodeNotFound() {
+    String zipCode = "01392";
+    //Arrange
+    when(buildingRepository.findByZipCode(zipCode)).thenReturn(List.of()); //empty list
+
+    //Act
+    ResponseEntity<?> response = buildingController.getBuildings(null, null, null, zipCode);
+
+    //Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    verify(buildingRepository, times(1)).findByZipCode(zipCode);
+  }
+
+  @Test
   void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
     BuildingEntity building1 = new BuildingEntity();
