@@ -47,4 +47,14 @@ public interface HousingUnitFeatureHousingUnitMappingRepositoryInterface
    */
   List<HousingUnitFeatureHousingUnitMappingEntity> findByHousingUnit(HousingUnitEntity housingUnit);
 
+  /**
+   * Finds the entries in the unit-unit feature mapping that correspond to
+   *     the desired unit feature.
+   *
+   * @param housingUnitFeatureId the ID corresponding with the desired unit feature
+   * @return a list of {@link HousingUnitFeatureHousingUnitMappingEntity} containing
+   *     all entries with the desired unit feature, or empty if none found
+   */
+  List<HousingUnitFeatureHousingUnitMappingEntity> 
+      findByHousingUnitFeatureId(int housingUnitFeatureId);
 }

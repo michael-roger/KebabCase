@@ -597,4 +597,34 @@ public class HousingUnitController {
         .collect(Collectors.toList());
     return ResponseEntity.ok(response);
   }
+
+  /**
+   * Displays a list of all housing units with the desired feature.
+   *
+   * @param id the ID of the desired housing unit feature
+   * @return a {@link ResponseEntity} containing the unit
+   *     information with the desired unit feature or a
+   *     404 Not Found response if the unit feature is not found
+   **/
+  @GetMapping("/housing-unit-feature/{id}/housing-units")
+  public ResponseEntity<?> getHousingUnitsByFeature(@PathVariable int id) {
+
+    Optional<HousingUnitFeatureEntity> feature = this.unitFeatureRepository.findById(id);
+    if (feature.isEmpty()) {
+      String errorMessage = "Housing unit feature with id " + id + " not found.";
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+    }
+
+    List<HousingUnitFeatureHousingUnitMappingEntity> result =
+        this.unitFeatureMappingRepository.findByHousingUnitFeatureId(id);
+
+    List<ObjectNode> unitList = result.stream()
+        .<ObjectNode>map(mapping -> {
+          HousingUnitEntity unit = mapping.getHousingUnit();
+          return getHousingUnitInfo(unit);
+        })
+        .collect(Collectors.toList());
+
+    return ResponseEntity.status(HttpStatus.OK).body(unitList);
+  }
 }

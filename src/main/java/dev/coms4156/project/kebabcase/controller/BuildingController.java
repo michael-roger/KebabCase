@@ -534,7 +534,8 @@ public class BuildingController {
   public ResponseEntity<List<BuildingEntity>> getBuildings(
            @RequestParam(required = false) String address,
            @RequestParam(required = false) String city,
-           @RequestParam(required = false) String state) {
+           @RequestParam(required = false) String state,
+           @RequestParam(required = false) String zipCode) {
 
     // filter by address
     if (address != null && !address.isEmpty()) {
@@ -557,6 +558,15 @@ public class BuildingController {
     // filter by state
     if (state != null && !state.isEmpty()) {
       List<BuildingEntity> buildings = buildingRepository.findByState(state);
+      if (buildings.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(buildings);
+    }
+
+    // filter by zip code
+    if (zipCode != null && !zipCode.isEmpty()) {
+      List<BuildingEntity> buildings = buildingRepository.findByZipCode(zipCode);
       if (buildings.isEmpty()) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
       }

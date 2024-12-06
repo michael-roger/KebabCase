@@ -612,7 +612,7 @@ class BuildingControllerUnitTests {
      when(buildingRepository.findByAddress(address)).thenReturn(Optional.of(building));
 
      // Act
-     ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(address, null, null);
+     ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(address, null, null, null);
 
      // Assert
      assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -635,7 +635,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findByCity(city)).thenReturn(List.of(building1, building2));
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, city, null );
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, city, null, null);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -658,7 +658,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findByState(state)).thenReturn(List.of(building1, building2));
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, state);
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, state, null);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -670,6 +670,30 @@ class BuildingControllerUnitTests {
   }
 
   @Test
+  void testGetBuildingsSuccessWithZipCode(){
+    // Arrange
+    BuildingEntity building1 = new BuildingEntity();
+    BuildingEntity building2 = new BuildingEntity();
+    building1.setId(1);
+    building2.setId(2);
+    String zipCode = "10027";
+    building1.setState(zipCode);
+    building2.setState(zipCode);
+    when(buildingRepository.findByZipCode(zipCode)).thenReturn(List.of(building1, building2));
+
+    // Act
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null, zipCode);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().isEmpty());
+    assertEquals(2, response.getBody().size());
+    verify(buildingRepository, times(1)).findByZipCode(zipCode);
+
+  }
+
+  @Test
   void testGetBuildingsAddressNotFound(){
 
     String address = "999 Lincoln St";
@@ -677,7 +701,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findByAddress(address)).thenReturn(Optional.empty());
 
     // Act
-    ResponseEntity<?> response = buildingController.getBuildings(address, null, null);
+    ResponseEntity<?> response = buildingController.getBuildings(address, null, null, null);
 
     // Assert
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -691,7 +715,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findByCity(city)).thenReturn(List.of()); //empty list
 
     // Act
-    ResponseEntity<?> response = buildingController.getBuildings(null, city, null);
+    ResponseEntity<?> response = buildingController.getBuildings(null, city, null, null);
 
     // Assert
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -700,20 +724,33 @@ class BuildingControllerUnitTests {
 
   @Test
   void testGetBuildingsStateNotFound() {
-  String state = "NY";
-  //Arrange
-  when(buildingRepository.findByState(state)).thenReturn(List.of()); //empty list
+    String state = "NY";
+    //Arrange
+    when(buildingRepository.findByState(state)).thenReturn(List.of()); //empty list
 
-  //Act
-  ResponseEntity<?> response = buildingController.getBuildings(null, null, state);
+    //Act
+    ResponseEntity<?> response = buildingController.getBuildings(null, null, state, null);
 
-  //Assert
-  assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-  verify(buildingRepository, times(1)).findByState(state);
-
+    //Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    verify(buildingRepository, times(1)).findByState(state);
   }
 
-    @Test
+  @Test
+  void testGetBuildingsZipCodeNotFound() {
+    String zipCode = "01392";
+    //Arrange
+    when(buildingRepository.findByZipCode(zipCode)).thenReturn(List.of()); //empty list
+
+    //Act
+    ResponseEntity<?> response = buildingController.getBuildings(null, null, null, zipCode);
+
+    //Assert
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    verify(buildingRepository, times(1)).findByZipCode(zipCode);
+  }
+
+  @Test
   void testGetBuildingsSuccessWithoutAddress() {
     // Arrange
     BuildingEntity building1 = new BuildingEntity();
@@ -735,7 +772,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findAll()).thenReturn(buildings);
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null );
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null, null);
 
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -750,7 +787,7 @@ class BuildingControllerUnitTests {
     when(buildingRepository.findAll()).thenReturn(List.of());
 
     // Act
-    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null);
+    ResponseEntity<List<BuildingEntity>> response = buildingController.getBuildings(null, null, null, null);
 
     // Assert
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
