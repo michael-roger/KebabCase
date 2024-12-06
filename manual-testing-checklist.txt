@@ -8,19 +8,176 @@ Fill out "Firstname"
 
 Fill out "Lastname"
 
-Fill out "E-Mail Address"
+Fill out "E-Mail Address" with an email you never used before to sign up and with the “@“ character before the domain name, for example: “bob@gmail.com”.
 
 Fill out "Password"
 
+Fill out  “Re-type password” with the same value used for “Password”
+
 Click "Signup"
 
-Click "Login"
+Success state: A message appears “Sign up successful! Please log in”, with a log in window appearing, provided the email you used to sign up was in fact never used to sign up before by any user of the app.
 
-Use same e-mail address and password as above
 
-Success state: You are now logged in
 
-+++++++++++++++++
+
+Testing Signup Process and Logging in after with same credentials for each - SUCCESS:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Click "Signup"
+
+Fill out "Firstname"
+
+Fill out "Lastname"
+
+Fill out "E-Mail Address" with an email you never used before to sign up and with the “@“ character before the domain name, for example: “sam@yahoo.com”.
+
+Fill out "Password"
+
+Fill out  “Re-type password” with the same value used for “Password”
+
+Log in as detailed in Testing Login Process - SUCCESS, using the same email and password you used for signing up.
+
+Success state: You are now logged in.
+
+
+
+
+Testing Signup Process and Logging in after with different credentials for each - SUCCESS:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+First Sign-up:
+
+Click "Signup"
+
+Fill out "Firstname"
+
+Fill out "Lastname"
+
+Fill out "E-Mail Address" with an email you never used before to sign up and with the “@“ character before the domain name, for example: “samantha@yahoo.com”.
+
+Fill out "Password"
+
+Fill out  “Re-type password” with the same value used for “Password”
+
+Second Sign up:
+
+Repeat these steps to sign up but using a different email.
+
+Log in as detailed in Testing Login Process - SUCCESS, but using the same email and password combination for the login that you used for the First Sign-up you completed.
+
+Success state: You are now logged in.
+
+
+
+
+Testing Signup Process with no fields entered - FAILURE:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Click "Signup"
+
+Leave all fields blank: “Firstname”, “Lastname”, "E-Mail Address”, "Password” and “Re-Type Password”
+
+Click "Signup”.
+
+Failure state: An error message appears: “All fields are required. Please fill out all fields.”
+
+
+
+
+Testing Signup Process with one to several missing fields - FAILURE:
+
+Repeat this process for each field shown on the “sign up” window:  “Firstname”, “Lastname”, "E-Mail Address”, "Password”, and “Re-type Password”, leaving only one field out of all of these blank at a time, and then repeat this process again leaving 2 fields and 5 fields blank at a time. All fields blank test case covered in Testing Signup Process with no fields entered - FAILURE (above).
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Click "Signup" from the top menu of the app.
+
+Leave a field/fields blank as described above.
+
+Click "Signup”.
+
+Failure state: An error message appears:  “All fields are required. Please fill out all fields.”
+
+
+
+
+Testing Signup Process with invalid email format - FAILURE:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Click "Signup"
+
+Fill out "Firstname"
+
+Fill out "Lastname"
+
+Fill out "E-Mail Address" with an email value not containing the “@“ character before the domain name, for example: “bobgmail.com” does not have the “@“ symbol before domain name: “gmail.com”.
+
+Fill out "Password"
+
+Fill out  “Re-type password” with the same value used for “Password”.
+
+Click "Signup"
+
+Failure state: An error message appears “Please provide a valid email address.”
+
+
+
+
+
+Testing Signup Process with non-matching passwords - FAILURE:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Click "Signup"
+
+Fill out "Firstname"
+
+Fill out "Lastname"
+
+Fill out "E-Mail Address" with an email you never used before to sign up and with the “@“ character before the domain name, for example: “ally@yahoo.com”.
+
+Fill out the first “Password" field and then the “Re-type password” field with a different password value.
+
+Click "Signup"
+
+Failure state: An error message appears “Passwords do not match!”
+
+
+
+
+
+Testing Signup Process with already existing email - FAILURE:
+
+Sign-up 1: first, you will sign up success ully as detailed in Testing Signup Process - SUCCESS.
+
+Sign-up 2:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Click "Signup"
+
+Fill out "Firstname"
+
+Fill out "Lastname"
+
+Fill out "E-Mail Address" with the same email you used to successfully sign up for the Sign-up 1 instructions.
+
+Fill out “Password"
+
+Fill out “Re-type password” field with same value as “Password”
+
+Click "Signup"
+
+Failure state: An error message appears “An account aleady exists with this email.”
+
+
+
+
 
 Testing Login Process - SUCCESS:
 
@@ -36,8 +193,6 @@ Click “Log in”
 
 Success state: You are now logged in
 
-+++++++++++++++++
-
 Testing Login Process - FAILURE due to incorrect email:
 
 Go to https://home-sweet-home-lemon.vercel.app/
@@ -52,7 +207,6 @@ Click “Log in”
 
 Failure state: A message appears on the page: No account found with the provided email.
 
-+++++++++++++++++
 
 Testing Login Process - FAILURE due to incorrect password:
 
@@ -67,8 +221,6 @@ Click “Log in”
 
 Failure state: A message appears on the page: Invalid password. Please try again.
 
-+++++++++++++++++
-
 Testing Login Process - SUCCESS after a failed attempt:
 
 Go to https://home-sweet-home-lemon.vercel.app/
@@ -81,7 +233,7 @@ Password: user fills out with any password value
 
 Click “Log in”
 
-A message appears on the page: No account found with the provided email. 
+A message appears on the page: No account found with the provided email.
 User fills out “Email” field with email they would have used when first signing up
 
 User fills out the password associated with that email into “Password” field - the password they would have used when first signing up
@@ -90,7 +242,6 @@ Click “Log in”
 
 Success state: User is now logged in
 
-+++++++++++++++++
 
 Testing View of All Buildings - SUCCESS:
 
@@ -100,11 +251,11 @@ Click “Buildings” on the top blue menu of the page
 
 Success state: A page displaying all buildings
 
-+++++++++++++++++
-
 Testing View Details of Building listed - SUCCESS:
 
 Navigate to https://home-sweet-home-lemon.vercel.app/
+
+Options: You can try all the steps below while already logged in, as detailed in Testing Login Process - SUCCESS, or you can try them without being logged in:
 
 Click “Buildings” on the top blue menu of the page
 
@@ -117,25 +268,26 @@ A list of all the building’s accessibility features below it i.e. Elevator, Ra
 A list of all the Housing Units belonging to the Building
 Each Housing unit is identified by its distinct Unit Number and unique features (i.e. Wheelchair Accessible, Walk-in Shower).
 
-+++++++++++++++++
 
 Testing Search Bar - SUCCESS
 
-Login to https://home-sweet-home-lemon.vercel.app/
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Options: You can try all the steps below while already logged in, as detailed in Testing Login Process - SUCCESS, or you can try them without being logged in:
 
 Click the search bar
 
-User types in some characters that are in the address parameter  of a building or housing unit, i.e. “ma”
+User types in some characters that are in the address parameter of a building or housing unit, i.e. “ma”
 
 User clicks Search or hits enter
 
 Success state: a page appears with the search bar cleared of the query and the result showing a list of Buildings address strings that contain “ma” in them.
 
-+++++++++++++++++
-
 Testing Search Bar - SUCCESS searching for buildings and housing units that contain some query feature
 
-Login to https://home-sweet-home-lemon.vercel.app/
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Options: You can try all the steps below while already logged in, as detailed in Testing Login Process - SUCCESS, or you can try them without being logged in:
 
 Click the search bar
 
@@ -145,11 +297,12 @@ User clicks Search or hits enter
 
 Success state: a page appears with the search bar cleared of the query and the result showing a list of buildings and housing units that contain the quay feature. In the example of ground floor search query, resulting page shows the words: Search Results, then Housing Unit Features, then Ground Floor.
 
-+++++++++++++++++
 
 Testing Search Bar - FAILURE
 
-Login to https://home-sweet-home-lemon.vercel.app/
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Options: You can try all the steps below while already logged in, as detailed in Testing Login Process - SUCCESS, or you can try them without being logged in:
 
 Click the search bar
 
@@ -159,21 +312,31 @@ User clicks Search or hits enter
 
 Failure state: a page appears with the search bar cleared of the query, the words “Search Results” on the page and a message underneath it: “ No results found for "reee.“
 
-+++++++++++++++++
 
-SHOWING RESULTS:
-Testing view your Favorites - EMPTY LIST
+Testing view your Favorites- SUCCESS:
+
+
+Ensure you follow these steps for an account that already has saved favorites as described in the Testing Favorite a Building Unit SUCCESS from the Browse Building Unit Accessibility Features Menu and the Testing Favorite a Unit instructions.
 
 Login to https://home-sweet-home-lemon.vercel.app/
 
-Do this for an account that has nothing favorited
+Click “Your Favorites” at the top right of the blue menu bar on the page
+
+Success state: A page with user’s first name, last name, email address, and buttons to view either Saved Buildings or Saved Housing Units. Saved Buildings button tab is selected by default to show an  table of saved buildings by the columns: building’s address, city, state, features and actions.
+When Saved Housing Units button tab clicked, a table appears with columns: housing unit’s Unit Number, Unit Features, Building, Building Features, Actions.
+
+
+
+Testing view your Favorites when its an empty list- SUCCESS:
+
+Login to https://home-sweet-home-lemon.vercel.app/
+
+Do this for an account that has no favorited buildings or housing units:
 
 Click “Your Favorites” at the top right of the blue menu bar on the page
 
 Success state: A page with user’s first name, last name, email address, and buttons to view either Saved Buildings or Saved Housing Units. Saved Buildings button tab is selected by default to show an empty table of saved buildings by the columns: building’s address, city, state, features and actions.
 Listing of buildings is empty because no favorited buildings by the user. When Saved Housing Units button tab clicked, a table appears with columns:  housing unit’s Unit Number, Unit Features, Building, Building Features, Actions. Table is also empty since user did not favorite any buildings
-
-+++++++++++++++++
 
 Testing Log Out Process - SUCCESS
 
@@ -183,8 +346,6 @@ Log in with valid email and password combination credentials of an existing user
 
 Click the “Log Out” button on the blue menu at the top of the page
 Success State: User is logged out of their account and on the welcome page of the app, which has a Login and Signup Option
-
-+++++++++++++++++
 
 Testing Log back in SUCCESS
 
@@ -200,14 +361,168 @@ Fill in valid combination for existing user of email and password
 
 Success State: The user is logged back in
 
-+++++++++++++++++
 
-TODO
 
-Testing Browse Building Accessibility Features: Elevator Ramps Near Hospital Gym Pool
+Testing Browse Building Accessibility Features: SUCCESS:
 
-Testing Browse Unit Accessibility Features: Wheelchair Accessible, Walk-in Shower, Ground Floor
+Go to https://home-sweet-home-lemon.vercel.app/
 
-Testing using search bar when no user is logged in
+Options: You can try all the steps below while already logged in, as detailed in Testing Login Process - SUCCESS, or you can try them without being logged in:
 
-Test sign up (does email format matter (needs @ sign)
+Under Browse Building Accessibility Features Menu at the bottom of the page, click any of the following available options: Elevator, Ramps, Near Hospital , Gym or Pool.
+
+Success State: If buildings exist with that selected feature, a page loads with header Buildings showing all the buildings with the feature chosen, in the form of address, city, state and zip. Option to click “View More” on any of the building listings, which takes you to another page, showing you any additional features that building has, as well as its Housing Units and their respective features
+
+
+Testing Browse Building Accessibility Features: FAILURE:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Options: You can try all the steps below while already logged in, as detailed in Testing Login Process - SUCCESS, or you can try them without being logged in:
+
+Under Browse Building Accessibility Features! menu at the bottom of the page, click any of the following available options: Elevator, Ramps, Near Hospital , Gym or Pool.
+
+Failure State: If no buildings have the selected feature, a page loads with the error message: “No buildings found for the desired building feature.”
+
+
+Testing Browse Housing Unit Accessibility Features: SUCCESS:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Options: You can try all the steps below while already logged in, as detailed in Testing Login Process - SUCCESS, or you can try them without being logged in:
+
+Under Browse Unit Accessibility Features! menu at the bottom of the page, click any of the following available options: Wheelchair Accessible, Walk-in Shower or Ground Floor.
+
+Success State: If housing units exist with that selected feature, a page loads with header “Housing Units” showing all the housing units with the feature chosen, in the form of Unit Number, its Building address, all of its features, and all of its Building features, with the option to click the “View Details” button for any of the units, which takes you to another page, showing you all Building features for the building associated with that housing unit, other housing units associated with the building, and the unit number and features of each of those housing units.
+
+
+
+
+Testing Favorite a Housing Unit FAILIURE from “Browse Unit Accessibility Features” Menu (for Housing Units):
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Under Browse Unit Accessibility Features! menu at the bottom of the page, click any of the following available options: Wheelchair Accessible, Walk-in Shower or Ground Floor. If housing units exist with that selected feature, a page loads with header “Housing Units” showing all the housing units with the feature chosen, in the form of Unit Number, its Building address, all of its features, and all of its Building features, with the option to click the “View Details” button. Click this button. Click “Add to Favorites” on the page that pops up showing the associated Building features of the housing unit as well as the other housing units in that building.
+
+Failure State:
+A pop up error message appears: “You must be logged in to favorite items.”
+
+
+Testing Favorite a Building Unit FAILURE from Browse Unit Accessibility Features Menu:
+
+Go to  https://home-sweet-home-lemon.vercel.app/
+
+Under Browse Building Accessibility Features Menu at the bottom of the page, click any of the following available options: Elevator, Ramps, Near Hospital , Gym or Pool. If buildings exist with that selected feature, a page loads with header Buildings, showing all the buildings with the feature chosen, in the form of address, city, state and zip. Option to click “View More” on any of the building listings, which takes you to another page, showing you any additional features that building has, as well as its Housing Units and their respective features. Click the “Add to Favorites” button.
+
+Failure State:
+A pop up error message appears: “You must be logged in to favorite items.”
+
+
+
+
+
+Testing Favorite a Building Unit associated with a Housing Unit SUCCESS from “Browse Unit Accessibility Features” Menu (for housing units):
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Login as detailed in Testing Login Process - SUCCESS.
+
+Under Browse Unit Accessibility Features! menu at the bottom of the page, click any of the following available options: Wheelchair Accessible, Walk-in Shower or Ground Floor. If housing units exist with that selected feature, a page loads with header “Housing Units” showing all the housing units with the feature chosen, in the form of Unit Number, its Building address, all of its features, and all of its Building features, with the option to click the “View Details” button. Click this button. Click “Add to Favorites” on the top of the page  that pops up showing the associated Building features of the housing unit as well as the other housing units in that building.
+
+Success State:
+A pop up message appears: “Building successfully added to favorites.” Once you click “Ok” the button previously labeled as “Add to Favorites” now shows up as “Remove from Favorites”.
+
+
+
+
+
+Testing Favorite a Housing Unit SUCCESS from “Browse Unit Accessibility Features” Menu (for housing units):
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Login as detailed in Testing Login Process - SUCCESS.
+
+Under Browse Unit Accessibility Features! menu at the bottom of the page, click any of the following available options: Wheelchair Accessible, Walk-in Shower or Ground Floor. If housing units exist with that selected feature, a page loads with header “Housing Units” showing all the housing units with the feature chosen, in the form of Unit Number, its Building address, all of its features, and all of its Building features, with the option to click the “View Details” button. Click this button. On the page that shows up with the associated Building features of the housing unit, the housing unit itself, and the other housing units in that building, click on “Add to Favorites” button that is underneath any housing unit not already favorited.
+
+Success State: A  “Housing Unit Successfully Added to Favorites” message pops up. Once you click “Ok” the button previously labeled as  “Add to Favorites” now shows up as “Remove from Favorites”.
+
+
+
+
+Testing Favorite a Building Unit SUCCESS from the Browse Building Unit Accessibility Features Menu:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Login as detailed in Testing Login Process - SUCCESS.
+
+Under Browse Building Accessibility Features Menu at the bottom of the page, click any of the following available options: Elevator, Ramps, Near Hospital , Gym or Pool. If buildings exist with that selected feature, a page loads with header Buildings, showing all the buildings with the feature chosen, in the form of address, city, state and zip. Option to click “View More” on any of the building listings, which takes you to another page, showing you any additional features that building has, as well as its Housing Units and their respective features. Click the “Add to Favorites” button.
+
+Success State:
+A pop up message appears: “Building successfully added to favorites”. Once you click “Ok” the button previously labeled as  “Add to Favorites” now shows up as “Remove from Favorites”.
+
+
+
+Testing Removal of a Building from Favorites - SUCCESS:
+
+Note, this only applies to building units already favorited.
+
+
+Option 1: From the Browse Building Unit Accessibility Features Menu:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Login as detailed in Testing Login Process - SUCCESS.
+
+Under Browse Building Accessibility Features Menu at the bottom of the page, click any of the following available options: Elevator, Ramps, Near Hospital , Gym or Pool. If buildings exist with that selected feature, a page loads with header Buildings, showing all the buildings with the feature chosen, in the form of address, city, state and zip. Option to click “View More” on the building listing you have favorited already, which takes you to another page, showing you any additional features that building has, as well as its Housing Units and their respective features. Click the “Add to Favorites” button. A pop up message appears: “Building successfully added to favorites”. Once you click “Ok” the button previously labeled as  “Add to Favorites” now shows up as “Remove from Favorites”.  Click this button.
+
+Success State: A pop up message appears: “Building successfully removed from favorites.” Once you click “Ok”, the button previously shown as “Remove from Favorites”  will show the message “Add to Favorites” again.
+
+
+Option 2: From the “Your Favorites” menu at the top left of the webpage:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Login as detailed in Testing Login Process - SUCCESS.
+
+Click “Your Favorites” on top menu of page.
+
+Click “Saved Buildings”.
+
+Click “Remove” under Actions column next to the building unit you wish to remove.
+
+Success state: That building entry has been removed the table of favorited buildings.
+
+
+
+
+Testing Removal of a Housing Unit from Favorites - SUCCESS:
+
+Note, this only applies to housing units already favorited.
+
+Option 1: From the Browse Unit Accessibility Features Menu:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Login as detailed in Testing Login Process - SUCCESS.
+
+Under Browse Unit Accessibility Features! menu at the bottom of the page, click any of the following available options: Wheelchair Accessible, Walk-in Shower or Ground Floor. If housing units exist with that selected feature, a page loads with header “Housing Units” showing all the housing units with the feature chosen, in the form of Unit Number, its Building address, all of its features, and all of its Building features, with the option to click the “View Details” button. Click this button. On the page that shows up with the associated Building features of the housing unit, the housing unit itself, and the other housing units in that building, click on “Add to Favorites” button that is underneath any housing unit not already favorited.  A “Housing Unit Successfully Added to Favorites” message pops up. Once you click “Ok” the button previously labeled as  “Add to Favorites” now shows up as “Remove from Favorites”. Click this button.
+
+Success State: A pop up message appears indicating successful removal of the housing unit from favorites. Once you click “Ok” on that popup message, the button previously shown as “Remove from Favorites” will show the message “Add to Favorites” again.
+
+
+Option 2: From the “Your Favorites” menu at the top left of the webpage:
+
+Go to https://home-sweet-home-lemon.vercel.app/
+
+Login as detailed in Testing Login Process - SUCCESS.
+
+Click “Your Favorites” on top menu of page.
+
+Click “Saved Housing Units”.
+
+Click “Remove” under the Actions column next to the unit you wish to remove.
+
+Success state: That housing unit entry has been removed the table of favorited housing units.
+
+
+
