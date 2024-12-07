@@ -5,37 +5,37 @@ KebabCollection
 
 → GET /
 
-  GET https://miniproject-2024.ue.r.appspot.com/ [200 OK, 525B, 95ms]
+  GET https://miniproject-2024.ue.r.appspot.com/ [200 OK, 525B, 104ms]
   ✓  Status test
 
 → GET /buildings
 
-  GET https://miniproject-2024.ue.r.appspot.com/buildings [200 OK, 1.9kB, 184ms]
+  GET https://miniproject-2024.ue.r.appspot.com/buildings [200 OK, 1.9kB, 54ms]
   ✓  Status test
   ✓  Response must be valid and have a body
   ✓  Contains required fields
 
 → GET /building/1
 
-  GET https://miniproject-2024.ue.r.appspot.com/building/1 [200 OK, 699B, 48ms]
+  GET https://miniproject-2024.ue.r.appspot.com/building/1 [200 OK, 699B, 57ms]
   ✓  Status test
   ✓  response must be valid and have a body
   ✓  Contains required fields
 
 → GET /housing-units
 
-  GET https://miniproject-2024.ue.r.appspot.com/housing-units [200 OK, 2.26kB, 733ms]
+  GET https://miniproject-2024.ue.r.appspot.com/housing-units [200 OK, 2.26kB, 273ms]
 
 → GET /housing-unit/1
 
-  GET https://miniproject-2024.ue.r.appspot.com/housing-unit/1 [200 OK, 811B, 281ms]
+  GET https://miniproject-2024.ue.r.appspot.com/housing-unit/1 [200 OK, 811B, 94ms]
   ✓  Status test
   ✓  response must be valid and have a body
   ✓  Contains required fields
 
 → GET /not-found
 
-  GET https://miniproject-2024.ue.r.appspot.com/not-found [404 Not Found, 611B, 294ms]
+  GET https://miniproject-2024.ue.r.appspot.com/not-found [404 Not Found, 611B, 755ms]
   ✓  Status test
 
 → GET /me
@@ -59,13 +59,13 @@ KebabCollection
 [90m├─────────────────────────[39m[90m┼────────────────────[39m[90m┼────────────────────┤[39m
 [90m│[39m              assertions [90m│[39m                 15 [90m│[39m                  0 [90m│[39m
 [90m├─────────────────────────┴────────────────────┴────────────────────┤[39m
-[90m│[39m total run duration: 1786ms                                        [90m│[39m
+[90m│[39m total run duration: 1490ms                                        [90m│[39m
 [90m├───────────────────────────────────────────────────────────────────┤[39m
 [90m│[39m total data received: 3.82kB (approx)                              [90m│[39m
 [90m├───────────────────────────────────────────────────────────────────┤[39m
-[90m│[39m average response time: 239ms [min: 43ms, max: 733ms, s.d.: 222ms] [90m│[39m
+[90m│[39m average response time: 197ms [min: 43ms, max: 755ms, s.d.: 239ms] [90m│[39m
 [90m└───────────────────────────────────────────────────────────────────┘[39m
 
 Uploading Postman CLI run data to Postman Cloud...
-Uploaded successfully! View on Postman: https://go.postman.co/workspace/fa5491e2-66fe-4c92-890b-f2faa10a0aa0/api/e68bd309-f00b-4271-9bcb-9acc4d2f1f83/run/40058464-e9c38bb8-fe8a-4983-80f7-ae840a4607b5
+Uploaded successfully! View on Postman: https://go.postman.co/workspace/fa5491e2-66fe-4c92-890b-f2faa10a0aa0/api/e68bd309-f00b-4271-9bcb-9acc4d2f1f83/run/40058464-49a15631-5194-4e2e-9a8a-db44d0dce34f
 
