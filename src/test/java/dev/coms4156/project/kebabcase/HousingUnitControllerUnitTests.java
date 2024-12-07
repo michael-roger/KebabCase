@@ -125,6 +125,47 @@ class HousingUnitControllerUnitTests {
   }
 
   @Test
+  void testGetAllHousingUnitsSuccess(){
+    HousingUnitEntity  house1 = new HousingUnitEntity();
+    HousingUnitEntity  house2 = new HousingUnitEntity();
+
+    house1.setId(1);
+    house2.setId(2);
+    house1.setUnitNumber("111");
+    house2.setUnitNumber("222");
+    house1.setCreatedDatetime(OffsetDateTime.now());
+    house2.setCreatedDatetime(OffsetDateTime.now());
+    house1.setModifiedDatetime(OffsetDateTime.now());
+    house2.setModifiedDatetime(OffsetDateTime.now());
+
+    BuildingEntity building1 = new BuildingEntity();
+    BuildingEntity building2 = new BuildingEntity();
+    building1.setId(10);
+    building2.setId(11);
+    building1.setAddress("22 Ledges Rd");
+    building2.setAddress("10 Happy Place");
+    building1.setCity("Cambridge");
+    building2.setCity("Happiest");
+    building1.setState("ST");
+    building2.setState("ZT");
+    building1.setZipCode("11101");
+    building2.setZipCode("13101");
+    house1.setBuilding(building1);
+    house2.setBuilding(building2);
+
+    List<HousingUnitEntity> houses = List.of(house1, house2);
+
+    when(housingUnitRepository.findAll()).thenReturn(houses);
+    ResponseEntity<List<ObjectNode>> response = housingUnitController.getAllHousingUnits();
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(2, response.getBody().size());
+    verify(housingUnitRepository, times(1)).findAll();
+  }
+
+
+  @Test
   void testGetHousingUnitSuccess() {
     // Arrange
     HousingUnitEntity housingUnit = new HousingUnitEntity();
